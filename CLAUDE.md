@@ -4,131 +4,154 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-このリポジトリは、getty104のClaude Codeマーケットプレイスプラグインです。TDD（テスト駆動開発）ベースの開発ワークフローを自動化するカスタムエージェント、コマンド、フックを提供します。
+このリポジトリはClaude Code Plugin Marketplaceであり、TDD（テスト駆動開発）ベースの開発ワークフローを自動化する専用プラグインを提供します。
 
-## アーキテクチャ
+**重要な特徴**:
+- **Marketplace形式**: 複数のプラグインを一元管理し、チームやコミュニティと簡単に共有できる
+- **git worktree活用**: mainブランチから分離された安全な作業環境を提供
+- **MCP統合**: playwright（ブラウザ自動化）、serena（コードベース分析）、context7（ライブラリドキュメント取得）の3つのMCPサーバーを統合
 
-### ディレクトリ構造
+## プラグイン検証コマンド
+
+### プラグインの検証
+```bash
+claude plugin validate getty104/
+```
+
+### ローカルでのテストインストール
+```bash
+claude plugin install ./getty104
+```
+
+## アーキテクチャと構成
+
+### Marketplace構造
 
 ```
 claude-code-marketplace/
 ├── .claude-plugin/
-│   └── marketplace.json        # マーケットプレイスのメタデータ
-├── getty104/                   # メインプラグイン
-│   ├── .mcp.json              # MCP設定（playwright, serena, context7）
-│   ├── agents/                # カスタムエージェント定義
-│   │   ├── github-issue-implementer.md
-│   │   └── review-comment-implementer.md
-│   ├── commands/              # スラッシュコマンド定義
-│   │   ├── exec-issue.md
-│   │   ├── fix-review-point.md
-│   │   └── fix-review-point-loop.md
-│   └── hooks/                 # イベントフック
-│       └── hooks.json
+│   └── marketplace.json          # Marketplaceメタデータ
+└── getty104/                      # getty104プラグイン
+    ├── .claude-plugin/            # 自動生成される
+    ├── .mcp.json                  # MCP設定
+    ├── agents/                    # サブエージェント
+    ├── commands/                  # スラッシュコマンド
+    └── hooks/                     # イベントハンドラ
 ```
 
-### カスタムエージェント
+### プラグインの4つのコンポーネント
 
-#### github-issue-implementer
-GitHub Issueから実装してPRを作成する専門エージェント。以下の責務を持ちます：
-- Issue内容の分析と実装計画の作成
-- TDDサイクル（テスト作成 → 失敗確認 → 実装 → 成功確認）の実行
-- `npm run lint`による品質チェック
-- PR作成（`@.github/PULL_REQUEST_TEMPLATE.md`に従う）
-- `docker compose down`による後処理
+1. **Agents** (`agents/*.md`): 特定のタスクに特化したサブエージェント
+   - `github-issue-implementer`: Issue実装とPR作成
+   - `review-comment-implementer`: レビューコメント対応
+   - `general-purpose-assistant`: 汎用的な問題解決とタスク実行
 
-#### review-comment-implementer
-レビューコメントの実装を専門とするエージェント。以下の機能を提供：
-- GitHub GraphQL APIを使用したResolveしていないレビューコメントの取得
-- TDDアプローチでの指摘事項の修正
-- レビューコメントのResolve処理
-- `/gemini review`コメントによる再レビュー依頼
-- `docker compose down`による後処理
+2. **Commands** (`commands/*.md`): カスタムスラッシュコマンド
+   - `/exec-issue <issue番号>`: Issueを読み込み、実装からPR作成まで自動化
+   - `/fix-review-point <ブランチ名>`: 未解決のレビューコメントへの対応
+   - `/fix-review-point-loop <ブランチ名>`: レビューコメントがなくなるまで繰り返し対応
+   - `/general-task <タスク内容>`: general-purpose-assistantを使用して汎用タスクを実行
 
-### コマンドワークフロー
+3. **Hooks** (`hooks/hooks.json`): イベントハンドラの設定
 
-すべてのコマンドは`git worktree`を活用し、メインブランチから独立した環境で作業します：
+4. **MCP Servers** (`.mcp.json`): 外部ツール統合
+   - `playwright`: npx @playwright/mcp@latest
+   - `serena`: uvx --from git+https://github.com/oraios/serena serena-mcp-server
+   - `context7`: CONTEXT7_API_KEY環境変数が必要
 
-1. **git-worktreeの準備フロー**
-   - mainブランチを最新化
-   - `.git-worktrees/`配下に新規worktreeを作成
-   - `.env`ファイルのコピー
-   - worktree内でSerenaアクティベート
-   - メモリのコピー（`cp -r ../../.serena/memories .serena/memories`）
-   - 依存パッケージのインストール
+### git worktree ワークフロー
 
-2. **コマンド実行時の制約**
-   - すべての作業はworktree内で実行
-   - `cd`使用時は`pwd`で現在地を必ず確認
-   - worktree外でのコード変更は厳禁
+このマーケットプレイスの核となる機能は、git worktreeを利用した分離された作業環境です：
 
-### MCP設定
+1. `.git-worktrees/`ディレクトリに新しいworktreeを作成
+2. ブランチ名には`/`を含めない（worktree名の生成時に`tr '/' '-'`で変換）
+3. `.env`ファイルをworktreeにコピー
+4. worktree内でSerenaをアクティベート後、`cp -r ../../.serena/memories .serena/memories`を実行
+5. 必要なセットアップ（npm installなど）を実行
+6. すべての作業をworktree内で完結
+7. 完了後は`docker compose down`でコンテナを停止
 
-プロジェクトで使用される3つのMCPサーバー：
-- **playwright**: ブラウザ自動化
-- **serena**: コードベース解析とセマンティック操作
-- **context7**: ライブラリドキュメントの取得
+### TDD実装フロー
 
-## 開発規約
+すべての実装タスクは以下のTDDサイクルに従います：
 
-### TDD（テスト駆動開発）
-1. テスト作成（テスト対象ファイルと同じディレクトリに配置）
-2. テスト実行（失敗確認）
+1. テスト作成（テスト対象のファイルと同じディレクトリに配置）
+2. テスト実行（失敗確認 - Red）
 3. 実装
-4. テスト実行（成功確認）
-5. リファクタリング
+4. テスト実行（成功確認 - Green）
+5. 必要に応じてリファクタリング
+6. `npm run lint`でコード品質チェック
+7. エラーがなくなるまで修正
 
-### コード品質基準
+### PR作成ルール
+
+PRを作成する際は以下のルールに従う：
+- PRのdescriptionテンプレートは `.github/PULL_REQUEST_TEMPLATE.md` を参照（存在する場合）
+- テンプレート内のコメントアウト箇所は削除
+- descriptionに`Closes #<issue番号>`を記載
+
+### レビューコメント対応ワークフロー
+
+1. 未解決のレビューコメントを取得（GraphQL API使用）
+2. TDDアプローチで修正
+3. テストとLintを実行
+4. コミット作成とpush
+5. レビューコメントをResolve（GraphQL mutation使用）
+6. `/gemini review`コメントでPRに再レビューを依頼
+7. `docker compose down`で終了
+
+## 品質基準
+
 - すべてのテストが通ること
-- `npm run lint`でエラーゼロ
+- `npm run lint`でエラーなし
 - TypeScript型安全性の確保
-- レイヤーアーキテクチャ（モデル、インフラ、アプリケーション、プレゼンテーション）の遵守
-- コメント禁止（コードは自己説明的であるべき）
+- **コメントは一切残さない**（コードは自己説明的であるべき）
 - 必要最小限のファイル変更
+- ドキュメントファイル（*.md）は明示的に要求された場合のみ作成
 
-### レイヤーアーキテクチャ
-プロジェクトは以下の4層構造を採用：
-- **モデル層**: ビジネスロジックとドメインモデル
-- **インフラストラクチャ層**: データベース、外部API等の実装
-- **アプリケーション層**: ユースケースの実装
-- **プレゼンテーション層**: UI/APIレスポンス
+## プラグイン開発ガイドライン
 
-## 使用方法
+### Agentの追加
 
-### Issue実装フロー
-```bash
-/exec-issue <issue番号>
-```
-GitHub Issueを読み込み、worktreeを作成して実装からPR作成まで自動化します。
+`agents/`ディレクトリに`.md`ファイルを作成し、frontmatterで定義：
 
-### レビューコメント対応フロー
-```bash
-/fix-review-point <ブランチ名>
-```
-指定ブランチのResolveされていないレビューコメントに対応します。
-
-### レビューコメント完全対応フロー
-```bash
-/fix-review-point-loop <ブランチ名>
-```
-レビューコメントがなくなるまで繰り返し対応します（5分間隔でチェック）。
-
-## プロジェクトファイルの編集
-
-### エージェントの追加・編集
-`getty104/agents/`配下に`.md`ファイルを作成し、以下の形式で記述：
 ```markdown
 ---
 name: agent-name
-description: エージェントの説明
-model: sonnet
+description: エージェントが使用される条件の明確な説明
+model: inherit  # または sonnet など
 color: cyan
 ---
+
 エージェントのプロンプト内容
 ```
 
-### コマンドの追加・編集
-`getty104/commands/`配下に`.md`ファイルを作成し、コマンドの処理内容を記述。
+**重要**: `description`はClaude Codeが自動的にエージェントを起動する判断基準になるため、明確かつ具体的に記述する
 
-### フックの設定
-`getty104/hooks/hooks.json`でイベントフック（Stop等）を設定。現在はStop時に音声通知を実装。
+### Commandの追加
+
+`commands/`ディレクトリに`.md`ファイルを作成：
+- ファイル名がコマンド名になる
+- `$ARGUMENTS`変数で引数を参照可能
+- Markdownで処理内容とステップを記述
+
+### Hooksの設定
+
+`hooks/hooks.json`でイベントハンドラを設定：
+- 利用可能なイベント: `PreToolUse`, `PostToolUse`, `Stop`など
+- 現在は`Stop`イベントでサウンド通知を設定
+
+### MCPサーバーの追加
+
+`.mcp.json`に新しいサーバーを追加：
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "command",
+      "args": ["arg1", "arg2"]
+    }
+  }
+}
+```

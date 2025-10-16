@@ -108,6 +108,21 @@ Agent specialized in implementing review comments
 Check PR review comments and fix the pointed out issues
 ```
 
+#### general-purpose-assistant
+General-purpose agent for diverse tasks requiring broad problem-solving capabilities
+
+**Features**:
+- Comprehensive problem analysis and solution
+- Adherence to project conventions (TDD, no comments, layered architecture)
+- Integration with Serena and Context7 MCPs
+- Flexible task execution across multiple domains
+
+**Usage Example**:
+```
+Explain the overall project structure
+Provide advice on improving development efficiency
+```
+
 ### Slash Commands
 
 #### `/exec-issue <issue number>`
@@ -131,6 +146,15 @@ Address unresolved review comments on specified branch
 
 #### `/fix-review-point-loop <branch name>`
 Repeatedly address review comments until none remain (checks every 5 minutes)
+
+#### `/general-task <task description>`
+Execute general tasks using the general-purpose-assistant agent
+
+**Execution Steps**:
+1. Analyze task requirements
+2. Select appropriate approach and tools
+3. Execute task with Serena MCP and Context7 MCP as needed
+4. Validate results against project standards
 
 ## Development Guidelines
 
@@ -170,11 +194,13 @@ claude-code-marketplace/
 │   ├── .mcp.json                           # MCP server configuration
 │   ├── agents/                             # Agent definitions
 │   │   ├── github-issue-implementer.md     # Issue implementation agent
-│   │   └── review-comment-implementer.md   # Review response agent
+│   │   ├── review-comment-implementer.md   # Review response agent
+│   │   └── general-purpose-assistant.md    # General-purpose agent
 │   ├── commands/                           # Command definitions
 │   │   ├── exec-issue.md                   # Issue implementation command
 │   │   ├── fix-review-point.md             # Review response command
-│   │   └── fix-review-point-loop.md        # Full review response command
+│   │   ├── fix-review-point-loop.md        # Full review response command
+│   │   └── general-task.md                 # General task execution command
 │   └── hooks/                              # Hook definitions
 │       └── hooks.json                      # Event handlers
 │
