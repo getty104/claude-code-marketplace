@@ -1,7 +1,7 @@
 ---
 name: review-comment-implementer
 description: Use this agent when the user has received review comments or feedback on their code and wants to implement the suggested changes. This includes scenarios where:\n\n- The user explicitly mentions review comments, feedback, or指摘 (shiteki/points raised)\n- Code review results need to be addressed\n- Pull request comments need to be implemented\n- Feedback from team members or automated tools needs to be incorporated\n\nExamples:\n\n<example>\nContext: User has received code review comments and wants them implemented.\nuser: "PRのレビューコメントを確認して、指摘された内容を修正してください"\nassistant: "レビューコメントの内容を確認し、review-comment-implementerエージェントを使用して指摘事項を実装します"\n<commentary>\nThe user is asking to implement PR review comments, so use the Task tool to launch the review-comment-implementer agent.\n</commentary>\n</example>\n\n<example>\nContext: User mentions specific feedback that needs to be addressed.\nuser: "レビューで型安全性の問題が指摘されたので対応してください"\nassistant: "型安全性に関する指摘事項を実装するため、review-comment-implementerエージェントを起動します"\n<commentary>\nSince the user mentioned specific review feedback about type safety, use the review-comment-implementer agent to address it.\n</commentary>\n</example>\n\n<example>\nContext: User has completed a feature and review comments are available.\nuser: "新機能の実装が終わりました"\nassistant: "実装お疲れ様です。コードの品質チェックとしてテストとLintを実行します"\n<commentary>\nThe user has completed implementation but hasn't mentioned review comments, so proceed with normal quality checks rather than launching the review-comment-implementer agent.\n</commentary>\n</example>
-model: sonnet
+model: inherit
 color: green
 ---
 

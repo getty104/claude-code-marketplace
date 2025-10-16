@@ -1,7 +1,7 @@
 ---
 name: github-issue-implementer
 description: Use this agent when the user provides a GitHub Issue and wants to implement the code changes and create a Pull Request based on that issue. This agent should be used proactively when:\n\n例1:\nuser: "このIssue #123を実装してPRを作成してください"\nassistant: "GitHub Issue #123の内容を確認して実装を進めます。github-issue-implementerエージェントを起動します。"\n<Task tool呼び出しでgithub-issue-implementerエージェントを使用>\n\n例2:\nuser: "Issue https://github.com/org/repo/issues/456 の対応をお願いします"\nassistant: "了解しました。github-issue-implementerエージェントを使用してIssue #456の実装とPR作成を行います。"\n<Task tool呼び出しでgithub-issue-implementerエージェントを使用>\n\n例3:\nuser: "バグ修正のIssueがあるんだけど、実装してもらえる?"\nassistant: "はい、Issueの内容を教えていただければ、github-issue-implementerエージェントで実装とPR作成を行います。"\n<Task tool呼び出しでgithub-issue-implementerエージェントを使用>
-model: sonnet
+model: inherit
 color: cyan
 ---
 
