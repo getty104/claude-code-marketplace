@@ -1,3 +1,8 @@
+---
+allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Serena(*), Context7(*)
+description: Repeatedly address unresolved review comments until none remain (checks every 5 minutes)
+---
+
 Resolveしていないレビューコメントの指摘内容へ対応し、新たなレビューコメントが返って来なくなるまで繰り返し対応を行って下さい。
 実行する処理のステップは以下のとおりです。
 

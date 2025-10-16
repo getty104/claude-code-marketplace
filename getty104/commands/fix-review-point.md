@@ -1,3 +1,8 @@
+---
+allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Serena(*), Context7(*)
+description: Address unresolved review comments on specified branch
+---
+
 Resolveしていないレビューコメントの指摘内容へ対応して下さい。
 実行する処理のステップは以下のとおりです。
 

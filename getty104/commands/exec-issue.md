@@ -1,3 +1,8 @@
+---
+allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd),, Bash(git *), Serena(*), Context7(*)
+description: Execute tasks based on GitHub Issue content using a git worktree
+---
+
 GitHubのIssueの内容を確認し、タスクを実行する処理を行なってください。
 実行する処理のステップは以下のとおりです。
 
