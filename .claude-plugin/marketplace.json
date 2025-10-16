@@ -1,0 +1,17 @@
+{
+  "name": "marketplace",
+  "metadata": {
+    "description": "getty104's marketplace",
+    "version": "0.0.1"
+  },
+  "owner": {
+    "name": "getty104"
+  },
+  "plugins": [
+    {
+      "name": "getty104",
+      "source": "./getty104",
+      "description": "This is a getty104's base tool set"
+    }
+  ]
+}
