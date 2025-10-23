@@ -1,10 +1,8 @@
 {
   "mcpServers": {
-    "playwright": {
+    "chrome-devtools": {
       "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
+      "args": ["chrome-devtools-mcp@latest"]
     },
     "serena": {
       "command": "uvx",
