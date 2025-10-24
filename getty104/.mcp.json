@@ -18,6 +18,10 @@
       "headers": {
         "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
       }
+    },
+    "next-devtools": {
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@latest"]
     }
   }
 }
