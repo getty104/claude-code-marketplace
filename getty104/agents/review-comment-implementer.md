@@ -14,7 +14,7 @@ color: green
 ## 作業手順
 
 1. **レビューコメントの確認**
-   - 「コマンド一覧」の「レビューコメントの確認方法」に記載のコマンドを用いて、Resolveしていないレビューコメントを確認します
+   - Resolveしていないレビューコメントを確認します
    - 各指摘の意図と優先度を理解します
    - 不明な点があれば、ユーザーに確認を求めます
 
@@ -43,7 +43,7 @@ color: green
    - 必要に応じて、PRのdescriptionを更新します
 
 7. **レビューコメントのResolve**
-   - 対応したレビューコメントを、「コマンド一覧」の「レビューコメントをResolveする方法」に記載のコマンドを用いてResolveします
+   - 対応したレビューコメントをResolveします
 
 8. **再レビューの依頼**
    - `/gemini review`というコメントをPRに追加して、再度レビューを依頼します
@@ -75,131 +75,6 @@ color: green
 - [ ] TypeScript型チェックでエラーなし
 - [ ] 不要なコメントが残っていない
 - [ ] レイヤーアーキテクチャが維持されている
-
-## コマンド一覧
-
-### レビューコメントの確認方法
-以下のコマンドでResolveしていないレビューコメントを取得できます。
-
-```
-OWNER_REPO="$(gh repo view --json nameWithOwner --jq '.nameWithOwner')"
-OWNER="$(echo $OWNER_REPO | cut -d'/' -f1)"
-REPO="$(echo $OWNER_REPO | cut -d'/' -f2)"
-PR_NUMBER="$(gh pr view --json number --jq '.number')"
-
-fetch_all_review_threads() {
-  local cursor="null"
-  local has_next_page=true
-  local temp_dir=$(mktemp -d)
-  local page_num=0
-
-  while [ "$has_next_page" = "true" ]; do
-    gh api graphql -f query="
-query(\$cursor: String) {
-  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
-    pullRequest(number: ${PR_NUMBER}) {
-      number
-      title
-      url
-      state
-      author {
-        login
-      }
-      reviewRequests(first: 100) {
-        nodes {
-          requestedReviewer {
-            ... on User {
-              login
-            }
-          }
-        }
-      }
-      reviewThreads(first: 100, after: \$cursor) {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        edges {
-          node {
-            id
-            isResolved
-            isOutdated
-            path
-            line
-            comments(last: 100) {
-              nodes {
-                author {
-                  login
-                }
-                body
-                url
-                createdAt
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}" -f cursor="$cursor" > "${temp_dir}/page_${page_num}.json"
-
-    has_next_page=$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.hasNextPage' "${temp_dir}/page_${page_num}.json")
-    cursor=$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.endCursor' "${temp_dir}/page_${page_num}.json")
-    page_num=$((page_num + 1))
-  done
-
-  jq -s '
-    .[0].data.repository.pullRequest as $first_pr |
-    {
-      pr_number: $first_pr.number,
-      title: $first_pr.title,
-      url: $first_pr.url,
-      state: $first_pr.state,
-      author: $first_pr.author.login,
-      requested_reviewers: [$first_pr.reviewRequests.nodes[].requestedReviewer.login],
-      unresolved_threads: [
-        .[].data.repository.pullRequest.reviewThreads.edges[] |
-        select(.node.isResolved == false and .node.isOutdated == false) |
-        {
-          thread_id: .node.id,
-          path: .node.path,
-          line: .node.line,
-          is_outdated: .node.isOutdated,
-          comments: [
-            .node.comments.nodes[] |
-            {
-              author: .author.login,
-              body: .body,
-              url: .url,
-              created_at: .createdAt
-            }
-          ]
-        }
-      ]
-    }
-  ' "${temp_dir}"/page_*.json
-
-  rm -rf "$temp_dir"
-}
-
-fetch_all_review_threads
-```
-
-### レビューコメントをResolveする方法
-
-以下のコマンドでResolveしていないレビューコメントをResolveできます。
-`{thread_id}`の部分は、上記のコマンドで取得したレビューコメントの`thread_id`に置き換えてください。
-
-```
-gh api graphql -f query='
-mutation {
-    resolveReviewThread(input: {threadId: "{thread_id}"}) {
-    thread {
-        isResolved
-    }
-    }
-}'
-```
 
 ## エスカレーション基準
 
