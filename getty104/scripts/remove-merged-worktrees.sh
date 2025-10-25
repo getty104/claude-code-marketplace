@@ -1,5 +1,7 @@
 #!/bin/bash
 
+git fetch --prune
+
 # mainブランチ(またはmaster)にmerge済みのブランチを取得
 MERGED_BRANCHES=$(git branch --merged main | grep -v "^\*" | grep -v "main" | grep -v "master")
 
