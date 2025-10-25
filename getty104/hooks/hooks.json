@@ -7,6 +7,10 @@
           {
             "type": "command",
             "command": "afplay /System/Library/Sounds/Funk.aiff"
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/remove-merged-worktrees.sh"
           }
         ]
       }
