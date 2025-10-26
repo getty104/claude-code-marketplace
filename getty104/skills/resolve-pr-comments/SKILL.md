@@ -1,6 +1,6 @@
 ---
 name: resolve-pr-comments
-description: GitHub プルリクエストのResolveしていないレビューコメントをResolveします。
+description: 未解決(Resolve)していないレビューコメントをResolveします。
 ---
 
 # Resolve PR Comments
