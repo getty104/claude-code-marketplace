@@ -43,7 +43,7 @@ color: green
    - 必要に応じて、PRのdescriptionを更新します
 
 7. **レビューコメントのResolve**
-   - 対応したレビューコメントをResolveします
+   - 解決(Resolve)していない状態のレビューコメントを全てResolveします
 
 8. **再レビューの依頼**
    - `/gemini review`というコメントをPRに追加して、再度レビューを依頼します
