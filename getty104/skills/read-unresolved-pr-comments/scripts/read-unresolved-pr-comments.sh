@@ -75,7 +75,7 @@ query(\$cursor: String) {
       requested_reviewers: [$first_pr.reviewRequests.nodes[].requestedReviewer.login],
       unresolved_threads: [
         .[].data.repository.pullRequest.reviewThreads.edges[] |
-        select(.node.isResolved == false and .node.isOutdated == false) |
+        select(.node.isResolved == false) |
         {
           thread_id: .node.id,
           path: .node.path,
