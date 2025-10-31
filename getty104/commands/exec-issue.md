@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd),, Bash(git *), Serena(*), Context7(*)
+allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Serena(*), Context7(*)
 description: Execute tasks based on GitHub Issue content using a git worktree
 ---
 

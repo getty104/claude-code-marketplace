@@ -8,6 +8,6 @@ description: GitHub プルリクエストの解決(Resolve)していないレビ
 ## Instructions
 以下のコマンドを実行して、未解決のプルリクエストレビューコメントを取得します。
 
-```bash
-bash scripts/read-unresolved-pr-comments.sh 
+```
+bash ${CLAUDE_PLUGIN_ROOT}/skills/read-unresolved-pr-comments/scripts/read-unresolved-pr-comments.sh 
 ```
