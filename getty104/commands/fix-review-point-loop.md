@@ -9,17 +9,9 @@ Resolveしていないレビューコメントの指摘内容へ対応し、新�
 ## git-worktreeの準備
 以下のステップでgit-worktreeを準備してください。
 
-1. `git checkout main`
-2. `git pull origin main`
-3. `git fetch`
-4. `mkdir -p .git-worktrees`
-5. `WORKTREE_NAME="$(echo "$ARGUMENTS" | tr '/' '-')"`でworktree名を準備する
-6. `git worktree list`で`$WORKTREE_NAME`という名前のworktreeが存在するかを確認する
-7. worktreeが存在しない場合は、`git worktree add .git-worktrees/$WORKTREE_NAME $ARGUMENTS` で新しいworktreeを作成する
-    - `.env`ファイルを作成したworktreeにコピーする
-8. 作成したworktreeに移動するために、`cd .git-worktrees/$WORKTREE_NAME`を実行する
-9. 移動したworktree内でSerenaのアクティベートを行い、`cp -r ../../.serena/memories .serena/memories`を実行後、オンボーディングを実施する
-10. 環境ごとに必要なセットアップ(nodeであればnpm installなど)を実行して、必要なパッケージをインストールする
+1. ${ARGUMENTS}で指定されたブランチのgit-worktreeを準備し、環境をセットアップする
+2. 作成したworktreeに移動するために、`cd .git-worktrees/$WORKTREE_NAME`を実行する
+3. 移動したworktree内でSerenaのアクティベートを行い、オンボーディングを実施する
 
 ## レビューコメントの確認とタスクの遂行
 以下の1,2の手順を、Resolveされていないレビューコメントが0になるまで繰り返して下さい。
