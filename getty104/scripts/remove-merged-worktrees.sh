@@ -1,18 +1,30 @@
 #!/bin/bash
 
+set -e
+
 git fetch --prune
 
-# mainブランチ(またはmaster)にmerge済みのブランチを取得
-MERGED_BRANCHES=$(git branch --merged main | grep -v "^\*" | grep -v "main" | grep -v "master")
+MERGED_BRANCHES=$(git branch --merged main | sed 's/^[*+ ]*//' | grep -v -E '^(main|master)$' || true)
 
-# 各worktreeをチェックして削除
-git worktree list | tail -n +2 | while read -r line; do
-    WORKTREE_PATH=$(echo "$line" | awk '{print $1}')
-    WORKTREE_BRANCH=$(echo "$line" | awk '{print $3}' | tr -d '[]')
+if [ -z "$MERGED_BRANCHES" ]; then
+    echo "No merged branches found."
+    exit 0
+fi
 
-    # merge済みのブランチかチェック
-    if echo "$MERGED_BRANCHES" | grep -q "^[[:space:]]*${WORKTREE_BRANCH}$"; then
-        echo "Removing worktree: $WORKTREE_PATH ($WORKTREE_BRANCH)"
+while IFS= read -r branch; do
+    WORKTREE_PATH=$(git worktree list --porcelain | awk -v branch="$branch" '
+        /^worktree / { path = substr($0, 10) }
+        /^branch / {
+            ref = substr($0, 8)
+            if (ref == "refs/heads/" branch) {
+                print path
+                exit
+            }
+        }
+    ')
+
+    if [ -n "$WORKTREE_PATH" ]; then
+        echo "Removing worktree: $WORKTREE_PATH ($branch)"
         git worktree remove "$WORKTREE_PATH"
     fi
-done
+done <<< "$MERGED_BRANCHES"
