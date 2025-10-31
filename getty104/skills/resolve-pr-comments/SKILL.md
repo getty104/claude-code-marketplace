@@ -10,5 +10,5 @@ description: GitHub プルリクエストの解決(Resolve)していないレビ
 以下のコマンドでResolveしていないレビューコメントをResolveします。
 
 ```
-bash ${CLAUDE_PLUGIN_ROOT}/skills/resolve-pr-comments/scripts/resolve-pr-comments.sh
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/resolve-pr-comments.sh
 ```

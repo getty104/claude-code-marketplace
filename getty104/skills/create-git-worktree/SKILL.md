@@ -11,5 +11,5 @@ description: git worktreeを作成し、環境のセットアップを行いま�
 引数にはgit worktree化するブランチ名を指定してください。
 
 ```
-bash ${CLAUDE_PLUGIN_ROOT}/skills/create-git-worktree/scripts/create-worktree.sh [ブランチ名]
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/create-worktree.sh [ブランチ名]
 ```
