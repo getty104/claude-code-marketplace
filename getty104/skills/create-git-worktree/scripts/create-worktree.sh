@@ -23,6 +23,17 @@ git pull
 
 mkdir -p .git-worktrees
 
+if [ -d "$WORKTREE_PATH" ]; then
+    echo ""
+    echo "✓ Worktree already exists at: $WORKTREE_PATH"
+    echo ""
+    echo "Next steps:"
+    echo "1. cd $WORKTREE_PATH"
+    echo "2. Continue working on your task"
+    echo ""
+    exit 0
+fi
+
 if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
     git worktree add "$WORKTREE_PATH" "$BRANCH_NAME"
 else
