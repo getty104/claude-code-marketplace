@@ -4,13 +4,63 @@ REPO="$(echo $OWNER_REPO | cut -d'/' -f2)"
 PR_NUMBER="$(gh pr view --json number --jq '.number')"
 
 fetch_all_review_threads() {
-  local cursor="null"
+  local cursor=""
   local has_next_page=true
   local temp_dir=$(mktemp -d)
   local page_num=0
 
   while [ "$has_next_page" = "true" ]; do
-    gh api graphql -f query="
+    if [ -z "$cursor" ]; then
+      gh api graphql -f query="
+query {
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    pullRequest(number: ${PR_NUMBER}) {
+      number
+      title
+      url
+      state
+      author {
+        login
+      }
+      reviewRequests(first: 100) {
+        nodes {
+          requestedReviewer {
+            ... on User {
+              login
+            }
+          }
+        }
+      }
+      reviewThreads(first: 100) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            isResolved
+            isOutdated
+            path
+            line
+            comments(last: 100) {
+              nodes {
+                author {
+                  login
+                }
+                body
+                url
+                createdAt
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}" > "${temp_dir}/page_${page_num}.json"
+    else
+      gh api graphql -f query="
 query(\$cursor: String) {
   repository(owner: \"${OWNER}\", name: \"${REPO}\") {
     pullRequest(number: ${PR_NUMBER}) {
@@ -58,9 +108,15 @@ query(\$cursor: String) {
     }
   }
 }" -f cursor="$cursor" > "${temp_dir}/page_${page_num}.json"
+    fi
 
     has_next_page=$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.hasNextPage' "${temp_dir}/page_${page_num}.json")
     cursor=$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.endCursor' "${temp_dir}/page_${page_num}.json")
+
+    if [ "$cursor" = "null" ]; then
+      cursor=""
+    fi
+
     page_num=$((page_num + 1))
   done
 
