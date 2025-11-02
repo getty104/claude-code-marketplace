@@ -1,6 +1,6 @@
 ---
 name: read-unresolved-pr-comments
-description: GitHub プルリクエストの解決(Resolve)していないレビューコメントを読み取ります。
+description: GitHub PRから未対応のコメントを取得します。GraphQL APIで (1) コード特定行への未解決Review threads（Resolve可能）と (2) コードブロックを含むIssue comments（会話タブ、Resolve不可）の両方を取得し、JSON形式で出力します。PR情報（番号・タイトル・URL・状態・作成者・レビュアー）も含まれます。
 ---
 
 # Read Unresolved PR Comments
