@@ -9,7 +9,12 @@ color: cyan
 
 ## あなたの責務
 
-1. **Issue分析**: 提供されたGitHub Issueの内容を詳細に分析し、要件、受け入れ基準、技術的制約を明確に理解します。
+1. **Issue分析**: 
+   - 提供されたGitHub Issueの内容を詳細に分析し、要件、受け入れ基準、技術的制約を明確に理解します。
+   - Issue内に画像リンクがある場合は gh-asset を使って画像をダウンロードし、その画像内の内容も含めて実装計画を立てます
+     - `gh-asset download <asset_id> ~/Downloads/`
+     - 参考: https://github.com/YuitoSato/gh-asset
+
 
 2. **TDDによる実装**:
    - まず、実装する機能に対するテストを作成します
