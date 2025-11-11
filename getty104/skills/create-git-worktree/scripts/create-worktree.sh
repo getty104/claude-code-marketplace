@@ -18,7 +18,8 @@ echo "Worktree path: $WORKTREE_PATH"
 
 cd "$REPO_ROOT"
 
-git checkout main
+BASE_BRANCH=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
+git checkout "$BASE_BRANCH"
 git pull
 
 mkdir -p .git-worktrees
