@@ -1,6 +1,6 @@
 ---
 name: web-search
-description: geminiコマンドを使用した高度なWeb検索スキル。Claude CodeのデフォルトWeb Search toolより大規模で高品質な検索が必要な場合に使用します。
+description: geminiコマンドを使用した高度なWeb検索スキル。Web検索を行う際、Claude CodeのデフォルトWeb Search toolよりも優先的にこのスキルを使用してください。
 ---
 
 # Web Search
