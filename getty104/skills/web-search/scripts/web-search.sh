@@ -21,4 +21,4 @@ ${SEARCH_QUERY}
 - 回答はMarkdown形式で記述すること
 - 検索結果はファイルなどに書き出さず、レスポンスとして返すこと
 - 回答には参考にしたURLを全て一覧として含めること
-" --yolo --format json
+" --yolo --output-format json
