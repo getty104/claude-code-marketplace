@@ -5,7 +5,10 @@ description: Create an implementation plan using task-requirement-analyzer and c
 
 引数で受け取った内容をもとに、実装プランを作成し、GitHub Issueを作成します。
 
-## ステップ1: 実装プランの作成
+## ステップ1: デフォルトブランチへの移動
+デフォルトブランチに移動し、originをpullして最新状態にしてください。
+
+## ステップ2: 実装プランの作成
 
 task-requirement-analyzerエージェントを使用して、以下のタスク内容について実装プランを作成してください。
 
@@ -13,7 +16,7 @@ task-requirement-analyzerエージェントを使用して、以下のタスク�
 
 $ARGUMENTS
 
-## ステップ2: GitHub Issueの作成
+## ステップ3: GitHub Issueの作成
 
 task-requirement-analyzerエージェントが作成した実装プランをもとに、GitHub Issueを作成してください。
 
