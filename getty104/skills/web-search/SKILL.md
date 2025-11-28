@@ -14,7 +14,7 @@ description: geminiコマンドを使用した高度なWeb検索スキル。Web�
 引数には検索したい内容や質問を自然言語で指定してください。
 
 ```
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/web-search.sh "<検索したい内容や質問>"
+bash scripts/web-search.sh "<検索したい内容や質問>"
 ```
 
 検索結果を確認し、ユーザーの質問に対する回答を構築します。

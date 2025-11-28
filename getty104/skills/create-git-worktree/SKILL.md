@@ -11,5 +11,5 @@ description: git worktree を利用した分離作業環境を自動構築しま
 引数にはgit worktree化するブランチ名を指定してください。
 
 ```
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/create-worktree.sh [ブランチ名]
+bash scripts/create-worktree.sh [ブランチ名]
 ```

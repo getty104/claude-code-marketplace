@@ -10,5 +10,5 @@ description: GitHub PRの未解決Review threadsを一括Resolveします。Grap
 以下のコマンドでResolveしていないレビューコメントをResolveします。
 
 ```
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/resolve-pr-comments.sh
+bash scripts/resolve-pr-comments.sh
 ```

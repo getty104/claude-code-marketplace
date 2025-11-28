@@ -9,5 +9,5 @@ description: GitHub PRから未対応のコメントを取得します。GraphQL
 以下のコマンドを実行して、未解決のプルリクエストレビューコメントを取得します。
 
 ```
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/read-unresolved-pr-comments.sh 
+bash scripts/read-unresolved-pr-comments.sh 
 ```
