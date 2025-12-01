@@ -4,7 +4,7 @@ getty104's Claude Code Plugin Marketplace
 
 ## Overview
 
-This repository is a plugin marketplace for Claude Code that automates TDD (Test-Driven Development) based development workflows. It provides specialized agents and custom commands to streamline the entire development process, from GitHub Issue implementation to code review responses.
+This repository is a plugin marketplace for Claude Code that automates TDD (Test-Driven Development) based development workflows. It provides specialized agents, custom commands, and skills to streamline the entire development process, from GitHub Issue implementation to code review responses.
 
 The **marketplace format** enables centralized management of multiple plugins and easy sharing with teams and communities.
 
@@ -15,6 +15,7 @@ The **marketplace format** enables centralized management of multiple plugins an
 - **git worktree Utilization**: Safe working environment isolated from the main branch
 - **Layered Architecture Compliance**: Maintains consistent code structure
 - **Quality Assurance**: Automatically runs lint, tests, and type checks
+- **Library Documentation Access**: Integrated MCP servers for Next.js, shadcn, and other libraries
 
 ## Installation
 
@@ -54,14 +55,11 @@ claude plugin install getty104
 ### MCP Configuration
 
 The `.mcp.json` included in the plugin automatically configures the following MCP servers:
-- **playwright**: Browser automation tool
+- **chrome-devtools**: Browser automation and DevTools integration
 - **serena**: Codebase analysis and semantic operations
-- **context7**: Library documentation retrieval (requires `CONTEXT7_API_KEY` environment variable)
-
-Set environment variable:
-```bash
-export CONTEXT7_API_KEY=your_api_key_here
-```
+- **context7**: Library documentation retrieval (HTTP-based, no API key required)
+- **next-devtools**: Next.js development tools and documentation
+- **shadcn**: shadcn/ui component library integration
 
 ## Marketplace Composition
 
@@ -69,12 +67,13 @@ This marketplace includes the following plugins:
 
 ### getty104 Plugin
 
-An integrated plugin for automating TDD development workflows. Composed of four component types:
+An integrated plugin for automating TDD development workflows. Composed of five component types:
 
 1. **Agents** (`agents/`) - Specialized sub-agents
 2. **Commands** (`commands/`) - Custom slash commands
-3. **Hooks** (`hooks/hooks.json`) - Event handlers
-4. **MCP Servers** (`.mcp.json`) - External tool integration
+3. **Skills** (`skills/`) - Reusable skill prompts
+4. **Hooks** (`hooks/hooks.json`) - Event handlers
+5. **MCP Servers** (`.mcp.json`) - External tool integration
 
 ## Key Features
 
@@ -108,6 +107,20 @@ Agent specialized in implementing review comments
 Check PR review comments and fix the pointed out issues
 ```
 
+#### task-requirement-analyzer
+Agent specialized in analyzing task requirements and creating implementation plans
+
+**Features**:
+- Deep analysis of task requirements (explicit and implicit)
+- Codebase exploration using Serena MCP
+- TDD-based phased implementation planning
+- Risk and concern identification
+
+**Usage Example**:
+```
+Analyze the requirements for adding password reset functionality
+```
+
 #### general-purpose-assistant
 General-purpose agent for diverse tasks requiring broad problem-solving capabilities
 
@@ -134,6 +147,23 @@ Reads GitHub Issue and automates from implementation to PR creation
 3. TDD implementation
 4. PR creation
 
+#### `/create-worktree <branch name>`
+Creates and sets up a git worktree for task execution
+
+**Execution Steps**:
+1. Create git worktree with specified branch name
+2. Copy environment files (.env)
+3. Copy Serena memories
+4. Install dependencies
+
+#### `/create-plan <task description>`
+Creates an implementation plan and GitHub Issue using task-requirement-analyzer
+
+**Execution Steps**:
+1. Move to default branch and pull latest changes
+2. Analyze task requirements using task-requirement-analyzer agent
+3. Create GitHub Issue with implementation plan
+
 #### `/fix-review-point <branch name>`
 Address unresolved review comments on specified branch
 
@@ -155,6 +185,62 @@ Execute general tasks using the general-purpose-assistant agent
 2. Select appropriate approach and tools
 3. Execute task with Serena MCP and Context7 MCP as needed
 4. Validate results against project standards
+
+### Skills
+
+Skills are reusable prompts that can be invoked to perform specific tasks.
+
+#### check-library
+Retrieves library documentation using appropriate MCP servers
+
+**Features**:
+- Next.js: Uses next-devtools MCP
+- shadcn/ui: Uses shadcn MCP
+- Other libraries: Uses context7 MCP
+
+**Usage**: Invoke when you need to check library documentation or usage
+
+#### create-git-worktree
+Automates git worktree creation and environment setup
+
+**Features**:
+- Creates worktree in `.git-worktrees/` directory
+- Automatically converts `/` to `-` in branch names
+- Copies .env and Serena memories
+- Reuses existing worktrees
+
+#### web-search
+Advanced web search using gemini command
+
+**Features**:
+- Natural language queries
+- Complex question handling
+- Source citation
+
+**Usage**: Preferred over default WebSearch tool for comprehensive searches
+
+#### high-quality-commit
+Guides appropriate git commit strategies
+
+**Features**:
+- Squash strategy (default): Amend to existing commits
+- New commit: For independent changes
+- Interactive rebase: For reorganizing commit history
+
+#### read-unresolved-pr-comments
+Retrieves unresolved PR comments via GitHub GraphQL API
+
+**Features**:
+- Fetches unresolved Review threads (code-specific comments)
+- Fetches Issue comments with code blocks
+- Returns PR metadata (number, title, URL, state, author, reviewers)
+
+#### resolve-pr-comments
+Batch resolves PR Review threads via GitHub GraphQL API
+
+**Features**:
+- Automatically resolves all unresolved Review threads
+- Displays resolve results for each thread
 
 ## Development Guidelines
 
@@ -195,12 +281,24 @@ claude-code-marketplace/
 │   ├── agents/                             # Agent definitions
 │   │   ├── github-issue-implementer.md     # Issue implementation agent
 │   │   ├── review-comment-implementer.md   # Review response agent
+│   │   ├── task-requirement-analyzer.md    # Task analysis agent
 │   │   └── general-purpose-assistant.md    # General-purpose agent
 │   ├── commands/                           # Command definitions
 │   │   ├── exec-issue.md                   # Issue implementation command
+│   │   ├── create-worktree.md              # Worktree creation command
+│   │   ├── create-plan.md                  # Implementation plan command
 │   │   ├── fix-review-point.md             # Review response command
 │   │   ├── fix-review-point-loop.md        # Full review response command
 │   │   └── general-task.md                 # General task execution command
+│   ├── skills/                             # Skill definitions
+│   │   ├── check-library/                  # Library documentation skill
+│   │   ├── create-git-worktree/            # Worktree creation skill
+│   │   ├── web-search/                     # Web search skill
+│   │   ├── high-quality-commit/            # Commit strategy skill
+│   │   ├── read-unresolved-pr-comments/    # PR comment retrieval skill
+│   │   └── resolve-pr-comments/            # PR comment resolution skill
+│   ├── scripts/                            # Utility scripts
+│   │   └── remove-merged-worktrees.sh      # Cleanup merged worktrees
 │   └── hooks/                              # Hook definitions
 │       └── hooks.json                      # Event handlers
 │
@@ -260,6 +358,11 @@ This prompt will be passed to the sub-agent.
 Create `.md` files in `getty104/commands/` and describe the processing content:
 
 ```markdown
+---
+allowed-tools: Bash(git *), Serena(*), Context7(*)
+description: Description of the command
+---
+
 Describe task description and execution steps in Markdown format.
 
 ## Step 1
@@ -270,6 +373,29 @@ Processing content...
 ```
 
 Commands are executed as `/command-name arguments`, and can reference arguments via the `$ARGUMENTS` variable.
+
+### Adding Skills
+
+Create a directory in `getty104/skills/` with a `SKILL.md` file:
+
+```markdown
+---
+name: skill-name
+description: Description of what this skill does and when to use it
+---
+
+# Skill Title
+
+## Instructions
+
+Detailed instructions for executing the skill...
+```
+
+Skills can include:
+- `SKILL.md`: Main skill definition
+- `scripts/`: Shell scripts for automation
+- `examples.md`: Usage examples
+- `reference.md`: Additional reference material
 
 ### Configuring Hooks
 
@@ -305,6 +431,19 @@ Add new MCP servers to `.mcp.json`:
     "server-name": {
       "command": "command",
       "args": ["arg1", "arg2"]
+    }
+  }
+}
+```
+
+For HTTP-based MCP servers:
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "type": "http",
+      "url": "https://example.com/mcp"
     }
   }
 }
@@ -363,11 +502,9 @@ Verify that the marketplace has been added correctly.
 
 ### MCP Server Won't Start
 
-Verify environment variables (especially `CONTEXT7_API_KEY`) are set:
-
-```bash
-echo $CONTEXT7_API_KEY
-```
+Ensure the required tools are installed:
+- `npx` for Node.js-based servers
+- `uvx` for Python-based servers (requires uv)
 
 ### Command Won't Execute
 
