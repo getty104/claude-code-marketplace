@@ -10,7 +10,9 @@ description: Create an implementation plan using task-requirement-analyzer and c
 
 ## ステップ2: 実装プランの作成
 
-task-requirement-analyzerエージェントを使用して、以下のタスク内容について実装プランを作成してください。
+- task-requirement-analyzerエージェントを使用して、タスク内容に基づく実装プランを作成します
+- 作成された実装プランを確認し、確認が必要なポイントをユーザーに質問してください
+- ユーザーからの回答をもとに、task-requirement-analyzerエージェントにフィードバックを提供し、実装プランを改善してください
 
 ### タスク内容
 
