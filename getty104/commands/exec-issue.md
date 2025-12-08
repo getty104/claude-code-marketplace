@@ -10,7 +10,7 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なっ
 以下のステップでgit-worktreeを準備してください。
 
 1. !`gh issue view $ARGUMENTS` でGitHubのIssueの内容を確認する
-2. git worktreeを作成し、環境のセットアップを行う
+2. create-git-worktree skillを用いてgit worktreeを作成し、環境のセットアップを行う
     - Issueの内容を元に、適切なブランチ名を決定する
 3. 作成したworktreeに移動するために、`cd .git-worktrees/ブランチ名`で移動する
 4. 移動したworktree内でSerenaのアクティベートを行い、オンボーディングを実施する

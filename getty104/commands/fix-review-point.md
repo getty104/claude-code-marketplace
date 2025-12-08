@@ -9,7 +9,7 @@ Resolveしていないレビューコメントの指摘内容へ対応して下�
 ## git-worktreeの準備
 以下のステップでgit-worktreeを準備してください。
 
-1. ${ARGUMENTS}で指定されたブランチのgit-worktreeを準備し、環境をセットアップする
+1. create-git-worktree skillを用いて${ARGUMENTS}で指定されたブランチのgit-worktreeを準備し、環境をセットアップする
 2. 作成したworktreeに移動するために、`cd .git-worktrees/$WORKTREE_NAME`を実行する
 3. 移動したworktree内でSerenaのアクティベートを行い、オンボーディングを実施する
 
