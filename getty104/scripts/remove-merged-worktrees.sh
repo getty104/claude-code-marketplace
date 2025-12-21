@@ -4,7 +4,9 @@ set -e
 
 git fetch --prune
 
-MERGED_BRANCHES=$(git branch --merged origin/main | sed 's/^[*+ ]*//' | grep -v -E '^(main|master)$' || true)
+DEFAULT_BRANCH="origin/HEAD"
+
+MERGED_BRANCHES=$(git branch --merged "$DEFAULT_BRANCH" | sed 's/^[*+ ]*//' | grep -v -E '^(main|master|develop)$' || true)
 
 if [ -z "$MERGED_BRANCHES" ]; then
     echo "No merged branches found."
@@ -12,7 +14,7 @@ if [ -z "$MERGED_BRANCHES" ]; then
 fi
 
 while IFS= read -r branch; do
-    UNIQUE_COMMITS=$(git log origin/main.."$branch" --oneline 2>/dev/null || true)
+    UNIQUE_COMMITS=$(git log "$DEFAULT_BRANCH".."$branch" --oneline 2>/dev/null || true)
 
     if [ -n "$UNIQUE_COMMITS" ]; then
         echo "Skipping branch '$branch' - has unique commits not yet merged to main"
