@@ -13,12 +13,12 @@ fi
 
 while IFS= read -r branch; do
     UNIQUE_COMMITS=$(git log main.."$branch" --oneline 2>/dev/null || true)
-    
-    if [ -z "$UNIQUE_COMMITS" ]; then
-        echo "Skipping branch '$branch' - no unique commits (may be newly created or not yet merged)"
+
+    if [ -n "$UNIQUE_COMMITS" ]; then
+        echo "Skipping branch '$branch' - has unique commits not yet merged to main"
         continue
     fi
-    
+
     WORKTREE_PATH=$(git worktree list --porcelain | awk -v branch="$branch" '
         /^worktree / { path = substr($0, 10) }
         /^branch / {
