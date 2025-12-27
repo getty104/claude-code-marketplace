@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Serena(*), Context7(*)
+allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Context7(*)
 description: Execute tasks based on GitHub Issue content using a git worktree
 ---
 
@@ -13,7 +13,6 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なっ
 2. create-git-worktree skillを用いてgit worktreeを作成し、環境のセットアップを行う
     - Issueの内容を元に、適切なブランチ名を決定する
 3. 作成したworktreeに移動するために、`cd .git-worktrees/ブランチ名`で移動する
-4. 移動したworktree内でSerenaのアクティベートを行い、オンボーディングを実施する
 
 ## Issueの内容確認とタスク遂行
 github-issue-implementerサブエージェントを用いて、Issueの内容を確認し、タスクを遂行してください。

@@ -56,7 +56,6 @@ claude plugin install getty104
 
 The `.mcp.json` included in the plugin automatically configures the following MCP servers:
 - **chrome-devtools**: Browser automation and DevTools integration
-- **serena**: Codebase analysis and semantic operations
 - **context7**: Library documentation retrieval (HTTP-based, no API key required)
 - **next-devtools**: Next.js development tools and documentation
 - **shadcn**: shadcn/ui component library integration
@@ -112,7 +111,6 @@ Agent specialized in analyzing task requirements and creating implementation pla
 
 **Features**:
 - Deep analysis of task requirements (explicit and implicit)
-- Codebase exploration using Serena MCP
 - TDD-based phased implementation planning
 - Risk and concern identification
 
@@ -127,7 +125,7 @@ General-purpose agent for diverse tasks requiring broad problem-solving capabili
 **Features**:
 - Comprehensive problem analysis and solution
 - Adherence to project conventions (TDD, no comments, layered architecture)
-- Integration with Serena and Context7 MCPs
+- Integration with Context7 MCP
 - Flexible task execution across multiple domains
 
 **Usage Example**:
@@ -153,8 +151,7 @@ Creates and sets up a git worktree for task execution
 **Execution Steps**:
 1. Create git worktree with specified branch name
 2. Copy environment files (.env)
-3. Copy Serena memories
-4. Install dependencies
+3. Install dependencies
 
 #### `/create-plan <task description>`
 Creates an implementation plan and GitHub Issue using task-requirement-analyzer
@@ -183,7 +180,7 @@ Execute general tasks using the general-purpose-assistant agent
 **Execution Steps**:
 1. Analyze task requirements
 2. Select appropriate approach and tools
-3. Execute task with Serena MCP and Context7 MCP as needed
+3. Execute task with Context7 MCP as needed
 4. Validate results against project standards
 
 ### Skills
@@ -206,7 +203,7 @@ Automates git worktree creation and environment setup
 **Features**:
 - Creates worktree in `.git-worktrees/` directory
 - Automatically converts `/` to `-` in branch names
-- Copies .env and Serena memories
+- Copies .env
 - Reuses existing worktrees
 
 #### web-search
@@ -359,7 +356,7 @@ Create `.md` files in `getty104/commands/` and describe the processing content:
 
 ```markdown
 ---
-allowed-tools: Bash(git *), Serena(*), Context7(*)
+allowed-tools: Bash(git *), Context7(*)
 description: Description of the command
 ---
 

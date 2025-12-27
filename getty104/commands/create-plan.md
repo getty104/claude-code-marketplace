@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(gh issue create *), Bash(gh issue view *), Serena(*), Context7(*)
+allowed-tools: Bash(gh issue create *), Bash(gh issue view *), Context7(*)
 description: Create an implementation plan using task-requirement-analyzer and create a GitHub Issue
 ---
 

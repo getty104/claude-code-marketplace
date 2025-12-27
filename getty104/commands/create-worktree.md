@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git *), Serena(*), Context7(*)
+allowed-tools: Bash(git *), Context7(*)
 description: Create and set up a git worktree for task execution
 ---
 

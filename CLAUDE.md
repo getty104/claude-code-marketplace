@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **重要な特徴**:
 - **Marketplace形式**: 複数のプラグインを一元管理し、チームやコミュニティと簡単に共有できる
 - **git worktree活用**: mainブランチから分離された安全な作業環境を提供
-- **MCP統合**: playwright（ブラウザ自動化）、serena（コードベース分析）、context7（ライブラリドキュメント取得）の3つのMCPサーバーを統合
+- **MCP統合**: chrome-devtools（ブラウザ自動化）、context7（ライブラリドキュメント取得）、next-devtools（Next.js開発ツール）、shadcn（shadcn/ui統合）のMCPサーバーを統合
 
 ## プラグイン検証コマンド
 
@@ -55,9 +55,10 @@ claude-code-marketplace/
 3. **Hooks** (`hooks/hooks.json`): イベントハンドラの設定
 
 4. **MCP Servers** (`.mcp.json`): 外部ツール統合
-   - `playwright`: npx @playwright/mcp@latest
-   - `serena`: uvx --from git+https://github.com/oraios/serena serena-mcp-server
-   - `context7`: CONTEXT7_API_KEY環境変数が必要
+   - `chrome-devtools`: ブラウザ自動化とDevTools統合
+   - `context7`: ライブラリドキュメント取得（HTTPベース）
+   - `next-devtools`: Next.js開発ツールとドキュメント
+   - `shadcn`: shadcn/uiコンポーネントライブラリ統合
 
 ### git worktree ワークフロー
 
@@ -66,10 +67,9 @@ claude-code-marketplace/
 1. `.git-worktrees/`ディレクトリに新しいworktreeを作成
 2. ブランチ名には`/`を含めない（worktree名の生成時に`tr '/' '-'`で変換）
 3. `.env`ファイルをworktreeにコピー
-4. worktree内でSerenaをアクティベート後、`cp -r ../../.serena/memories .serena/memories`を実行
-5. 必要なセットアップ（npm installなど）を実行
-6. すべての作業をworktree内で完結
-7. 完了後は`docker compose down`でコンテナを停止
+4. 必要なセットアップ（npm installなど）を実行
+5. すべての作業をworktree内で完結
+6. 完了後は`docker compose down`でコンテナを停止
 
 ### TDD実装フロー
 

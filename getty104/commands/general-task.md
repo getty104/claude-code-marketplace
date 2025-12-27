@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(mkdir *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Serena(*), Context7(*)
+allowed-tools: Bash(mkdir *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Context7(*)
 description: General purpose assistant to execute tasks using a git worktree
 ---
 

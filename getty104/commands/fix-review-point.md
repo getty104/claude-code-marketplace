@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Serena(*), Context7(*)
+allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Context7(*)
 description: Address unresolved review comments on specified branch
 ---
 
@@ -11,7 +11,6 @@ Resolveしていないレビューコメントの指摘内容へ対応して下�
 
 1. create-git-worktree skillを用いて${ARGUMENTS}で指定されたブランチのgit-worktreeを準備し、環境をセットアップする
 2. 作成したworktreeに移動するために、`cd .git-worktrees/$WORKTREE_NAME`を実行する
-3. 移動したworktree内でSerenaのアクティベートを行い、オンボーディングを実施する
 
 ## レビューコメントの確認とタスクの遂行
 review-comment-implementerサブエージェントを用いて、Resolveしていないレビューコメントの指摘内容へ対応して下さい。

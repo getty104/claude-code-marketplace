@@ -48,14 +48,6 @@ fi
 
 cd "$WORKTREE_PATH"
 
-if [ -d "$REPO_ROOT/.serena" ]; then
-    mkdir -p .serena
-    if [ -d "$REPO_ROOT/.serena/memories" ]; then
-        cp -r "$REPO_ROOT/.serena/memories" .serena/memories
-        echo "Copied Serena memories to worktree"
-    fi
-fi
-
 if [ -f package.json ]; then
     echo "Installing npm dependencies..."
     npm install
@@ -66,7 +58,6 @@ echo "✓ Worktree created successfully!"
 echo ""
 echo "Next steps:"
 echo "1. cd $WORKTREE_PATH"
-echo "2. Activate Serena and complete onboarding if needed"
-echo "3. Start working on your task"
+echo "2. Start working on your task"
 echo ""
 echo "When done, don't forget to run 'docker compose down' if using Docker"
