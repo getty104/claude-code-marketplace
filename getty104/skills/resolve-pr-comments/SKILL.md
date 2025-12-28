@@ -6,5 +6,9 @@ description: GitHub PRの未解決Review threadsを一括Resolveします。Grap
 # Resolve PR Comments
 
 ## Instructions
-scripts/read-unresolved-pr-comments.sh スクリプトで取得した未解決のReview threadsを一括でResolveします。
-このスクリプトを実行することで、PRの未解決コメントを簡単に解決できます。
+
+以下のコマンドでResolveしていないレビューコメントをResolveします。
+
+```
+bash scripts/resolve-pr-comments.sh
+```

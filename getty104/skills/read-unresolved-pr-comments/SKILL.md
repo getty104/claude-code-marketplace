@@ -6,5 +6,8 @@ description: GitHub PRから未対応のコメントを取得します。GraphQL
 # Read Unresolved PR Comments
 
 ## Instructions
-scripts/read-unresolved-pr-comments.sh スクリプトは、指定されたGitHubリポジトリのプルリクエストから未解決のレビューコメントとイシューコメントを取得し、JSON形式で出力します。
-これを実行することで、未対応のコメントを簡単に確認できます。
+以下のコマンドを実行して、未解決のプルリクエストレビューコメントを取得します。
+
+```
+bash scripts/read-unresolved-pr-comments.sh 
+```
