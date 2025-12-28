@@ -6,10 +6,5 @@ description: git worktree を利用した分離作業環境を自動構築しま
 # Create Git Worktree and Setup Environment
 
 ## Instructions
-
-以下のコマンドを実行して、git worktreeを作成し、環境のセットアップを行います。
-引数にはgit worktree化するブランチ名を指定してください。
-
-```
-bash scripts/create-worktree.sh [ブランチ名]
-```
+scripts/create-worktree.sh スクリプトは、指定されたブランチ名に基づいて.git-worktrees/ディレクトリに新しいgit worktreeを作成し、.envファイルのコピーとnpm依存関係のインストールを自動的に行います。
+このスクリプトを実行することで、分離された作業環境が簡単に構築されます。
