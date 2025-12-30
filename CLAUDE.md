@@ -36,21 +36,26 @@ claude-code-marketplace/
     ├── .mcp.json                  # MCP設定
     ├── agents/                    # サブエージェント
     ├── commands/                  # スラッシュコマンド
-    └── hooks/                     # イベントハンドラ
+    ├── hooks/                     # イベントハンドラ
+    ├── scripts/                   # シェルスクリプト
+    └── skills/                    # 再利用可能なスキル
 ```
 
-### プラグインの4つのコンポーネント
+### プラグインの5つのコンポーネント
 
 1. **Agents** (`agents/*.md`): 特定のタスクに特化したサブエージェント
    - `github-issue-implementer`: Issue実装とPR作成
    - `review-comment-implementer`: レビューコメント対応
    - `general-purpose-assistant`: 汎用的な問題解決とタスク実行
+   - `task-requirement-analyzer`: タスク要件の分析と実装プラン策定
 
 2. **Commands** (`commands/*.md`): カスタムスラッシュコマンド
    - `/exec-issue <issue番号>`: Issueを読み込み、実装からPR作成まで自動化
    - `/fix-review-point <ブランチ名>`: 未解決のレビューコメントへの対応
    - `/fix-review-point-loop <ブランチ名>`: レビューコメントがなくなるまで繰り返し対応
    - `/general-task <タスク内容>`: general-purpose-assistantを使用して汎用タスクを実行
+   - `/create-plan <タスク内容>`: task-requirement-analyzerで実装プランを作成しGitHub Issueを作成
+   - `/create-worktree <ブランチ名>`: git worktreeを作成し環境をセットアップ
 
 3. **Hooks** (`hooks/hooks.json`): イベントハンドラの設定
 
@@ -59,6 +64,14 @@ claude-code-marketplace/
    - `context7`: ライブラリドキュメント取得（HTTPベース）
    - `next-devtools`: Next.js開発ツールとドキュメント
    - `shadcn`: shadcn/uiコンポーネントライブラリ統合
+
+5. **Skills** (`skills/*/SKILL.md`): 再利用可能なスキル
+   - `check-library`: ライブラリの情報をMCPサーバーから取得
+   - `create-git-worktree`: git worktreeを利用した作業環境を自動構築
+   - `high-quality-commit`: 適切なgitコミット戦略でコード変更をコミット
+   - `read-unresolved-pr-comments`: GitHub PRから未対応のコメントを取得
+   - `resolve-pr-comments`: GitHub PRの未解決Review threadsを一括Resolve
+   - `web-search`: geminiコマンドを使用した高度なWeb検索
 
 ### git worktree ワークフロー
 
@@ -154,4 +167,27 @@ color: cyan
     }
   }
 }
+```
+
+### Skillの追加
+
+`skills/`ディレクトリに新しいディレクトリを作成し、`SKILL.md`ファイルを配置：
+
+```
+skills/
+└── my-skill/
+    ├── SKILL.md          # スキル定義（必須）
+    ├── examples.md       # 使用例（オプション）
+    └── reference.md      # リファレンス（オプション）
+```
+
+`SKILL.md`のfrontmatterで定義：
+
+```markdown
+---
+name: skill-name
+description: スキルの説明（日本語可）
+---
+
+スキルのプロンプト内容
 ```

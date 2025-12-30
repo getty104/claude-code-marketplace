@@ -185,9 +185,9 @@ Execute general tasks using the general-purpose-assistant agent
 
 ### Skills
 
-Skills are reusable prompts that can be invoked to perform specific tasks.
+Skills are reusable prompts that can be invoked to perform specific tasks. Each skill can be invoked using the `/skill-name` syntax (e.g., `/check-library`, `/web-search`).
 
-#### check-library
+#### `/check-library`
 Retrieves library documentation using appropriate MCP servers
 
 **Features**:
@@ -195,49 +195,81 @@ Retrieves library documentation using appropriate MCP servers
 - shadcn/ui: Uses shadcn MCP
 - Other libraries: Uses context7 MCP
 
-**Usage**: Invoke when you need to check library documentation or usage
+**Usage Example**:
+```
+/check-library React Query
+```
 
-#### create-git-worktree
+#### `/create-git-worktree`
 Automates git worktree creation and environment setup
 
 **Features**:
 - Creates worktree in `.git-worktrees/` directory
 - Automatically converts `/` to `-` in branch names
-- Copies .env
+- Copies .env files
+- Installs dependencies (npm install)
 - Reuses existing worktrees
 
-#### web-search
-Advanced web search using gemini command
+**Usage Example**:
+```
+/create-git-worktree feature/new-feature
+```
+
+#### `/web-search`
+Advanced web search using gemini command. Preferred over default WebSearch tool for comprehensive searches.
 
 **Features**:
 - Natural language queries
 - Complex question handling
 - Source citation
+- Multi-result integration
 
-**Usage**: Preferred over default WebSearch tool for comprehensive searches
+**Usage Example**:
+```
+/web-search How to implement authentication with Next.js App Router
+```
 
-#### high-quality-commit
-Guides appropriate git commit strategies
+#### `/high-quality-commit`
+Guides appropriate git commit strategies for code changes
 
 **Features**:
 - Squash strategy (default): Amend to existing commits
 - New commit: For independent changes
 - Interactive rebase: For reorganizing commit history
+- Commit message guidelines (type, subject, body, footer)
 
-#### read-unresolved-pr-comments
+**Usage Example**:
+```
+/high-quality-commit
+```
+
+#### `/read-unresolved-pr-comments`
 Retrieves unresolved PR comments via GitHub GraphQL API
 
 **Features**:
-- Fetches unresolved Review threads (code-specific comments)
-- Fetches Issue comments with code blocks
+- Fetches unresolved Review threads (code-specific comments, resolvable)
+- Fetches Issue comments with code blocks (conversation tab, not resolvable)
 - Returns PR metadata (number, title, URL, state, author, reviewers)
+- JSON output format
 
-#### resolve-pr-comments
+**Usage Example**:
+```
+/read-unresolved-pr-comments
+```
+
+#### `/resolve-pr-comments`
 Batch resolves PR Review threads via GitHub GraphQL API
 
 **Features**:
 - Automatically resolves all unresolved Review threads
+- Uses resolveReviewThread mutation
 - Displays resolve results for each thread
+- Note: Issue comments (conversation tab) are not resolvable
+
+**Usage Example**:
+```
+/resolve-pr-comments
+```
 
 ## Development Guidelines
 
@@ -289,11 +321,29 @@ claude-code-marketplace/
 │   │   └── general-task.md                 # General task execution command
 │   ├── skills/                             # Skill definitions
 │   │   ├── check-library/                  # Library documentation skill
+│   │   │   ├── SKILL.md
+│   │   │   └── examples.md
 │   │   ├── create-git-worktree/            # Worktree creation skill
+│   │   │   ├── SKILL.md
+│   │   │   └── scripts/
+│   │   │       └── create-worktree.sh
 │   │   ├── web-search/                     # Web search skill
+│   │   │   ├── SKILL.md
+│   │   │   ├── examples.md
+│   │   │   └── scripts/
+│   │   │       └── web-search.sh
 │   │   ├── high-quality-commit/            # Commit strategy skill
+│   │   │   ├── SKILL.md
+│   │   │   ├── examples.md
+│   │   │   └── reference.md
 │   │   ├── read-unresolved-pr-comments/    # PR comment retrieval skill
+│   │   │   ├── SKILL.md
+│   │   │   └── scripts/
+│   │   │       └── read-unresolved-pr-comments.sh
 │   │   └── resolve-pr-comments/            # PR comment resolution skill
+│   │       ├── SKILL.md
+│   │       └── scripts/
+│   │           └── resolve-pr-comments.sh
 │   ├── scripts/                            # Utility scripts
 │   │   └── remove-merged-worktrees.sh      # Cleanup merged worktrees
 │   └── hooks/                              # Hook definitions
@@ -388,11 +438,22 @@ description: Description of what this skill does and when to use it
 Detailed instructions for executing the skill...
 ```
 
-Skills can include:
-- `SKILL.md`: Main skill definition
-- `scripts/`: Shell scripts for automation
-- `examples.md`: Usage examples
-- `reference.md`: Additional reference material
+Skills can include the following structure:
+```
+skills/
+└── my-skill/
+    ├── SKILL.md              # Main skill definition (required)
+    ├── scripts/              # Shell scripts for automation (optional)
+    │   └── my-script.sh
+    ├── examples.md           # Usage examples (optional)
+    └── reference.md          # Additional reference material (optional)
+```
+
+**Best Practices**:
+- Make `description` clear and specific for auto-invocation by Claude Code
+- Include `## Instructions` section with step-by-step guidance
+- Place shell scripts in `scripts/` subdirectory for organization
+- Reference scripts using relative paths: `bash scripts/my-script.sh`
 
 ### Configuring Hooks
 
