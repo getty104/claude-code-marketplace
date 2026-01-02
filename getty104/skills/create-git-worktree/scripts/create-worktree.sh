@@ -48,9 +48,9 @@ fi
 
 cd "$WORKTREE_PATH"
 
-if [ -f package.json ]; then
-    echo "Installing npm dependencies..."
-    npm install
+if [ -f docker-compose.yml ] || [ -f compose.yaml ]; then
+    echo "Building Docker containers..."
+  docker compose build
 fi
 
 echo ""
