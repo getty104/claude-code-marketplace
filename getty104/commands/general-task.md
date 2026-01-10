@@ -5,7 +5,7 @@ description: General purpose assistant to execute tasks using a git worktree
 
 ## 指示
 
-general-purpose-assistant を用いて、以下のタスクを遂行して下さい
+general-purpose-assistant エージェントを用いて、以下のタスクを遂行して下さい
 
 ## タスク内容
 
