@@ -6,7 +6,12 @@ description: Create an implementation plan using task-requirement-analyzer and c
 引数で受け取った内容をもとに、実装プランを作成し、GitHub Issueを作成します。
 
 ## ステップ1: デフォルトブランチへの移動
+
 デフォルトブランチに移動し、originをpullして最新状態にしてください。
+
+## ステップ2: Serena MCPのアクティベート
+
+Serena MCPのアクティベートとオンボーディングを行ってください
 
 ## ステップ2: 実装プランの作成
 
