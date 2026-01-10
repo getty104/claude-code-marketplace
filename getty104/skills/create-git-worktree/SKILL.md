@@ -9,6 +9,7 @@ description: git worktree を利用した分離作業環境を自動構築しま
 
 以下のコマンドを実行して、git worktreeを作成し、環境のセットアップを行います。
 引数にはgit worktree化するブランチ名を指定してください。
+scriptsディレクトリはプラグイン内のskills/create-git-worktree/配下に配置されています。
 
 ```
 bash scripts/create-worktree.sh [ブランチ名]

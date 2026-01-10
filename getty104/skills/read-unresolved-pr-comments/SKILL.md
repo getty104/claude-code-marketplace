@@ -7,6 +7,7 @@ description: GitHub PRから未対応のコメントを取得します。GraphQL
 
 ## Instructions
 以下のコマンドを実行して、未解決のプルリクエストレビューコメントを取得します。
+scriptsディレクトリはプラグイン内のskills/create-git-worktree/配下に配置されています。
 
 ```
 bash scripts/read-unresolved-pr-comments.sh 

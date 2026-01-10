@@ -46,6 +46,11 @@ if [ -f .env ]; then
     echo "Copied .env file to worktree"
 fi
 
+if [ -f .serena ]; then
+    cp .serena "$WORKTREE_PATH/.serena"
+    echo "Copied .serena file to worktree"
+fi
+
 cd "$WORKTREE_PATH"
 
 if [ -f docker-compose.yml ] || [ -f compose.yaml ]; then
