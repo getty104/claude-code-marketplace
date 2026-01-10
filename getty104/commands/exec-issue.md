@@ -13,6 +13,7 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なっ
 1. read-github-issue skillを用いて対象のIssueの内容を取得する
 2. create-git-worktree skillを用いてgit worktreeを作成し、環境のセットアップを行う
     - Issueの内容を元に、適切なブランチ名を決定する
+    - ブランチ名には`/`は使用しないでください
 3. 作成したworktreeに移動するために、`cd .git-worktrees/ブランチ名`で移動する
 
 ## Issueの内容確認とタスク遂行
