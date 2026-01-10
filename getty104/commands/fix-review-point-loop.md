@@ -3,7 +3,7 @@ allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bas
 description: Repeatedly address unresolved review comments until none remain (checks every 5 minutes)
 ---
 
-Resolveしていないレビューコメントの指摘内容へ対応し、新たなレビューコメントが返って来なくなるまで繰り返し対応を行って下さい。
+Resolveしていないレビューコメントの指摘内容へ対応して下さい。
 実行する処理のステップは以下のとおりです。
 
 ## git-worktreeの準備
@@ -13,10 +13,28 @@ Resolveしていないレビューコメントの指摘内容へ対応し、新�
 2. 作成したworktreeに移動するために、`cd .git-worktrees/$WORKTREE_NAME`を実行する
 
 ## レビューコメントの確認とタスクの遂行
-以下の1,2の手順を、Resolveされていないレビューコメントが0になるまで繰り返して下さい。
-なお、タスクはすべて作成したworktree内で行います。
-作成したworktree以外の場所で作業を行わず、コードの変更も行わないでください。
-`cd`コマンドを利用する場合は`pwd`コマンドで現在のディレクトリを確認し、作成したworktree内であることを確認してください。
+以下のステップでレビューコメントの確認とタスクの遂行を行ってください。
 
-1. review-comment-implementerサブエージェントを用いて、Resolveしていないレビューコメントの指摘内容の確認、対応を行う
-2. 5分待つ
+1. pr-review-plannerサブエージェントを用いて、PRの未解決レビューコメントを分析し、修正タスクを洗い出す
+2. general-purpose-assistantサブエージェントを用いて、洗い出したタスクを順番に実行する
+3. resolve-pr-comments skillを用いて、すべてのレビューコメントをResolveする
+4. 修正した内容を元に、PRのdescriptionを最新の状態に更新する
+5. `/gemini review`というコメントをPRに追加して、再度レビューを依頼する
+
+
+
+## レビューコメントの確認とタスクの遂行
+以下の手順を、Resolveされていないレビューコメントが0になるまで繰り返して下さい。
+
+1. pr-review-plannerサブエージェントを用いて、PRの未解決レビューコメントを分析し、修正タスクを洗い出す
+2. general-purpose-assistantサブエージェントを用いて、洗い出したタスクを順番に実行する
+3. resolve-pr-comments skillを用いて、すべてのレビューコメントをResolveする
+4. 修正した内容を元に、PRのdescriptionを最新の状態に更新する
+5. `/gemini review`というコメントをPRに追加して、再度レビューを依頼する
+6. 5分待つ
+
+## 重要な制約
+
+- タスクはすべて作成したworktree内で行います
+- 作成したworktree以外の場所で作業を行わず、コードの変更も行わないでください
+- `cd`コマンドを利用する場合は`pwd`コマンドで現在のディレクトリを確認し、作成したworktree内であることを確認してください
