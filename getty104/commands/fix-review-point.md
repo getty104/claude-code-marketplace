@@ -1,5 +1,4 @@
 ---
-allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Context7(*)
 description: Address unresolved review comments on specified branch
 ---
 

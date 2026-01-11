@@ -1,5 +1,4 @@
 ---
-allowed-tools: Bash(mkdir *), Bash(gh issue view *), Bash(cp *), Bash(cd *), Bash(pwd), Bash(git *), Context7(*)
 description: Repeatedly address unresolved review comments until none remain (checks every 5 minutes)
 ---
 

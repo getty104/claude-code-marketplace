@@ -16,6 +16,7 @@ The **marketplace format** enables centralized management of multiple plugins an
 - **Layered Architecture Compliance**: Maintains consistent code structure
 - **Quality Assurance**: Automatically runs lint, tests, and type checks
 - **Library Documentation Access**: Integrated MCP servers for Next.js, shadcn, and other libraries
+- **Semantic Code Analysis**: Serena MCP integration for symbol-level code operations
 
 ## Installation
 
@@ -25,6 +26,7 @@ The **marketplace format** enables centralized management of multiple plugins an
 - Node.js (if used in your project)
 - Docker (if used in your project)
 - [GitHub CLI (`gh`)](https://cli.github.com/)
+- Python [uv](https://docs.astral.sh/uv/) (for Serena MCP)
 
 ### Adding the Marketplace
 
@@ -59,6 +61,7 @@ The `.mcp.json` included in the plugin automatically configures the following MC
 - **context7**: Library documentation retrieval (HTTP-based, no API key required)
 - **next-devtools**: Next.js development tools and documentation
 - **shadcn**: shadcn/ui component library integration
+- **serena**: Semantic code analysis with symbol-level operations (Python/uv required)
 
 ## Marketplace Composition
 
@@ -104,6 +107,20 @@ Agent specialized in implementing review comments
 **Usage Example**:
 ```
 Check PR review comments and fix the pointed out issues
+```
+
+#### pr-review-planner
+Agent specialized in analyzing PR review comments and creating fix plans
+
+**Features**:
+- Retrieval and analysis of unresolved review comments
+- Classification by severity (Critical/Important/Suggestion/Question)
+- Structured fix plan creation with priorities
+- Impact assessment for each fix
+
+**Usage Example**:
+```
+Analyze PR review comments and create a fix plan
 ```
 
 #### task-requirement-analyzer
@@ -185,7 +202,7 @@ Execute general tasks using the general-purpose-assistant agent
 
 ### Skills
 
-Skills are reusable prompts that can be invoked to perform specific tasks. Each skill can be invoked using the `/skill-name` syntax (e.g., `/check-library`, `/web-search`).
+Skills are reusable prompts that can be invoked to perform specific tasks. Each skill can be invoked using the `/skill-name` syntax (e.g., `/check-library`, `/serena-mcp`).
 
 #### `/check-library`
 Retrieves library documentation using appropriate MCP servers
@@ -215,18 +232,20 @@ Automates git worktree creation and environment setup
 /create-git-worktree feature/new-feature
 ```
 
-#### `/web-search`
-Advanced web search using gemini command. Preferred over default WebSearch tool for comprehensive searches.
+#### `/serena-mcp`
+Expert guide for Serena MCP - semantic code analysis and editing
 
 **Features**:
-- Natural language queries
-- Complex question handling
-- Source citation
-- Multi-result integration
+- Symbol-level code analysis (vs. reading entire files)
+- Efficient code editing via symbol replacement
+- Dependency analysis with referencing symbol search
+- Pattern-based code search with regex support
+- Project knowledge management via memories
+- LSP symbol type filtering
 
 **Usage Example**:
 ```
-/web-search How to implement authentication with Next.js App Router
+/serena-mcp
 ```
 
 #### `/high-quality-commit`
@@ -241,6 +260,31 @@ Guides appropriate git commit strategies for code changes
 **Usage Example**:
 ```
 /high-quality-commit
+```
+
+#### `/read-github-issue`
+Retrieves GitHub Issue content via gh command
+
+**Features**:
+- Fetches Issue title, body, comments, labels, and assignments
+- Downloads images from Issues using gh-asset
+
+**Usage Example**:
+```
+/read-github-issue
+```
+
+#### `/create-pr`
+Creates GitHub Pull Request with proper template
+
+**Features**:
+- Uses `.github/PULL_REQUEST_TEMPLATE.md` for description
+- Removes commented sections from template
+- Includes `Closes #<issue number>` in description
+
+**Usage Example**:
+```
+/create-pr
 ```
 
 #### `/read-unresolved-pr-comments`
@@ -310,11 +354,11 @@ claude-code-marketplace/
 │   ├── agents/                             # Agent definitions
 │   │   ├── github-issue-implementer.md     # Issue implementation agent
 │   │   ├── review-comment-implementer.md   # Review response agent
+│   │   ├── pr-review-planner.md            # PR review analysis agent
 │   │   ├── task-requirement-analyzer.md    # Task analysis agent
 │   │   └── general-purpose-assistant.md    # General-purpose agent
 │   ├── commands/                           # Command definitions
 │   │   ├── exec-issue.md                   # Issue implementation command
-│   │   ├── create-worktree.md              # Worktree creation command
 │   │   ├── create-plan.md                  # Implementation plan command
 │   │   ├── fix-review-point.md             # Review response command
 │   │   ├── fix-review-point-loop.md        # Full review response command
@@ -327,15 +371,17 @@ claude-code-marketplace/
 │   │   │   ├── SKILL.md
 │   │   │   └── scripts/
 │   │   │       └── create-worktree.sh
-│   │   ├── web-search/                     # Web search skill
+│   │   ├── serena-mcp/                     # Serena MCP expert guide
 │   │   │   ├── SKILL.md
-│   │   │   ├── examples.md
-│   │   │   └── scripts/
-│   │   │       └── web-search.sh
+│   │   │   └── CLAUDE.md
 │   │   ├── high-quality-commit/            # Commit strategy skill
 │   │   │   ├── SKILL.md
 │   │   │   ├── examples.md
 │   │   │   └── reference.md
+│   │   ├── read-github-issue/              # GitHub Issue retrieval skill
+│   │   │   └── SKILL.md
+│   │   ├── create-pr/                      # PR creation skill
+│   │   │   └── SKILL.md
 │   │   ├── read-unresolved-pr-comments/    # PR comment retrieval skill
 │   │   │   ├── SKILL.md
 │   │   │   └── scripts/
@@ -502,6 +548,19 @@ For HTTP-based MCP servers:
     "server-name": {
       "type": "http",
       "url": "https://example.com/mcp"
+    }
+  }
+}
+```
+
+For Python-based MCP servers (using uv):
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/org/repo", "package", "start-mcp-server"]
     }
   }
 }
