@@ -12,5 +12,5 @@ description: git worktree を利用した分離作業環境を自動構築しま
 scriptsディレクトリはプラグイン内のskills/create-git-worktree/配下に配置されています。
 
 ```
-bash scripts/create-worktree.sh [ブランチ名]
+bash /プラグインルートパス/skills/create-git-worktree/scripts/create-worktree.sh [ブランチ名]
 ```

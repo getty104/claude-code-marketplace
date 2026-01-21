@@ -8,8 +8,8 @@ description: GitHub PRの未解決Review threadsを一括Resolveします。Grap
 ## Instructions
 
 以下のコマンドでResolveしていないレビューコメントをResolveします。
-scriptsディレクトリはプラグイン内のskills/create-git-worktree/配下に配置されています。
+scriptsディレクトリはプラグイン内のskills/resolve-pr-comments/配下に配置されています。
 
 ```
-bash scripts/resolve-pr-comments.sh
+bash /プラグインルートパス/skills/resolve-pr-comments/scripts/resolve-pr-comments.sh
 ```
