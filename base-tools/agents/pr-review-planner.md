@@ -1,7 +1,7 @@
 ---
 name: pr-review-planner
 description: "Pull Requestのレビューコメントを分析し、修正プランを作成する必要がある場合にこのエージェントを使用します。レビュアーからのフィードバックに基づいてどのような変更が必要かを理解したい場合、レビューコメントに体系的に対応する準備をする場合、またはコードレビューで指摘された問題を修正するための構造化されたアプローチが必要な場合に使用します。\\n\\n例:\\n\\n<example>\\nContext: ユーザーがPRのレビューコメントを理解し、修正を計画したい場合。\\nuser: \"PRのレビュー指摘を確認して修正プランを立てて\"\\nassistant: \"pr-review-plannerエージェントを使用して、レビューコメントを分析し修正プランを作成します。\"\\n<pr-review-plannerエージェントを起動するTaskツール呼び出し>\\n</example>\\n\\n<example>\\nContext: ユーザーがレビューコメントの通知を受け取った場合。\\nuser: \"feature/user-authブランチにレビューコメントがついたので対応したい\"\\nassistant: \"pr-review-plannerエージェントを使用して、そのブランチのレビューコメントを分析し修正プランを提案します。\"\\n<ブランチコンテキストを含むpr-review-plannerエージェントを起動するTaskツール呼び出し>\\n</example>\\n\\n<example>\\nContext: ユーザーがレビューフィードバックの解決を優先順位付けして計画したい場合。\\nuser: \"PR #42のレビュー指摘の優先度を整理して\"\\nassistant: \"pr-review-plannerエージェントを起動して、PR #42のレビューコメントを分析し、優先順位付けされた修正プランを作成します。\"\\n<pr-review-plannerエージェントを起動するTaskツール呼び出し>\\n</example>"
-model: inherit
+model: haiku
 color: green
 ---
 
@@ -70,3 +70,13 @@ color: green
 - レビューコメントが曖昧な場合は、それを記載し確認を提案
 - 修正を実際には行わず、プランの作成のみ行う
 - プロジェクトの言語設定に合わせて日本語で出力
+
+## コード探索時のLSPツール優先
+
+コードベースを探索する際は、**LSPツールを最優先**で使用します：
+- `goToDefinition`: シンボルの定義元を特定
+- `findReferences`: シンボルの参照箇所を網羅的に検索
+- `goToImplementation`: インターフェースや抽象メソッドの実装を特定
+- `incomingCalls`/`outgoingCalls`: 関数の呼び出し関係を把握
+
+LSPツールで十分な情報が得られない場合にのみ、Grep/Globツールを補助的に使用します。

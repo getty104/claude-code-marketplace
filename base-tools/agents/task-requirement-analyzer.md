@@ -1,7 +1,7 @@
 ---
 name: task-requirement-analyzer
 description: Use this agent when you need to analyze and organize task requirements before implementation. This includes understanding the scope of a feature request, exploring relevant codebase sections, and creating an optimal implementation plan. Examples:\n\n<example>\nContext: The user wants to add a new feature to an existing system.\nuser: "ユーザー認証機能にパスワードリセット機能を追加したい"\nassistant: "タスクの要件を整理し、最適な実装プランを立てるためにtask-requirement-analyzerエージェントを使用します"\n<Task tool call to launch task-requirement-analyzer>\n</example>\n\n<example>\nContext: The user has a complex refactoring task.\nuser: "データベースアクセス層をリファクタリングして、Repository patternを導入したい"\nassistant: "この複雑なリファクタリングタスクの要件を整理するため、task-requirement-analyzerエージェントを起動します"\n<Task tool call to launch task-requirement-analyzer>\n</example>\n\n<example>\nContext: The user provides a GitHub issue to implement.\nuser: "Issue #42を実装してほしい"\nassistant: "まずtask-requirement-analyzerエージェントでIssueの内容を分析し、実装プランを策定します"\n<Task tool call to launch task-requirement-analyzer>\n</example>
-model: inherit
+model: sonnet
 color: pink
 ---
 
@@ -84,6 +84,16 @@ color: pink
 - 最小限の変更で最大の効果を得られる実装アプローチを優先する
 - テストファーストのアプローチを常に計画に組み込む
 - 不確実な点は明示的に報告し、確認を求める
+
+## コード探索時のLSPツール優先
+
+コードベースを探索する際は、**LSPツールを最優先**で使用します：
+- `goToDefinition`: シンボルの定義元を特定
+- `findReferences`: シンボルの参照箇所を網羅的に検索
+- `goToImplementation`: インターフェースや抽象メソッドの実装を特定
+- `incomingCalls`/`outgoingCalls`: 関数の呼び出し関係を把握
+
+LSPツールで十分な情報が得られない場合にのみ、Grep/Globツールを補助的に使用します。
 
 ## 禁止事項
 
