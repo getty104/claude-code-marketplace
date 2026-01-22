@@ -16,7 +16,6 @@ The **marketplace format** enables centralized management of multiple plugins an
 - **Layered Architecture Compliance**: Maintains consistent code structure
 - **Quality Assurance**: Automatically runs lint, tests, and type checks
 - **Library Documentation Access**: Integrated MCP servers for Next.js, shadcn, and other libraries
-- **Semantic Code Analysis**: Serena MCP integration for symbol-level code operations
 
 ## Installation
 
@@ -26,7 +25,6 @@ The **marketplace format** enables centralized management of multiple plugins an
 - Node.js (if used in your project)
 - Docker (if used in your project)
 - [GitHub CLI (`gh`)](https://cli.github.com/)
-- Python [uv](https://docs.astral.sh/uv/) (for Serena MCP)
 
 ### Adding the Marketplace
 
@@ -51,7 +49,7 @@ claude marketplace add https://github.com/getty104/claude-code-marketplace
 After adding the marketplace, included plugins will be automatically available:
 
 ```bash
-claude plugin install getty104
+claude plugin install base-tools
 ```
 
 ### MCP Configuration
@@ -61,13 +59,12 @@ The `.mcp.json` included in the plugin automatically configures the following MC
 - **context7**: Library documentation retrieval (HTTP-based, no API key required)
 - **next-devtools**: Next.js development tools and documentation
 - **shadcn**: shadcn/ui component library integration
-- **serena**: Semantic code analysis with symbol-level operations (Python/uv required)
 
 ## Marketplace Composition
 
 This marketplace includes the following plugins:
 
-### getty104 Plugin
+### base-tools Plugin
 
 An integrated plugin for automating TDD development workflows. Composed of five component types:
 
@@ -202,7 +199,7 @@ Execute general tasks using the general-purpose-assistant agent
 
 ### Skills
 
-Skills are reusable prompts that can be invoked to perform specific tasks. Each skill can be invoked using the `/skill-name` syntax (e.g., `/check-library`, `/serena-mcp`).
+Skills are reusable prompts that can be invoked to perform specific tasks. Each skill can be invoked using the `/skill-name` syntax (e.g., `/check-library`).
 
 #### `/check-library`
 Retrieves library documentation using appropriate MCP servers
@@ -230,22 +227,6 @@ Automates git worktree creation and environment setup
 **Usage Example**:
 ```
 /create-git-worktree feature/new-feature
-```
-
-#### `/serena-mcp`
-Expert guide for Serena MCP - semantic code analysis and editing
-
-**Features**:
-- Symbol-level code analysis (vs. reading entire files)
-- Efficient code editing via symbol replacement
-- Dependency analysis with referencing symbol search
-- Pattern-based code search with regex support
-- Project knowledge management via memories
-- LSP symbol type filtering
-
-**Usage Example**:
-```
-/serena-mcp
 ```
 
 #### `/high-quality-commit`
@@ -347,7 +328,7 @@ claude-code-marketplace/
 ├── .claude-plugin/
 │   └── marketplace.json                    # Marketplace manifest
 │
-├── getty104/                               # getty104 plugin
+├── base-tools/                             # base-tools plugin
 │   ├── .claude-plugin/
 │   │   └── plugin.json                     # Plugin manifest (auto-generated)
 │   ├── .mcp.json                           # MCP server configuration
@@ -371,9 +352,6 @@ claude-code-marketplace/
 │   │   │   ├── SKILL.md
 │   │   │   └── scripts/
 │   │   │       └── create-worktree.sh
-│   │   ├── serena-mcp/                     # Serena MCP expert guide
-│   │   │   ├── SKILL.md
-│   │   │   └── CLAUDE.md
 │   │   ├── high-quality-commit/            # Commit strategy skill
 │   │   │   ├── SKILL.md
 │   │   │   ├── examples.md
@@ -405,7 +383,7 @@ claude-code-marketplace/
 
 ```json
 {
-  "name": "marketplace",
+  "name": "getty104",
   "metadata": {
     "description": "getty104's marketplace",
     "version": "0.0.1"
@@ -415,8 +393,8 @@ claude-code-marketplace/
   },
   "plugins": [
     {
-      "name": "getty104",
-      "source": "./getty104",
+      "name": "base-tools",
+      "source": "./base-tools",
       "description": "This is a getty104's base tool set"
     }
   ]
@@ -427,7 +405,7 @@ claude-code-marketplace/
 
 ### Adding Agents
 
-Create `.md` files in `getty104/agents/`. Define `name`, `description`, `model`, and `color` in frontmatter:
+Create `.md` files in `base-tools/agents/`. Define `name`, `description`, `model`, and `color` in frontmatter:
 
 ```markdown
 ---
@@ -448,7 +426,7 @@ This prompt will be passed to the sub-agent.
 
 ### Adding Commands
 
-Create `.md` files in `getty104/commands/` and describe the processing content:
+Create `.md` files in `base-tools/commands/` and describe the processing content:
 
 ```markdown
 ---
@@ -469,7 +447,7 @@ Commands are executed as `/command-name arguments`, and can reference arguments 
 
 ### Adding Skills
 
-Create a directory in `getty104/skills/` with a `SKILL.md` file:
+Create a directory in `base-tools/skills/` with a `SKILL.md` file:
 
 ```markdown
 ---
@@ -503,7 +481,7 @@ skills/
 
 ### Configuring Hooks
 
-Configure event handlers in `getty104/hooks/hooks.json`:
+Configure event handlers in `base-tools/hooks/hooks.json`:
 
 ```json
 {
@@ -571,13 +549,13 @@ For Python-based MCP servers (using uv):
 Always validate plugins before distribution:
 
 ```bash
-claude plugin validate getty104/
+claude plugin validate base-tools/
 ```
 
 Run local tests:
 
 ```bash
-claude plugin install ./getty104
+claude plugin install ./base-tools
 ```
 
 ## Sharing the Marketplace

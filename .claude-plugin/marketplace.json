@@ -1,5 +1,5 @@
 {
-  "name": "marketplace",
+  "name": "getty104",
   "metadata": {
     "description": "getty104's marketplace",
     "version": "0.0.1"
@@ -9,8 +9,8 @@
   },
   "plugins": [
     {
-      "name": "getty104",
-      "source": "./getty104",
+      "name": "base-tools",
+      "source": "./base-tools",
       "description": "This is a getty104's base tool set"
     }
   ]
