@@ -1,6 +1,10 @@
 ---
 name: create-git-worktree
 description: git worktree を利用した分離作業環境を自動構築します。デフォルトブランチから最新コードを取得し、.git-worktrees/ ディレクトリに新規worktreeを作成、.env・npm依存関係を自動セットアップします。ブランチ名の '/' は自動的に '-' に変換されます。既存worktreeは再利用されます。
+model: haiku
+agent: general-purpose
+context: fork
+argument-hint: "[branch-name]"
 ---
 
 # Create Git Worktree and Setup Environment
@@ -12,5 +16,5 @@ description: git worktree を利用した分離作業環境を自動構築しま
 scriptsディレクトリはプラグイン内のskills/create-git-worktree/配下に配置されています。
 
 ```
-bash /プラグインルートパス/skills/create-git-worktree/scripts/create-worktree.sh [ブランチ名]
+bash /プラグインルートパス/skills/create-git-worktree/scripts/create-worktree.sh $ARGUMENTS
 ```

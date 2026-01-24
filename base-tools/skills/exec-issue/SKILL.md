@@ -1,6 +1,13 @@
 ---
+name: exec-issue
 description: Execute tasks based on GitHub Issue content using a git worktree
+argument-hint: "[issue-number]"
+context: fork
+model: opus
+agent: general-purpose
 ---
+
+# Execute Issue
 
 GitHubのIssueの内容を確認し、タスクを実行する処理を行なってください。
 実行する処理のステップは以下のとおりです。
@@ -10,6 +17,7 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なっ
 以下のステップでgit-worktreeを準備してください。
 
 1. read-github-issue skillを用いて対象のIssueの内容を取得する
+  - Issue番号: $ARGUMENTS
 2. create-git-worktree skillを用いてgit worktreeを作成し、環境のセットアップを行う
     - Issueの内容を元に、適切なブランチ名を決定する
     - ブランチ名には`/`は使用しないでください

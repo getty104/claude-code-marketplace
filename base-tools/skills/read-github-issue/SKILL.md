@@ -1,6 +1,10 @@
 ---
 name: read-github-issue
 description: GitHub Issueの内容を取得します。ghコマンドを使用してIssueのタイトル、本文、コメント、ラベル、アサイン情報などを取得します。
+model: haiku
+agent: general-purpose
+context: fork
+argument-hint: "[issue-number]"
 ---
 
 # Read GitHub Issue
@@ -9,10 +13,9 @@ description: GitHub Issueの内容を取得します。ghコマンドを使用�
 
 ### Issueの取得
 以下のコマンドでGitHub Issueの内容を取得します。
-scriptsディレクトリはプラグイン内のskills/create-git-worktree/配下に配置されています。
 
 ```
-gh view issue [Issue番号]
+gh issue view $ARGUMENTS
 ```
 
 ### 画像のダウンロード

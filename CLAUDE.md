@@ -31,31 +31,39 @@ claude plugin install ./getty104
 claude-code-marketplace/
 ├── .claude-plugin/
 │   └── marketplace.json          # Marketplaceメタデータ
-└── getty104/                      # getty104プラグイン
+└── base-tools/                    # base-toolsプラグイン
     ├── .claude-plugin/            # 自動生成される
     ├── .mcp.json                  # MCP設定
     ├── agents/                    # サブエージェント
-    ├── commands/                  # スラッシュコマンド
     ├── hooks/                     # イベントハンドラ
     ├── scripts/                   # シェルスクリプト
-    └── skills/                    # 再利用可能なスキル
+    └── skills/                    # スキル（スラッシュコマンド含む）
 ```
 
-### プラグインの5つのコンポーネント
+### プラグインの4つのコンポーネント
 
 1. **Agents** (`agents/*.md`): 特定のタスクに特化したサブエージェント
-   - `github-issue-implementer`: Issue実装とPR作成
-   - `review-comment-implementer`: レビューコメント対応
    - `general-purpose-assistant`: 汎用的な問題解決とタスク実行
    - `task-requirement-analyzer`: タスク要件の分析と実装プラン策定
+   - `pr-review-planner`: PRレビューコメントの分析と修正プラン作成
 
-2. **Commands** (`commands/*.md`): カスタムスラッシュコマンド
+2. **Skills** (`skills/*/SKILL.md`): 再利用可能なスキル（スラッシュコマンド含む）
+
+   **ユーザー呼び出し専用スキル（`disable-model-invocation: true`）**:
    - `/exec-issue <issue番号>`: Issueを読み込み、実装からPR作成まで自動化
    - `/fix-review-point <ブランチ名>`: 未解決のレビューコメントへの対応
    - `/fix-review-point-loop <ブランチ名>`: レビューコメントがなくなるまで繰り返し対応
    - `/general-task <タスク内容>`: general-purpose-assistantを使用して汎用タスクを実行
    - `/create-plan <タスク内容>`: task-requirement-analyzerで実装プランを作成しGitHub Issueを作成
-   - `/create-worktree <ブランチ名>`: git worktreeを作成し環境をセットアップ
+
+   **自動/手動呼び出し可能スキル**:
+   - `check-library`: ライブラリの情報をMCPサーバーから取得
+   - `create-git-worktree`: git worktreeを利用した作業環境を自動構築
+   - `create-pr`: GitHub PRを作成
+   - `high-quality-commit`: 適切なgitコミット戦略でコード変更をコミット
+   - `read-github-issue`: GitHub Issueの内容を取得
+   - `read-unresolved-pr-comments`: GitHub PRから未対応のコメントを取得
+   - `resolve-pr-comments`: GitHub PRの未解決Review threadsを一括Resolve
 
 3. **Hooks** (`hooks/hooks.json`): イベントハンドラの設定
 
@@ -64,14 +72,6 @@ claude-code-marketplace/
    - `context7`: ライブラリドキュメント取得（HTTPベース）
    - `next-devtools`: Next.js開発ツールとドキュメント
    - `shadcn`: shadcn/uiコンポーネントライブラリ統合
-
-5. **Skills** (`skills/*/SKILL.md`): 再利用可能なスキル
-   - `check-library`: ライブラリの情報をMCPサーバーから取得
-   - `create-git-worktree`: git worktreeを利用した作業環境を自動構築
-   - `high-quality-commit`: 適切なgitコミット戦略でコード変更をコミット
-   - `read-unresolved-pr-comments`: GitHub PRから未対応のコメントを取得
-   - `resolve-pr-comments`: GitHub PRの未解決Review threadsを一括Resolve
-   - `web-search`: geminiコマンドを使用した高度なWeb検索
 
 ### git worktree ワークフロー
 
@@ -141,13 +141,6 @@ color: cyan
 
 **重要**: `description`はClaude Codeが自動的にエージェントを起動する判断基準になるため、明確かつ具体的に記述する
 
-### Commandの追加
-
-`commands/`ディレクトリに`.md`ファイルを作成：
-- ファイル名がコマンド名になる
-- `$ARGUMENTS`変数で引数を参照可能
-- Markdownで処理内容とステップを記述
-
 ### Hooksの設定
 
 `hooks/hooks.json`でイベントハンドラを設定：
@@ -179,6 +172,7 @@ skills/
     ├── SKILL.md          # スキル定義（必須）
     ├── examples.md       # 使用例（オプション）
     └── reference.md      # リファレンス（オプション）
+    └── scripts/          # スクリプト（オプション）
 ```
 
 `SKILL.md`のfrontmatterで定義：
@@ -186,8 +180,20 @@ skills/
 ```markdown
 ---
 name: skill-name
-description: スキルの説明（日本語可）
+description: スキルの説明（Claudeが自動呼び出しの判断に使用）
+disable-model-invocation: true  # ユーザー呼び出し専用にする場合
+argument-hint: "[引数の説明]"    # オートコンプリート時に表示
 ---
 
 スキルのプロンプト内容
 ```
+
+**フロントマターのフィールド**:
+- `name`: スキル名（省略時はディレクトリ名）
+- `description`: スキルの説明（Claudeが自動呼び出しの判断に使用）
+- `disable-model-invocation`: `true`でClaude自動呼び出しを無効化（ユーザー専用）
+- `user-invocable`: `false`で`/`メニューから非表示（Claude専用）
+- `argument-hint`: オートコンプリート時に表示する引数ヒント
+- `allowed-tools`: スキル実行時に許可するツールのリスト
+- `context`: `fork`でサブエージェントとして実行
+- `agent`: `context: fork`時に使用するエージェントタイプ

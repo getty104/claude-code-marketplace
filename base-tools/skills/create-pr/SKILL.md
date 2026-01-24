@@ -1,9 +1,12 @@
 ---
 name: create-pr
 description: GitHubでPull Request（PR）を作成します。PRのdescriptionには指定されたテンプレートを使用し、必要な情報を記載します。PR作成後、PRのURLを報告します。
+model: haiku
+agent: general-purpose
+context: fork
 ---
 
-# High Quality Commit
+# Create Pull Request
 
 このスキルは、GitHubでPull Request（PR）を作成するための包括的なガイダンスを提供します。
 
