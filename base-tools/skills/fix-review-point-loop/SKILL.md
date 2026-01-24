@@ -4,8 +4,6 @@ description: Repeatedly address unresolved review comments until none remain (ch
 disable-model-invocation: true
 argument-hint: "[branch-name]"
 model: opus
-agent: general-purpose
-context: fork
 ---
 
 # Fix Review Point Loop

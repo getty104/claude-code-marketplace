@@ -3,8 +3,6 @@ name: fix-review-point
 description: Address unresolved review comments on specified branch
 argument-hint: "[branch-name]"
 model: opus
-agent: general-purpose
-context: fork
 ---
 
 # Fix Review Point

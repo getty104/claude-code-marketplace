@@ -2,9 +2,7 @@
 name: exec-issue
 description: Execute tasks based on GitHub Issue content using a git worktree
 argument-hint: "[issue-number]"
-context: fork
 model: opus
-agent: general-purpose
 ---
 
 # Execute Issue
