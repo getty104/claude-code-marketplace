@@ -3,9 +3,7 @@ name: create-plan
 description: Create an implementation plan using task-requirement-analyzer and create a GitHub Issue
 disable-model-invocation: true
 argument-hint: "[task-description]"
-context: fork
 model: sonnet
-agent: Plan
 ---
 
 # Create Plan
@@ -18,7 +16,10 @@ agent: Plan
 
 ## ステップ2: 実装プランの作成
 
-- タスク内容に基づく実装プランを作成します
+以下のステップでタスク内容に基づく実装プランを作成します。
+
+- Exploreサブエージェントを使用して、タスク内容を分析
+- Planサブエージェントを使用して、具体的な実装プランを策定
 
 ### タスク内容
 
