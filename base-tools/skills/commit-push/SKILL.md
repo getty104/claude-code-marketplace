@@ -1,16 +1,17 @@
 ---
-name: high-quality-commit
-description: コード変更を適切なgitコミット戦略でgit commitします。基本的には既存のgitコミットへのsquash戦略を採用し、必要に応じてブランチ全体のgitコミット履歴を再構成します。実装完了時やユーザーがgit commitを依頼した時に使用します。
+name: commit-push
+description: コード変更を適切なgitコミット戦略でgit commitし、pushします。基本的には既存のgitコミットへのsquash戦略を採用し、必要に応じてブランチ全体のgitコミット履歴を再構成します。実装完了時やユーザーがgit commitを依頼した時に使用します。
 model: haiku
 agent: general-purpose
 context: fork
 ---
 
-# High Quality Commit
+# Commit and Push Code Changes
 
-このスキルは、コード変更を高品質なgitコミットとして記録するための包括的なガイダンスを提供します。
+このスキルは、コード変更を高品質なgitコミットとして記録するための包括的なガイダンスとpushを行うまでの手順を提供します。基本的には既存のgitコミットへのsquash戦略を採用し、必要に応じてブランチ全体のgitコミット履歴を再構成します。
 
 ## Instructions
+
 
 ### ステップ1: ブランチとgitコミット履歴の確認
 
@@ -23,8 +24,14 @@ git log --oneline --graph origin/main..HEAD
 
 確認事項：
 - 現在のブランチ名
-- mainブランチから何gitコミット進んでいるか
+- デフォルトブランチから何gitコミット進んでいるか
 - 各gitコミットの内容と粒度
+
+現在のブランチがデフォルトブランチの場合は直接git commitせず、新規にブランチを作成して作業してください。
+
+```bash
+git checkout -b your-feature-branch
+```
 
 ### ステップ2: gitコミット戦略の判断
 
@@ -130,9 +137,17 @@ git status
 - 意図したファイルがすべて含まれているか
 - gitコミットメッセージが適切か
 
+
+### ステップ5: 変更のpush
+変更をリモートブランチにpush：
+
+```bash
+git push origin HEAD --force-with-lease
+```
+
 ## 重要な注意事項
 
-1. **mainブランチでは実行しない**: mainブランチで直接git commitしないでください
+1. **デフォルトブランチではcommitを作成しない**: デフォルトブランチで直接git commitしないでください。
 2. **コメントは残さない**: コード内の説明コメントは削除してください
 3. **原子的なgitコミット**: 各gitコミットは独立して意味を持つようにしてください
 4. **一貫性**: プロジェクトの既存のgitコミットスタイルに従ってください
@@ -140,11 +155,13 @@ git status
 ## 戦略選択のフローチャート
 
 ```
-ブランチにgitコミットがある？
-  ├─ No → 新規gitコミット作成
-  └─ Yes → 変更は既存のgitコミットと同じテーマ？
-      ├─ Yes → Squash（git commit --amend）
-      └─ No → gitコミットを分ける合理性がある？
-          ├─ Yes → 新規gitコミット作成
-          └─ 履歴を整理したい → Interactive Rebase
+デフォルトブランチ？
+  ├─ Yes → 新規ブランチを作成して作業
+  └─ No → ブランチにgitコミットがある？
+      ├─ No → 新規gitコミット作成
+      └─ Yes → 変更は既存のgitコミットと同じテーマ？
+          ├─ Yes → Squash（git commit --amend）
+          └─ No → gitコミットを分ける合理性がある？
+              ├─ Yes → 新規gitコミット作成
+              └─ 履歴を整理したい → Interactive Rebase
 ```

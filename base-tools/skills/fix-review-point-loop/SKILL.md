@@ -32,12 +32,13 @@ Resolveしていないレビューコメントの指摘内容へ対応して下�
 
 以下の手順を、Resolveされていないレビューコメントが0になるまで繰り返して下さい。
 
-1. pr-review-plannerサブエージェントを用いて、PRの未解決レビューコメントを分析し、修正タスクを洗い出す
-2. general-purpose-assistantサブエージェントを用いて、洗い出したタスクを順番に実行する
-3. resolve-pr-comments skillを用いて、すべてのレビューコメントをResolveする
-4. 修正した内容を元に、PRのdescriptionを最新の状態に更新する
-5. `/gemini review`というコメントをPRに追加して、再度レビューを依頼する
-6. 5分待つ
+1. read-unresolved-pr-comments skillを用いてPRの未解決レビューコメントを分析し、修正タスクを洗い出す
+2. 洗い出したタスクごとにgeneral-purpose-assistantサブエージェントを呼び出し、順番に実行する
+3. タスクの実行が完了したら、commit-push skillを用いて、変更内容を適切にコミットし、pushする
+4. resolve-pr-comments skillを用いて、すべてのレビューコメントをResolveする
+5. 修正した内容を元に、PRのdescriptionを最新の状態に更新する
+6. `/gemini review`というコメントをPRに追加して、再度レビューを依頼する
+7. 5分待つ
 
 ## 重要な制約
 
