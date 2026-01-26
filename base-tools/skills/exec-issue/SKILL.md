@@ -26,7 +26,7 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なっ
 以下のステップでIssueの内容に合わせたタスクの遂行、PRの作成を行ってください。
 
 1. read-github-issue skillを用いて対象のIssueの内容と実装プランを確認し、修正タスクを洗い出す
-2. 洗い出したタスクごとにgeneral-purpose-assistantサブエージェントを呼び出し、順番に実行する
+2. 洗い出したタスクごとに、general-purpose-assistant サブエージェントを用いて、順番に実行する
 3. 全てのタスクが完了したら、commit-push skillを用いて、変更内容を適切にコミットし、pushする
 4. create-pr skillを用いて、変更内容を反映したPRを作成する
 5. PRのURLを報告する

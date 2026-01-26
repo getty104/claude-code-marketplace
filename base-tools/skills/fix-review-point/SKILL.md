@@ -22,7 +22,7 @@ Resolveしていないレビューコメントの指摘内容へ対応して下�
 以下のステップでレビューコメントの確認とタスクの遂行を行ってください。
 
 1. read-unresolved-pr-comments skillを用いてPRの未解決レビューコメントを分析し、修正タスクを洗い出す
-2. 洗い出したタスクごとにgeneral-purpose-assistantサブエージェントを呼び出し、順番に実行する
+2. 洗い出したタスクごとに、general-purpose-assistant サブエージェントを用いて、順番に実行する
 3. タスクの実行が完了したら、commit-push skillを用いて、変更内容を適切にコミットし、pushする
 4. resolve-pr-comments skillを用いて、すべてのレビューコメントをResolveする
 5. 修正した内容を元に、PRのdescriptionを最新の状態に更新する
