@@ -1,7 +1,6 @@
 ---
 name: create-issue
 description: Create an implementation plan using task-requirement-analyzer and create a GitHub Issue
-disable-model-invocation: true
 argument-hint: "[task-description]"
 model: sonnet
 ---
