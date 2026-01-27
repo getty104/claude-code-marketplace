@@ -1,35 +1,39 @@
 ---
-name: create-plan
+name: create-issue
 description: Create an implementation plan using task-requirement-analyzer and create a GitHub Issue
 disable-model-invocation: true
 argument-hint: "[task-description]"
 model: sonnet
 ---
 
-# Create Plan
+# Create Issue
 
-引数で受け取った内容をもとに、実装プランを作成し、GitHub Issueを作成します。
+引数で受け取った内容をもとに要件を整理し、GitHub Issueを作成します。
 
-## ステップ1: デフォルトブランチへの移動
+## Instructions
+
+### 実行ステップ
+
+#### 1. デフォルトブランチへの移動
 
 デフォルトブランチに移動し、originをpullして最新状態にしてください。
 
-## ステップ2: 実装プランの作成
+#### 2. 実装プランの作成
 
 以下のステップでタスク内容に基づく実装プランを作成します。
 
-- Exploreサブエージェントを使用して、タスク内容を分析
-- Planサブエージェントを使用して、具体的な実装プランを策定
+- Explore サブエージェントで、タスク内容を分析
+- Plan サブエージェントで、具体的な実装プランを策定
 
-### タスク内容
+##### タスク内容
 
 $ARGUMENTS
 
-## ステップ3: GitHub Issueの作成
+#### 3. GitHub Issueの作成
 
 ステップ2で作成した実装プランをもとに、GitHub Issueを作成してください。
 
-### Issue作成時の注意事項
+##### Issue作成時の注意事項
 
 - タイトル: タスクの目的を簡潔に表現したもの
 - 本文: 以下の構造で作成
@@ -39,18 +43,13 @@ $ARGUMENTS
   - **影響範囲**: 変更が必要なファイルや関連コード
   - **確認事項**: 実装前に確認が必要な点（あれば）
 
-## ステップ4: 実装プランの改善
+#### 4. 実装プランの改善
 
 - 以下の処理を繰り返してください
    - ユーザーにGitHub Issueの内容が適切か確認してください
    - ユーザーからフィードバックがあった場合、GitHub Issueの内容を改善してください
    - ユーザーからの承認が得られたら、処理を終了してください
 
-### Issueの作成コマンド
+##### Issueの作成コマンド
 
 `gh issue create --title "タイトル" --body "本文"`を使用してください。
-
-## 完了条件
-
-- 実装プランが策定されていること
-- GitHub Issueが作成され、Issue番号が報告されていること

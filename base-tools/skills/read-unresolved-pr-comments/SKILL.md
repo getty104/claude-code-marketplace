@@ -8,9 +8,9 @@ model: sonnet
 
 ## Instructions
 
-以下のステップに従って、GitHubプルリクエストから未対応のコメントを取得し、修正プランを作成します。
+### 実行ステップ
 
-### 未解決のプルリクエストレビューコメントの取得
+#### 1. 未解決のプルリクエストレビューコメントの取得
 
 以下のコマンドを実行して、未解決のプルリクエストレビューコメントを取得します。
 scriptsディレクトリはプラグイン内のskills/read-unresolved-pr-comments/配下に配置されています。
@@ -19,7 +19,7 @@ scriptsディレクトリはプラグイン内のskills/read-unresolved-pr-comme
 bash /プラグインルートパス/skills/read-unresolved-pr-comments/scripts/read-unresolved-pr-comments.sh 
 ```
 
-### 修正プランの作成
+#### 2. 修正プランの作成
 
 取得した未解決コメントをもとに、修正プランを作成します。
 修正プランは以下のステップで作成してください。

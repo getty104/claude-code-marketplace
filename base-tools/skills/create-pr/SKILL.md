@@ -11,6 +11,7 @@ context: fork
 このスキルは、GitHubでPull Request（PR）を作成するための包括的なガイダンスを提供します。
 
 ## Instructions
+
 PRは以下のルールで作成します。
 
 - PRのdescriptionのテンプレートは`.github/PULL_REQUEST_TEMPLATE.md`を参照し、それに従うこと

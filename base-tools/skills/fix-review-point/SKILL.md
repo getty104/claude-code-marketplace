@@ -8,16 +8,21 @@ model: opus
 # Fix Review Point
 
 Resolveしていないレビューコメントの指摘内容へ対応して下さい。
+
+## Instructions
+
+### 実行ステップ
+
 実行する処理のステップは以下のとおりです。
 
-## git-worktreeの準備
+#### 1. git-worktreeの準備
 
 以下のステップでgit-worktreeを準備してください。
 
 1. create-git-worktree skillを用いて$ARGUMENTSで指定されたブランチのgit-worktreeを準備し、環境をセットアップする
 2. 作成したworktreeに移動するために、`cd .git-worktrees/$WORKTREE_NAME`を実行する
 
-## レビューコメントの確認とタスクの遂行
+#### 2. レビューコメントの確認とタスクの遂行
 
 以下のステップでレビューコメントの確認とタスクの遂行を行ってください。
 
@@ -28,7 +33,7 @@ Resolveしていないレビューコメントの指摘内容へ対応して下�
 5. 修正した内容を元に、PRのdescriptionを最新の状態に更新する
 6. `/gemini review`というコメントをPRに追加して、再度レビューを依頼する
 
-## 重要な制約
+### 重要な制約
 
 - タスクはすべて作成したworktree内で行います
 - 作成したworktree以外の場所で作業を行わず、コードの変更も行わないでください

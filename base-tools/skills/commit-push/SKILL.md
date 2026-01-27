@@ -12,8 +12,9 @@ context: fork
 
 ## Instructions
 
+### 実行ステップ
 
-### ステップ1: ブランチとgitコミット履歴の確認
+#### ステップ1: ブランチとgitコミット履歴の確認
 
 以下のコマンドで現在の状態を確認：
 
@@ -33,11 +34,11 @@ git log --oneline --graph origin/main..HEAD
 git checkout -b your-feature-branch
 ```
 
-### ステップ2: gitコミット戦略の判断
+#### ステップ2: gitコミット戦略の判断
 
 以下の基準でgitコミット戦略を選択：
 
-#### 戦略A: Squash（基本戦略）
+##### 戦略A: Squash（基本戦略）
 
 以下の条件を満たす場合、既存のgitコミットにsquashします：
 
@@ -54,7 +55,7 @@ git commit --amend
 
 gitコミットメッセージを適切に更新してください。
 
-#### 戦略B: 新規gitコミット
+##### 戦略B: 新規gitコミット
 
 以下の場合は新規gitコミットを作成：
 
@@ -69,7 +70,7 @@ git add -A
 git commit
 ```
 
-#### 戦略C: Interactive Rebase（gitコミット再構成）
+##### 戦略C: Interactive Rebase（gitコミット再構成）
 
 以下の場合はブランチ全体のgitコミットを再構成：
 
@@ -90,7 +91,7 @@ git rebase -i origin/main
 - `reword`または`r`: gitコミットメッセージを変更
 - 行の順序を変更してgitコミット順を変更
 
-### ステップ3: gitコミットメッセージのガイドライン
+#### ステップ3: gitコミットメッセージのガイドライン
 
 gitコミットメッセージは以下の形式で記述：
 
@@ -124,7 +125,7 @@ gitコミットメッセージは以下の形式で記述：
 - Issue番号への参照（例: `Closes #123`）
 - Breaking changesの記述
 
-### ステップ4: git commit後の確認
+#### ステップ4: git commit後の確認
 
 git commit後、以下を確認：
 
@@ -138,21 +139,22 @@ git status
 - gitコミットメッセージが適切か
 
 
-### ステップ5: 変更のpush
+#### ステップ5: 変更のpush
+
 変更をリモートブランチにpush：
 
 ```bash
 git push origin HEAD --force-with-lease
 ```
 
-## 重要な注意事項
+### 重要な注意事項
 
 1. **デフォルトブランチではcommitを作成しない**: デフォルトブランチで直接git commitしないでください。
 2. **コメントは残さない**: コード内の説明コメントは削除してください
 3. **原子的なgitコミット**: 各gitコミットは独立して意味を持つようにしてください
 4. **一貫性**: プロジェクトの既存のgitコミットスタイルに従ってください
 
-## 戦略選択のフローチャート
+### 戦略選択のフローチャート
 
 ```
 デフォルトブランチ？
