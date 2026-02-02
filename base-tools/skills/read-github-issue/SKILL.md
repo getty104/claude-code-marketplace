@@ -41,6 +41,5 @@ gh-asset download <asset_id> ~/Downloads/
 
 #### 実装プラン作成時の重要なルール
 
-- 各タスクはgeneral-purpose-assistantサブエージェントで実装する旨を明記すること
 - プランは具体的かつ実行可能なステップに分解すること
 - プランは優先順位順に並べること
