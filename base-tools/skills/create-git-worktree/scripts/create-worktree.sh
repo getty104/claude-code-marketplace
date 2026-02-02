@@ -46,6 +46,11 @@ if [ -f .env ]; then
     echo "Copied .env file to worktree"
 fi
 
+if [ -d node_modules ]; then
+    cp -R node_modules "$WORKTREE_PATH/node_modules"
+    echo "Copied node_modules to worktree"
+fi
+
 cd "$WORKTREE_PATH"
 
 if [ -f docker-compose.yml ] || [ -f compose.yaml ]; then
