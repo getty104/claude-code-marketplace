@@ -7,11 +7,13 @@ argument-hint: "[issue-number]"
 
 # Read GitHub Issue
 
-## Instructions
+GitHub Issueの内容を取得し、実装プランを作成します。
 
-### 実行ステップ
+# Instructions
 
-#### 1. Issueの取得
+## 実行ステップ
+
+### 1. Issueの取得
 
 以下のコマンドでGitHub Issueの内容を取得します。
 
@@ -19,13 +21,13 @@ argument-hint: "[issue-number]"
 gh issue view $ARGUMENTS
 ```
 
-##### 画像のダウンロード
+#### 画像のダウンロード
 Issue内に画像リンクがある場合は gh-asset を使って画像をダウンロードし、その画像の情報も読み込みます
 
 - `gh-asset download <asset_id> ~/Downloads/`
 - 参考: https://github.com/YuitoSato/gh-asset
 
-#### 2. 実装プランの作成
+### 2. 実装プランの作成
 
 取得したIssue内容をもとに、実装プランを作成します。
 実装プランは以下のステップで作成してください。

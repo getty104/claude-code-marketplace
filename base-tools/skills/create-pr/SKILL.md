@@ -10,7 +10,7 @@ context: fork
 
 このスキルは、GitHubでPull Request（PR）を作成するための包括的なガイダンスを提供します。
 
-## Instructions
+# Instructions
 
 PRは以下のルールで作成します。
 

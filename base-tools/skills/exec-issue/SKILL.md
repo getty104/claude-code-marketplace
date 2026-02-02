@@ -9,11 +9,11 @@ model: opus
 
 GitHubのIssueの内容を確認し、タスクを実行する処理を行なってください。
 
-## Instructions
+# Instructions
 
-### 実行ステップ
+## 実行ステップ
 
-#### 1. git-worktreeの準備
+### 1. git-worktreeの準備
 
 以下のステップでgit-worktreeを準備してください。
 
@@ -24,17 +24,17 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なっ
     - ブランチ名には`/`は使用しないでください
 3. 作成したworktreeに移動するために、`cd .git-worktrees/ブランチ名`で移動する
 
-#### 2. Issueの内容確認とタスク遂行
+### 2. Issueの内容確認とタスク遂行
 
 以下のステップでIssueの内容に合わせたタスクの遂行、PRの作成を行ってください。
 
-1. read-github-issue skillを用いて対象のIssueの内容と実装プランを確認し、修正タスクを洗い出す
-2. 洗い出したタスクごとに、general-purpose-assistant サブエージェントを用いて、順番に実行する
-3. 全てのタスクが完了したら、commit-push skillを用いて、変更内容を適切にコミットし、pushする
+1. read-github-issue skillを用いて対象のIssueの内容のやることを洗い出す
+2. 洗い出した内容ごとに、general-purpose-assistant サブエージェントを用いて順番に実装する
+3. 全て実装が完了したら、commit-push skillを用いて、変更内容を適切にコミットし、pushする
 4. create-pr skillを用いて、変更内容を反映したPRを作成する
 5. PRのURLを報告する
 
-### 重要な制約
+## 重要な制約
 
 - タスクはすべて作成したworktree内で行います
 - 作成したworktree以外の場所で作業を行わず、コードの変更も行わないでください

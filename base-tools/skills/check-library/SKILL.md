@@ -8,9 +8,11 @@ model: haiku
 
 このスキルは、ライブラリの情報を確認するために適切なMCPサーバーを選択して利用します。
 
-## Instructions
+# Instructions
 
 ライブラリ名に応じて、以下の優先順位でMCPサーバーを使用してください：
+
+## 実行ルール
 
 ### 1. Next.js関連の場合
 
@@ -58,16 +60,7 @@ mcp__plugin_getty104_context7__get-library-docs
 
 ## 使用例
 
-### Next.jsのApp Routerについて調べる
-1. `mcp__plugin_getty104_next-devtools__init` で初期化
-2. `mcp__plugin_getty104_next-devtools__nextjs_docs` でApp Routerのドキュメントを検索
-
-### shadcn/uiのButtonコンポーネントについて調べる
-1. shadcn MCPのツールを使用してButtonコンポーネントの情報を取得
-
-### React Queryの使い方を調べる
-1. `mcp__plugin_getty104_context7__resolve-library-id` でReact QueryのライブラリIDを取得
-2. `mcp__plugin_getty104_context7__get-library-docs` でドキュメントを取得
+examples.mdを参照してください。
 
 ## 注意事項
 
