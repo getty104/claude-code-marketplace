@@ -1,7 +1,7 @@
 ---
 name: read-unresolved-pr-comments
 description: GitHub PRから未対応のコメントを取得し、修正プランを作成します。
-model: sonnet
+context: fork
 ---
 
 # Read Unresolved PR Comments
@@ -31,5 +31,4 @@ bash /プラグインルートパス/skills/read-unresolved-pr-comments/scripts/
 
 #### 修正プラン作成時の重要なルール
 
-- プランは具体的かつ実行可能なステップに分解すること
-- プランは優先順位順に並べること
+- プランは具体的かつ並列実行可能な単位で分解すること
