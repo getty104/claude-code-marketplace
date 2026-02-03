@@ -8,7 +8,7 @@ context: fork
 
 # Commit and Push Code Changes
 
-このスキルは、コード変更を高品質なgitコミットとして記録するための包括的なガイダンスとpushを行うまでの手順を提供します。基本的には既存のgitコミットへのsquash戦略を採用します。
+このスキルは、コード変更を適切なgitコミット戦略でgit commitし、pushするための包括的なガイダンスを提供します。
 
 # Instructions
 

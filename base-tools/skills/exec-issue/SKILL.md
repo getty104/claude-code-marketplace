@@ -28,9 +28,11 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なっ
 
 1. read-github-issue skillを用いて対象のIssueの内容の実装プランを確認する
 2. 洗い出したタスクごとにgeneral-purpose-assistantサブエージェントで実装を行う
-3. 全て実装が完了したら、commit-push skillを用いて、変更内容を適切にコミットし、pushする
-4. create-pr skillを用いて、変更内容を反映したPRを作成する
-5. PRのURLを報告する
+3. 全ての実装が完了したら、general-purpose-assistantサブエージェントでテスト・Lintが全て通過することを確認する
+  - 問題があれば修正を行う
+4. commit-push skillを用いて、変更内容を適切にコミットし、pushする
+5. create-pr skillを用いて、変更内容を反映したPRを作成する
+6. PRのURLを報告する
 
 ## 重要な制約
 
