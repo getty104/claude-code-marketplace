@@ -2,6 +2,8 @@
 name: read-github-issue
 description: GitHub Issueの内容を取得し、実装プランを作成します。
 model: sonnet
+context: fork
+agent: general-purpose
 argument-hint: "[issue-number]"
 ---
 
@@ -36,7 +38,10 @@ gh-asset download <asset_id> ~/Downloads/
 取得したIssue内容をもとに、実装プランを作成します。
 実装プランは以下のステップで作成してください。
 
-- Exploreサブエージェントを使用して、Issueの内容を分析する
+- Issueの内容を詳細に分析する
+  - Issueで要求されている機能や改善点を特定する
+  - 要件の背景や目的を理解する
+  - 実装が必要なコード箇所を特定する
 - 分析した内容をもとに、具体的な実装プランを策定する
 
 #### 実装プラン作成時の重要なルール

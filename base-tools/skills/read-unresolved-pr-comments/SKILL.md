@@ -1,7 +1,9 @@
 ---
 name: read-unresolved-pr-comments
 description: GitHub PRから未対応のコメントを取得し、修正プランを作成します。
+model: sonnet
 context: fork
+agent: general-purpose
 ---
 
 # Read Unresolved PR Comments
@@ -26,7 +28,10 @@ bash /プラグインルートパス/skills/read-unresolved-pr-comments/scripts/
 取得した未解決コメントをもとに、修正プランを作成します。
 修正プランは以下のステップで作成してください。
 
-- Exploreサブエージェントを使用して、未解決コメントの内容を分析する
+- 未解決コメントの内容を詳細に分析する
+  - コメントが指摘している問題点や改善点を特定する
+  - コメントの背景や意図を理解する
+  - 修正が必要なコード箇所を特定する
 - 分析した内容をもとに、具体的な修正プランを策定する
 
 #### 修正プラン作成時の重要なルール
