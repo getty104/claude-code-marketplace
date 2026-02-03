@@ -1,6 +1,7 @@
 ---
 name: commit-push
 description: コード変更を適切なgitコミット戦略でgit commitし、pushします。基本的には既存のgitコミットへのsquash戦略を採用し、必要に応じてブランチ全体のgitコミット履歴を再構成します。実装完了時やユーザーがgit commitを依頼した時に使用します。
+model: haiku
 agent: general-purpose
 context: fork
 ---
