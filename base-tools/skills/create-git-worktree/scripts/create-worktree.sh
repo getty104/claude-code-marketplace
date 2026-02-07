@@ -53,11 +53,6 @@ fi
 
 cd "$WORKTREE_PATH"
 
-if [ -f docker-compose.yml ] || [ -f compose.yaml ]; then
-    echo "Building Docker containers..."
-  docker compose build
-fi
-
 echo ""
 echo "✓ Worktree created successfully!"
 echo ""
