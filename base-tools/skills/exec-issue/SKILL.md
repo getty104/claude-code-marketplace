@@ -18,7 +18,6 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なっ
 以下のステップでgit-worktreeを準備してください。
 
 1. create-git-worktree skillを用いてgit worktreeを作成し、環境のセットアップを行う
-  - Issueの内容を元に、適切なブランチ名を決定する
   - ブランチ名には`/`は使用しないでください
 2. 作成したworktreeに移動するために、`cd .git-worktrees/ブランチ名`で移動する
 
