@@ -17,4 +17,4 @@ PRは以下のルールで作成します。
 - PRのdescriptionのテンプレートは`.github/PULL_REQUEST_TEMPLATE.md`を参照し、それに従うこと
 - PRのdescriptionのテンプレート内でコメントアウトされている箇所は必ず削除すること
 - PRのdescriptionには`Closes [Issue番号]`と記載すること
-- ghコマンドの`gh api user`で取得したユーザーをアサインしてください
+- ghコマンドの`gh api user`で取得したユーザーをAssigneesとReviewersに追加すること
