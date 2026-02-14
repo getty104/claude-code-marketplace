@@ -4,7 +4,7 @@ getty104's Claude Code Plugin Marketplace
 
 ## Overview
 
-This repository is a plugin marketplace for Claude Code that automates TDD (Test-Driven Development) based development workflows. It provides specialized agents, custom commands, and skills to streamline the entire development process, from GitHub Issue implementation to code review responses.
+This repository is a plugin marketplace for Claude Code that automates TDD (Test-Driven Development) based development workflows. It provides specialized agents, skills, and hooks to streamline the entire development process, from GitHub Issue implementation to code review responses.
 
 The **marketplace format** enables centralized management of multiple plugins and easy sharing with teams and communities.
 
@@ -66,72 +66,16 @@ This marketplace includes the following plugins:
 
 ### base-tools Plugin
 
-An integrated plugin for automating TDD development workflows. Composed of five component types:
+An integrated plugin for automating TDD development workflows. Composed of four component types:
 
 1. **Agents** (`agents/`) - Specialized sub-agents
-2. **Commands** (`commands/`) - Custom slash commands
-3. **Skills** (`skills/`) - Reusable skill prompts
-4. **Hooks** (`hooks/hooks.json`) - Event handlers
-5. **MCP Servers** (`.mcp.json`) - External tool integration
+2. **Skills** (`skills/`) - Reusable skill prompts and slash commands
+3. **Hooks** (`hooks/hooks.json`) - Event handlers
+4. **MCP Servers** (`.mcp.json`) - External tool integration
 
 ## Key Features
 
 ### Agents
-
-#### github-issue-implementer
-Specialized agent for implementing GitHub Issues and creating PRs
-
-**Features**:
-- Analysis of Issue content and implementation planning
-- Implementation following TDD cycle
-- Code quality checks (lint, tests)
-- Automatic PR creation
-
-**Usage Example**:
-```
-Implement this Issue #123 and create a PR
-```
-
-#### review-comment-implementer
-Agent specialized in implementing review comments
-
-**Features**:
-- Retrieval of unresolved review comments
-- TDD approach for fixes
-- Resolving review comments
-- Automation of re-review requests
-
-**Usage Example**:
-```
-Check PR review comments and fix the pointed out issues
-```
-
-#### pr-review-planner
-Agent specialized in analyzing PR review comments and creating fix plans
-
-**Features**:
-- Retrieval and analysis of unresolved review comments
-- Classification by severity (Critical/Important/Suggestion/Question)
-- Structured fix plan creation with priorities
-- Impact assessment for each fix
-
-**Usage Example**:
-```
-Analyze PR review comments and create a fix plan
-```
-
-#### task-requirement-analyzer
-Agent specialized in analyzing task requirements and creating implementation plans
-
-**Features**:
-- Deep analysis of task requirements (explicit and implicit)
-- TDD-based phased implementation planning
-- Risk and concern identification
-
-**Usage Example**:
-```
-Analyze the requirements for adding password reset functionality
-```
 
 #### general-purpose-assistant
 General-purpose agent for diverse tasks requiring broad problem-solving capabilities
@@ -139,7 +83,7 @@ General-purpose agent for diverse tasks requiring broad problem-solving capabili
 **Features**:
 - Comprehensive problem analysis and solution
 - Adherence to project conventions (TDD, no comments, layered architecture)
-- Integration with Context7 MCP
+- LSP-first code exploration strategy
 - Flexible task execution across multiple domains
 
 **Usage Example**:
@@ -148,58 +92,41 @@ Explain the overall project structure
 Provide advice on improving development efficiency
 ```
 
-### Slash Commands
+### Skills
+
+Skills are reusable prompts that can be invoked to perform specific tasks. Each skill can be invoked using the `/skill-name` syntax (e.g., `/exec-issue 123`).
 
 #### `/exec-issue <issue number>`
 Reads GitHub Issue and automates from implementation to PR creation
 
 **Execution Steps**:
-1. Create git worktree
-2. Analyze Issue content
-3. TDD implementation
-4. PR creation
+1. Create git worktree via `create-git-worktree` skill
+2. Read and analyze Issue content via `read-github-issue` skill
+3. Implement tasks using `general-purpose-assistant` sub-agent
+4. Commit and push via `commit-push` skill
+5. Create PR via `create-pr` skill
 
-#### `/create-worktree <branch name>`
-Creates and sets up a git worktree for task execution
-
-**Execution Steps**:
-1. Create git worktree with specified branch name
-2. Copy environment files (.env)
-3. Install dependencies
-
-#### `/create-plan <task description>`
-Creates an implementation plan and GitHub Issue using task-requirement-analyzer
+#### `/create-issue <task description>`
+Analyzes task requirements and creates a GitHub Issue with implementation plan
 
 **Execution Steps**:
 1. Move to default branch and pull latest changes
-2. Analyze task requirements using task-requirement-analyzer agent
-3. Create GitHub Issue with implementation plan
+2. Analyze task requirements using Explore sub-agent
+3. Create GitHub Issue with structured implementation plan
+4. Iterate on Issue content based on user feedback
 
 #### `/fix-review-point <branch name>`
 Address unresolved review comments on specified branch
 
 **Execution Steps**:
 1. Prepare git worktree
-2. Retrieve review comments
-3. TDD fixes
-4. Resolve comments
-5. Re-review request
+2. Retrieve unresolved review comments via `read-unresolved-pr-comments` skill
+3. Implement fixes using `general-purpose-assistant` sub-agent
+4. Commit, push, and resolve comments
+5. Request re-review via `/gemini review` comment
 
 #### `/fix-review-point-loop <branch name>`
 Repeatedly address review comments until none remain (checks every 5 minutes)
-
-#### `/general-task <task description>`
-Execute general tasks using the general-purpose-assistant agent
-
-**Execution Steps**:
-1. Analyze task requirements
-2. Select appropriate approach and tools
-3. Execute task with Context7 MCP as needed
-4. Validate results against project standards
-
-### Skills
-
-Skills are reusable prompts that can be invoked to perform specific tasks. Each skill can be invoked using the `/skill-name` syntax (e.g., `/check-library`).
 
 #### `/check-library`
 Retrieves library documentation using appropriate MCP servers
@@ -214,7 +141,7 @@ Retrieves library documentation using appropriate MCP servers
 /check-library React Query
 ```
 
-#### `/create-git-worktree`
+#### `/create-git-worktree <branch name>`
 Automates git worktree creation and environment setup
 
 **Features**:
@@ -229,30 +156,32 @@ Automates git worktree creation and environment setup
 /create-git-worktree feature/new-feature
 ```
 
-#### `/high-quality-commit`
-Guides appropriate git commit strategies for code changes
+#### `/commit-push`
+Guides appropriate git commit strategies and pushes code changes
 
 **Features**:
 - Squash strategy (default): Amend to existing commits
 - New commit: For independent changes
 - Interactive rebase: For reorganizing commit history
 - Commit message guidelines (type, subject, body, footer)
+- Automatic push with `--force-with-lease`
 
 **Usage Example**:
 ```
-/high-quality-commit
+/commit-push
 ```
 
-#### `/read-github-issue`
-Retrieves GitHub Issue content via gh command
+#### `/read-github-issue <issue number>`
+Retrieves GitHub Issue content and creates an implementation plan
 
 **Features**:
 - Fetches Issue title, body, comments, labels, and assignments
 - Downloads images from Issues using gh-asset
+- Creates detailed implementation plan from Issue content
 
 **Usage Example**:
 ```
-/read-github-issue
+/read-github-issue 123
 ```
 
 #### `/create-pr`
@@ -262,6 +191,7 @@ Creates GitHub Pull Request with proper template
 - Uses `.github/PULL_REQUEST_TEMPLATE.md` for description
 - Removes commented sections from template
 - Includes `Closes #<issue number>` in description
+- Auto-assigns the current user
 
 **Usage Example**:
 ```
@@ -269,13 +199,12 @@ Creates GitHub Pull Request with proper template
 ```
 
 #### `/read-unresolved-pr-comments`
-Retrieves unresolved PR comments via GitHub GraphQL API
+Retrieves unresolved PR comments and creates a fix plan
 
 **Features**:
-- Fetches unresolved Review threads (code-specific comments, resolvable)
-- Fetches Issue comments with code blocks (conversation tab, not resolvable)
-- Returns PR metadata (number, title, URL, state, author, reviewers)
-- JSON output format
+- Fetches unresolved Review threads via GitHub GraphQL API
+- Analyzes comment content and identifies required fixes
+- Creates structured fix plan
 
 **Usage Example**:
 ```
@@ -288,8 +217,6 @@ Batch resolves PR Review threads via GitHub GraphQL API
 **Features**:
 - Automatically resolves all unresolved Review threads
 - Uses resolveReviewThread mutation
-- Displays resolve results for each thread
-- Note: Issue comments (conversation tab) are not resolvable
 
 **Usage Example**:
 ```
@@ -333,32 +260,30 @@ claude-code-marketplace/
 │   │   └── plugin.json                     # Plugin manifest (auto-generated)
 │   ├── .mcp.json                           # MCP server configuration
 │   ├── agents/                             # Agent definitions
-│   │   ├── github-issue-implementer.md     # Issue implementation agent
-│   │   ├── review-comment-implementer.md   # Review response agent
-│   │   ├── pr-review-planner.md            # PR review analysis agent
-│   │   ├── task-requirement-analyzer.md    # Task analysis agent
 │   │   └── general-purpose-assistant.md    # General-purpose agent
-│   ├── commands/                           # Command definitions
-│   │   ├── exec-issue.md                   # Issue implementation command
-│   │   ├── create-plan.md                  # Implementation plan command
-│   │   ├── fix-review-point.md             # Review response command
-│   │   ├── fix-review-point-loop.md        # Full review response command
-│   │   └── general-task.md                 # General task execution command
 │   ├── skills/                             # Skill definitions
 │   │   ├── check-library/                  # Library documentation skill
 │   │   │   ├── SKILL.md
 │   │   │   └── examples.md
+│   │   ├── commit-push/                    # Commit and push skill
+│   │   │   ├── SKILL.md
+│   │   │   ├── examples.md
+│   │   │   └── reference.md
 │   │   ├── create-git-worktree/            # Worktree creation skill
 │   │   │   ├── SKILL.md
 │   │   │   └── scripts/
 │   │   │       └── create-worktree.sh
-│   │   ├── high-quality-commit/            # Commit strategy skill
-│   │   │   ├── SKILL.md
-│   │   │   ├── examples.md
-│   │   │   └── reference.md
-│   │   ├── read-github-issue/              # GitHub Issue retrieval skill
+│   │   ├── create-issue/                   # Issue creation skill
 │   │   │   └── SKILL.md
 │   │   ├── create-pr/                      # PR creation skill
+│   │   │   └── SKILL.md
+│   │   ├── exec-issue/                     # Issue execution skill
+│   │   │   └── SKILL.md
+│   │   ├── fix-review-point/               # Review fix skill
+│   │   │   └── SKILL.md
+│   │   ├── fix-review-point-loop/          # Repeated review fix skill
+│   │   │   └── SKILL.md
+│   │   ├── read-github-issue/              # GitHub Issue retrieval skill
 │   │   │   └── SKILL.md
 │   │   ├── read-unresolved-pr-comments/    # PR comment retrieval skill
 │   │   │   ├── SKILL.md
@@ -424,27 +349,6 @@ This prompt will be passed to the sub-agent.
 - Create agents with specialized roles
 - Specify communication requirements (e.g., Japanese language)
 
-### Adding Commands
-
-Create `.md` files in `base-tools/commands/` and describe the processing content:
-
-```markdown
----
-allowed-tools: Bash(git *), Context7(*)
-description: Description of the command
----
-
-Describe task description and execution steps in Markdown format.
-
-## Step 1
-Processing content...
-
-## Step 2
-Processing content...
-```
-
-Commands are executed as `/command-name arguments`, and can reference arguments via the `$ARGUMENTS` variable.
-
 ### Adding Skills
 
 Create a directory in `base-tools/skills/` with a `SKILL.md` file:
@@ -453,6 +357,7 @@ Create a directory in `base-tools/skills/` with a `SKILL.md` file:
 ---
 name: skill-name
 description: Description of what this skill does and when to use it
+model: haiku
 ---
 
 # Skill Title
@@ -473,11 +378,15 @@ skills/
     └── reference.md          # Additional reference material (optional)
 ```
 
-**Best Practices**:
-- Make `description` clear and specific for auto-invocation by Claude Code
-- Include `## Instructions` section with step-by-step guidance
-- Place shell scripts in `scripts/` subdirectory for organization
-- Reference scripts using relative paths: `bash scripts/my-script.sh`
+**Frontmatter Fields**:
+- `name`: Skill name (defaults to directory name if omitted)
+- `description`: Skill description (used by Claude for auto-invocation judgment)
+- `model`: Model to use (`haiku`, `sonnet`, `opus`)
+- `disable-model-invocation`: Set to `true` to disable automatic Claude invocation (user-only)
+- `user-invocable`: Set to `false` to hide from `/` menu (Claude-only)
+- `argument-hint`: Hint displayed during autocomplete (e.g., `"[issue-number]"`)
+- `context`: Set to `fork` to run as sub-agent
+- `agent`: Agent type to use when `context: fork` is set (e.g., `general-purpose`)
 
 ### Configuring Hooks
 
@@ -603,7 +512,7 @@ Ensure the required tools are installed:
 
 ### Command Won't Execute
 
-Verify that command file names are correct. File names become command names as-is.
+Verify that skill file names are correct. Directory names become skill names as-is.
 
 ## Resources
 
