@@ -28,6 +28,7 @@ gh issue view <Issue番号>
 ### 3. コードの分析
 
 Explore サブエージェントで依頼内容に基づき、コードベースをできるだけ詳細に分析してください。
+ユーザーへの確認が必要な事項がある場合は途中で質問をせず、実装後、GitHub Issueにコメントしてください。
 
 #### 依頼内容
 
@@ -49,3 +50,10 @@ $ARGUMENTS
 #### Issueの更新コマンド
 
 `gh issue edit <Issue番号> --body "本文"`を使用してください。
+
+### 5. GitHub Issueへ確認事項のコメントを行う
+Issueの更新後、ユーザーにIssueの実施にあたり確認が必要な事項がある場合は、Issueにコメントしてください。
+
+#### Issueへのコメントコマンド
+
+`gh issue comment <Issue番号> --body "コメント内容"`を使用してください。
