@@ -35,7 +35,7 @@ Resolveしていないレビューコメントの指摘内容へ対応して下�
 5. resolve-pr-comments skillを用いて、すべてのレビューコメントをResolveする
 6. 修正した内容を元に、PRのdescriptionを最新の状態に更新する
 7. `/gemini review`というコメントをPRに追加する
-8. Reviewersに再レビュー依頼を行う
+8. `gh api user`コマンドでユーザーを確認し、ユーザーをメンションして修正が完了したことをコメントする
 9. 5分待つ
 
 ## 重要な制約
