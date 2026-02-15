@@ -123,10 +123,7 @@ Address unresolved review comments on specified branch
 2. Retrieve unresolved review comments via `read-unresolved-pr-comments` skill
 3. Implement fixes using `general-purpose-assistant` sub-agent
 4. Commit, push, and resolve comments
-5. Request re-review via `/gemini review` comment
-
-#### `/fix-review-point-loop <branch name>`
-Repeatedly address review comments until none remain (checks every 5 minutes)
+5. Update PR description and request re-review via `/gemini review` comment
 
 #### `/check-library`
 Retrieves library documentation using appropriate MCP servers
@@ -191,7 +188,7 @@ Creates GitHub Pull Request with proper template
 - Uses `.github/PULL_REQUEST_TEMPLATE.md` for description
 - Removes commented sections from template
 - Includes `Closes #<issue number>` in description
-- Auto-assigns the current user
+- Auto-assigns the current user to Assignees
 
 **Usage Example**:
 ```
@@ -280,8 +277,6 @@ claude-code-marketplace/
 │   │   ├── exec-issue/                     # Issue execution skill
 │   │   │   └── SKILL.md
 │   │   ├── fix-review-point/               # Review fix skill
-│   │   │   └── SKILL.md
-│   │   ├── fix-review-point-loop/          # Repeated review fix skill
 │   │   │   └── SKILL.md
 │   │   ├── read-github-issue/              # GitHub Issue retrieval skill
 │   │   │   └── SKILL.md

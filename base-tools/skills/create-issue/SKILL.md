@@ -1,6 +1,6 @@
 ---
 name: create-issue
-description: Create an implementation plan using task-requirement-analyzer and create a GitHub Issue
+description: Create an implementation plan and a GitHub Issue based on the task description provided as an argument
 argument-hint: "[task-description]"
 model: opus
 ---
@@ -20,7 +20,6 @@ model: opus
 ### 2. コードの分析
 
 Explore サブエージェントでタスクで依頼されている要件をできるだけ詳細に分析してください。
-また、要件を整理する上で判断が難しい場合は、適宜質問を行い、必要な情報を収集してください。
 
 #### タスク内容
 
@@ -37,18 +36,16 @@ $ARGUMENTS
 - 本文: 以下の構造で作成
   - **概要**: タスクの目的と達成すべきゴール
   - **要件**: 機能要件と非機能要件のリスト
-  - **実装プラン**: Planサブエージェントが策定したフェーズごとの計画
+  - **実装プラン**: コードの分析によって策定したフェーズごとの計画
   - **影響範囲**: 変更が必要なファイルや関連コード
-  - **確認事項**: 実装前に確認が必要な点（あれば）
-
-
-### 4. 実装プランの改善
-
-- 以下の処理を繰り返してください
-   - ユーザーにGitHub Issueの内容が適切か確認してください
-   - ユーザーからフィードバックがあった場合、GitHub Issueの内容を改善してください
-   - ユーザーからの承認が得られたら、処理を終了してください
 
 #### Issueの作成コマンド
 
 `gh issue create --title "タイトル" --body "本文"`を使用してください。
+
+### 4. GitHub Issueへ確認事項のコメントを行う
+Issueの作成後、ユーザーにIssueの実施にあたり確認が必要な事項がある場合は、Issueにコメントしてください。
+
+#### Issueへのコメントコマンド
+
+`gh issue comment <Issue番号> --body "コメント内容"`を使用してください。
