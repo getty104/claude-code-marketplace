@@ -1,7 +1,7 @@
 ---
 name: update-issue
 description: Update an existing GitHub Issue's description based on the issue number and request provided as arguments
-argument-hint: "番号: [Issue番号] 依頼内容: [依頼内容]"
+argument-hint: "Issue番号: [Issue番号] 依頼内容: [依頼内容]"
 model: opus
 ---
 
@@ -31,6 +31,7 @@ Explore サブエージェントで依頼内容に基づき、コードベース
 ユーザーへの確認が必要な事項がある場合は途中で質問をせず、実装後、GitHub Issueにコメントしてください。
 
 #### 依頼内容
+依頼内容は以下の通りです。
 
 $ARGUMENTS
 
