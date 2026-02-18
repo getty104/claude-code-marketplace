@@ -2,7 +2,7 @@
 name: create-issue
 description: Create an implementation plan and a GitHub Issue based on the task description provided as an argument
 argument-hint: "[task-description]"
-model: opus
+model: sonnet
 ---
 
 # Create Issue

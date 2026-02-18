@@ -1,7 +1,7 @@
 ---
 name: read-unresolved-pr-comments
 description: GitHub PRから未対応のコメントを取得し、修正プランを作成します。
-model: opus
+model: sonnet
 context: fork
 agent: general-purpose
 ---
