@@ -58,7 +58,6 @@ claude-code-marketplace/
 
    **自動/手動呼び出し可能スキル**:
    - `check-library`: ライブラリの情報をMCPサーバーから取得
-   - `create-git-worktree`: git worktreeを利用した作業環境を自動構築
    - `create-pr`: GitHub PRを作成
    - `high-quality-commit`: 適切なgitコミット戦略でコード変更をコミット
    - `read-github-issue`: GitHub Issueの内容を取得

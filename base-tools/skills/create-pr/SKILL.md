@@ -8,7 +8,8 @@ context: fork
 
 # Create Pull Request
 
-このスキルは、GitHubでPull Request（PR）を作成するための包括的なガイダンスを提供します。
+このスキルは、GitHubでPull Request（PR）を作成するためのスキルです。
+このスキルが呼び出された際には、Instructionsに従って、PRの作成を行ってください。
 
 # Instructions
 

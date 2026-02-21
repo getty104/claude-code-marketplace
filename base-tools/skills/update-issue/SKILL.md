@@ -7,7 +7,8 @@ model: sonnet
 
 # Update Issue
 
-引数で受け取ったIssue番号と依頼内容をもとにコードを分析し、該当のGitHub Issueのdescriptionを更新します。
+引数で受け取ったIssue番号と依頼内容をもとにコードを分析し、該当のGitHub Issueのdescriptionを更新するためのスキルです。
+このスキルが呼び出された際には、Instructionsに従って、Issueの内容を確認し、コードの分析を行い、Issueのdescriptionの更新を行ってください。
 
 # Instructions
 

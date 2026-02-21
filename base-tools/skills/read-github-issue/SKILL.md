@@ -9,7 +9,8 @@ argument-hint: "[issue-number]"
 
 # Read GitHub Issue
 
-GitHub Issueの内容を取得し、実装プランを作成します。
+GitHub Issueの内容を取得し、実装プランを作成するためのスキルです。
+このスキルが呼び出された際には、Instructionsに従って、Issueの内容を取得し、実装プランの作成を行ってください。
 
 # Instructions
 

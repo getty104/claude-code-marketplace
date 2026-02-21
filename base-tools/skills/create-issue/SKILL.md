@@ -7,7 +7,8 @@ model: sonnet
 
 # Create Issue
 
-引数で受け取った内容をもとに要件を整理し、GitHub Issueを作成します。
+引数で受け取った内容をもとに要件を整理し、GitHub Issueを作成するためのスキルです。
+このスキルが呼び出された際には、Instructionsに従ってタスクの内容を分析し、実装プランを作成した上でGitHub Issueを作成してください。
 
 # Instructions
 

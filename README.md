@@ -100,11 +100,10 @@ Skills are reusable prompts that can be invoked to perform specific tasks. Each 
 Reads GitHub Issue and automates from implementation to PR creation
 
 **Execution Steps**:
-1. Create git worktree via `create-git-worktree` skill
-2. Read and analyze Issue content via `read-github-issue` skill
-3. Implement tasks using `general-purpose-assistant` sub-agent
-4. Commit and push via `commit-push` skill
-5. Create PR via `create-pr` skill
+1. Read and analyze Issue content via `read-github-issue` skill
+2. Implement tasks using `general-purpose-assistant` sub-agent
+3. Commit and push via `commit-push` skill
+4. Create PR via `create-pr` skill
 
 #### `/create-issue <task description>`
 Analyzes task requirements and creates a GitHub Issue with implementation plan
@@ -119,11 +118,10 @@ Analyzes task requirements and creates a GitHub Issue with implementation plan
 Address unresolved review comments on specified branch
 
 **Execution Steps**:
-1. Prepare git worktree
-2. Retrieve unresolved review comments via `read-unresolved-pr-comments` skill
-3. Implement fixes using `general-purpose-assistant` sub-agent
-4. Commit, push, and resolve comments
-5. Update PR description and request re-review via `/gemini review` comment
+1. Retrieve unresolved review comments via `read-unresolved-pr-comments` skill
+2. Implement fixes using `general-purpose-assistant` sub-agent
+3. Commit, push, and resolve comments
+4. Update PR description and request re-review via `/gemini review` comment
 
 #### `/check-library`
 Retrieves library documentation using appropriate MCP servers
@@ -136,21 +134,6 @@ Retrieves library documentation using appropriate MCP servers
 **Usage Example**:
 ```
 /check-library React Query
-```
-
-#### `/create-git-worktree <branch name>`
-Automates git worktree creation and environment setup
-
-**Features**:
-- Creates worktree in `.git-worktrees/` directory
-- Automatically converts `/` to `-` in branch names
-- Copies .env files
-- Installs dependencies (npm install)
-- Reuses existing worktrees
-
-**Usage Example**:
-```
-/create-git-worktree feature/new-feature
 ```
 
 #### `/commit-push`
@@ -266,10 +249,6 @@ claude-code-marketplace/
 │   │   │   ├── SKILL.md
 │   │   │   ├── examples.md
 │   │   │   └── reference.md
-│   │   ├── create-git-worktree/            # Worktree creation skill
-│   │   │   ├── SKILL.md
-│   │   │   └── scripts/
-│   │   │       └── create-worktree.sh
 │   │   ├── create-issue/                   # Issue creation skill
 │   │   │   └── SKILL.md
 │   │   ├── create-pr/                      # PR creation skill
