@@ -1,12 +1,12 @@
 {
   "hooks": {
-    "Stop": [
+    "SessionStart": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/remove-merged-worktrees.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/setup-worktree.sh"
           }
         ]
       }
