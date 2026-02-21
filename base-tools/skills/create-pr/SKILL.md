@@ -19,3 +19,4 @@ PRは以下のルールで作成します。
 - PRのdescriptionのテンプレート内でコメントアウトされている箇所は必ず削除すること
 - PRのdescriptionには`Closes [Issue番号]`と記載すること
 - ghコマンドの`gh api user`で取得したユーザーをAssigneesに追加すること
+- PRのベースブランチはデフォルトブランチにすること
