@@ -30,3 +30,9 @@ Resolveしていないレビューコメントの指摘内容へ対応をする�
 6. resolve-pr-comments skillを用いて、すべてのレビューコメントをResolveする
 7. 修正した内容を元に、PRのdescriptionを最新の状態に更新する
 8. `/gemini review`というコメントをPRに追加する
+
+## 重要な制約
+
+- タスクはすべてworktree内で行います
+- worktree以外の場所で作業を行わず、コードの変更も行わないでください
+- `cd`コマンドを利用する場合は`pwd`コマンドで現在のディレクトリを確認し、worktree内であることを確認してください
