@@ -9,5 +9,6 @@ if [[ ! "$CURRENT_DIR" =~ /.claude/worktrees/[^/]+$ ]]; then
     exit 0
 fi
 
-wt_path=$(pwd) && cd ../../.. && git worktree remove "$wt_path"
-echo "Removed worktree: $wt_path"
+cd ../../..
+git worktree remove "$CURRENT_DIR" --force
+echo "Removed worktree: $CURRENT_DIR"
