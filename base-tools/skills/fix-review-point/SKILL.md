@@ -21,7 +21,7 @@ Resolveしていないレビューコメントの指摘内容へ対応をする�
 
 以下のステップでレビューコメントの確認とタスクの遂行を行ってください。
 
-1. !`git checkout $ARGUMENTS`コマンドを実行して、指定されたブランチに切り替える
+1. `git checkout $ARGUMENTS`コマンドを実行して、指定されたブランチに切り替える
 2. read-unresolved-pr-comments skillを用いてPRの未解決レビューコメントから修正プランを確認する
 3. 洗い出したタスクごとにbase-tools:general-purpose-assistantサブエージェントで実装を行う
 4. 全ての実装が完了したら、base-tools:general-purpose-assistantサブエージェントでテスト・Lintが全て通過することを確認する
