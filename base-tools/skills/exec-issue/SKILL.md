@@ -3,6 +3,11 @@ name: exec-issue
 description: Execute tasks based on GitHub Issue content
 argument-hint: "[issue-number]"
 model: sonnet
+hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: "wt_path=$(pwd) && cd ../../.. && git worktree remove "$wt_path""
 ---
 
 # Execute Issue
