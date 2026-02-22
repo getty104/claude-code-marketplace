@@ -3,6 +3,11 @@ name: fix-review-point
 description: Address unresolved review comments on specified branch
 argument-hint: "[branch-name]"
 model: sonnet
+hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: "git checkout -"
 ---
 
 # Fix Review Point
