@@ -1,7 +1,7 @@
 ---
 name: read-github-issue
 description: GitHub Issueの内容を取得し、実装プランを作成します。
-model: sonnet
+model: opus
 context: fork
 agent: general-purpose
 argument-hint: "[issue-number]"
