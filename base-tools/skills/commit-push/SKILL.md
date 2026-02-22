@@ -8,7 +8,8 @@ context: fork
 
 # Commit and Push Code Changes
 
-コード変更を適切なgitコミット戦略でgit commitし、pushしてください。
+コード変更を適切なgitコミット戦略でgit commitし、pushするためのスキルです。
+このスキルが呼び出された際には、Instructionsに従って、コード変更のgit commitとpushを行ってください。
 
 # Instructions
 
