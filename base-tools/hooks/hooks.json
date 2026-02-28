@@ -9,6 +9,15 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/setup-worktree.sh"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git fetch --prune"
+          }
+        ]
       }
     ],
     "SessionEnd": [
