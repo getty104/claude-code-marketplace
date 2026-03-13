@@ -4,31 +4,54 @@ getty104's Claude Code Plugin Marketplace
 
 ## Overview
 
-This repository is a plugin marketplace for Claude Code that automates TDD (Test-Driven Development) based development workflows. It provides specialized agents, skills, and hooks to streamline the entire development process, from GitHub Issue implementation to code review responses.
+[claude-task-worker](https://github.com/getty104/claude-task-worker) と組み合わせて使用することで、GitHub Issue の実装からPRのレビュー対応までを自動化する Claude Code プラグインマーケットプレイスです。
 
-The **marketplace format** enables centralized management of multiple plugins and easy sharing with teams and communities.
+claude-task-worker が GitHub のラベルを検知してタスクを起動し、本マーケットプレイスの base-tools プラグインが実際の実装・レビュー対応・Issue 管理を担います。
 
-## Features
+## Architecture
 
-- **TDD Automation**: Automatically executes the test creation → implementation → quality check cycle
-- **GitHub Integration**: Automates Issue implementation and review comment responses
-- **git worktree Utilization**: Safe working environment isolated from the main branch
-- **Layered Architecture Compliance**: Maintains consistent code structure
-- **Quality Assurance**: Automatically runs lint, tests, and type checks
-- **Library Documentation Access**: Integrated MCP servers for Next.js, shadcn, and other libraries
+```
+┌─────────────────────────────────────────────────────┐
+│                   GitHub                            │
+│  Issue (cc-exec-issue)  ──┐                         │
+│  Issue (cc-create-issue) ─┤                         │
+│  Issue (cc-update-issue) ─┤    ┌──────────────────┐ │
+│  PR (cc-fix-onetime)    ──┼───▶│claude-task-worker│ │
+│  PR (cc-fix-repeat)     ──┘    └────────┬─────────┘ │
+└─────────────────────────────────────────┼───────────┘
+                                          │ invoke
+                                          ▼
+                               ┌─────────────────────┐
+                               │    Claude Code CLI   │
+                               │  + base-tools plugin │
+                               └─────────────────────┘
+```
+
+claude-task-worker は以下のラベルをトリガーにしてタスクを検出し、Claude Code CLI 経由で base-tools のスキルを呼び出します。
+
+| Label | Worker Command | 呼び出されるスキル |
+|---|---|---|
+| `cc-exec-issue` | `exec-issue` | `/exec-issue` |
+| `cc-create-issue` | `create-issue` | `/create-issue` |
+| `cc-update-issue` | `update-issue` | `/update-issue` |
+| `cc-fix-onetime` | `fix-review-point` | `/fix-review-point` |
+| `cc-fix-repeat` | `fix-review-point` | `/fix-review-point`（繰り返し） |
 
 ## Installation
 
 ### Prerequisites
 
-- [Claude Code CLI](https://docs.claude.com/en/docs/claude-code/installation) installed
-- Node.js (if used in your project)
-- Docker (if used in your project)
+- [Claude Code CLI](https://docs.claude.com/en/docs/claude-code/installation)
 - [GitHub CLI (`gh`)](https://cli.github.com/)
+- [claude-task-worker](https://github.com/getty104/claude-task-worker)
 
-### Adding the Marketplace
+### 1. Marketplace の追加
 
-Add to your Claude Code settings file (`~/.config/claude/settings.json`):
+```bash
+claude marketplace add https://github.com/getty104/claude-code-marketplace
+```
+
+または `~/.config/claude/settings.json` に直接追加：
 
 ```json
 {
@@ -38,466 +61,184 @@ Add to your Claude Code settings file (`~/.config/claude/settings.json`):
 }
 ```
 
-Or add directly via Claude Code command:
-
-```bash
-claude marketplace add https://github.com/getty104/claude-code-marketplace
-```
-
-### Installing Plugins
-
-After adding the marketplace, included plugins will be automatically available:
+### 2. Plugin のインストール
 
 ```bash
 claude plugin install base-tools
 ```
 
-### MCP Configuration
+### 3. claude-task-worker のセットアップ
 
-The `.mcp.json` included in the plugin automatically configures the following MCP servers:
-- **chrome-devtools**: Browser automation and DevTools integration
-- **context7**: Library documentation retrieval (HTTP-based, no API key required)
-- **next-devtools**: Next.js development tools and documentation
-- **shadcn**: shadcn/ui component library integration
+対象リポジトリで初期化を実行すると、必要なラベル・Issue テンプレート・GitHub Actions ワークフローが作成されます。
 
-## Marketplace Composition
-
-This marketplace includes the following plugins:
-
-### base-tools Plugin
-
-An integrated plugin for automating TDD development workflows. Composed of four component types:
-
-1. **Agents** (`agents/`) - Specialized sub-agents
-2. **Skills** (`skills/`) - Reusable skill prompts and slash commands
-3. **Hooks** (`hooks/hooks.json`) - Event handlers
-4. **MCP Servers** (`.mcp.json`) - External tool integration
-
-## Key Features
-
-### Agents
-
-#### general-purpose-assistant
-General-purpose agent for diverse tasks requiring broad problem-solving capabilities
-
-**Features**:
-- Comprehensive problem analysis and solution
-- Adherence to project conventions (TDD, no comments, layered architecture)
-- LSP-first code exploration strategy
-- Flexible task execution across multiple domains
-
-**Usage Example**:
-```
-Explain the overall project structure
-Provide advice on improving development efficiency
+```bash
+npx claude-task-worker init
 ```
 
-### Skills
+### 4. Worker の起動
 
-Skills are reusable prompts that can be invoked to perform specific tasks. Each skill can be invoked using the `/skill-name` syntax (e.g., `/exec-issue 123`).
-
-#### `/exec-issue <issue number>`
-Reads GitHub Issue and automates from implementation to PR creation
-
-**Execution Steps**:
-1. Read and analyze Issue content via `read-github-issue` skill
-2. Implement tasks using `general-purpose-assistant` sub-agent
-3. Commit and push via `commit-push` skill
-4. Create PR via `create-pr` skill
-
-#### `/create-issue <task description>`
-Analyzes task requirements and creates a GitHub Issue with implementation plan
-
-**Execution Steps**:
-1. Move to default branch and pull latest changes
-2. Analyze task requirements using Explore sub-agent
-3. Create GitHub Issue with structured implementation plan
-4. Iterate on Issue content based on user feedback
-
-#### `/fix-review-point <branch name>`
-Address unresolved review comments on specified branch
-
-**Execution Steps**:
-1. Retrieve unresolved review comments and CI status via `create-review-fix-plan` skill
-2. Implement fixes using `general-purpose-assistant` sub-agent
-3. Commit, push, and resolve comments
-4. Update PR description and request re-review via `/gemini review` comment
-
-#### `/check-library`
-Retrieves library documentation using appropriate MCP servers
-
-**Features**:
-- Next.js: Uses next-devtools MCP
-- shadcn/ui: Uses shadcn MCP
-- Other libraries: Uses context7 MCP
-
-**Usage Example**:
-```
-/check-library React Query
+```bash
+npx claude-task-worker all
 ```
 
-#### `/commit-push`
-Guides appropriate git commit strategies and pushes code changes
+すべてのワーカーが起動し、GitHub Issue/PR のポーリングが開始されます。
 
-**Features**:
-- Squash strategy (default): Amend to existing commits
-- New commit: For independent changes
-- Interactive rebase: For reorganizing commit history
-- Commit message guidelines (type, subject, body, footer)
-- Automatic push with `--force-with-lease`
+## Usage
 
-**Usage Example**:
-```
-/commit-push
-```
+### 自動実行（claude-task-worker 経由）
 
-#### `/read-github-issue <issue number>`
-Retrieves GitHub Issue content and creates an implementation plan
+1. GitHub Issue を作成し、`cc-exec-issue` ラベルを付与
+2. claude-task-worker が検知し、`/exec-issue` スキルを呼び出す
+3. Issue の内容に基づいて自動実装 → PR 作成まで完了
 
-**Features**:
-- Fetches Issue title, body, comments, labels, and assignments
-- Downloads images from Issues using gh-asset
-- Creates detailed implementation plan from Issue content
+### 手動実行（Claude Code CLI で直接呼び出し）
 
-**Usage Example**:
-```
-/read-github-issue 123
+```bash
+claude
+> /exec-issue 123
+> /fix-review-point feature-branch
+> /create-issue ユーザー認証機能を追加したい
 ```
 
-#### `/create-pr`
-Creates GitHub Pull Request with proper template
+## Skills
 
-**Features**:
-- Uses `.github/PULL_REQUEST_TEMPLATE.md` for description
-- Removes commented sections from template
-- Includes `Closes #<issue number>` in description
-- Auto-assigns the current user to Assignees
+### Issue 管理
 
-**Usage Example**:
-```
-/create-pr
-```
+| Skill | Description |
+|---|---|
+| `/exec-issue <issue番号>` | Issue を読み込み、実装から PR 作成まで自動化 |
+| `/create-issue <タスク内容>` | タスク要件を分析し、実装プラン付き GitHub Issue を作成 |
+| `/update-issue <Issue番号> <依頼内容>` | 既存 Issue の description を更新 |
+| `/breakdown-issues <タスク内容>` | 要件を TODO に分解し、タスクごとに GitHub Issue を作成 |
+| `/read-github-issue <issue番号>` | Issue の内容を取得し実装プランを作成 |
 
-#### `/create-review-fix-plan`
-Retrieves unresolved PR comments and CI status, then creates a fix plan
+### PR・レビュー対応
 
-**Features**:
-- Fetches unresolved Review threads via GitHub GraphQL API
-- Checks CI status and identifies failure causes
-- Analyzes comment content and identifies required fixes
-- Creates structured fix plan
+| Skill | Description |
+|---|---|
+| `/fix-review-point <ブランチ名>` | 未解決のレビューコメントに対応 |
+| `/create-pr` | PR テンプレートを使用して GitHub PR を作成 |
+| `/create-review-fix-plan` | 未解決レビューコメントと CI ステータスから修正プランを作成 |
+| `/resolve-pr-comments` | PR の未解決 Review threads を一括 Resolve |
 
-**Usage Example**:
-```
-/create-review-fix-plan
-```
+### トリアージ
 
-#### `/resolve-pr-comments`
-Batch resolves PR Review threads via GitHub GraphQL API
+| Skill | Description |
+|---|---|
+| `/triage-issues` | アサインされた Issue に適切なラベルを付与 |
+| `/triage-prs` | CI 完了済み PR を確認し、修正ラベル付与またはマージ |
 
-**Features**:
-- Automatically resolves all unresolved Review threads
-- Uses resolveReviewThread mutation
+### 開発ツール
 
-**Usage Example**:
-```
-/resolve-pr-comments
-```
+| Skill | Description |
+|---|---|
+| `/commit-push` | 適切な git コミット戦略でコミット＆プッシュ |
+| `/check-library` | MCP サーバー経由でライブラリドキュメントを取得 |
+| `/create-task-summary` | 直近一週間の PR からサマリーを作成 |
 
-## Development Guidelines
+## Agents
 
-### TDD (Test-Driven Development)
+| Agent | Description |
+|---|---|
+| `general-purpose-assistant` | 汎用的な問題解決とタスク実行 |
+| `requirement-todo-organizer` | タスクを要件と依存関係付き TODO リストに分解 |
 
-1. Create tests (in same directory as test target file)
-2. Run tests (confirm failure)
-3. Implementation
-4. Run tests (confirm success)
-5. Refactoring
+## MCP Servers
 
-### Code Quality Standards
+base-tools プラグインに含まれる `.mcp.json` により、以下の MCP サーバーが自動設定されます。
 
-- All tests must pass
-- Zero errors from `npm run lint`
-- TypeScript type safety ensured
-- No comments (code should be self-explanatory)
-- Minimal file changes
-
-### Layered Architecture
-
-- **Model Layer**: Business logic
-- **Infrastructure Layer**: Database, external APIs
-- **Application Layer**: Use cases
-- **Presentation Layer**: UI/API responses
+| Server | Description |
+|---|---|
+| `chrome-devtools` | ブラウザ自動化と DevTools 統合 |
+| `context7` | ライブラリドキュメント取得（API キー不要） |
+| `next-devtools` | Next.js 開発ツールとドキュメント |
+| `shadcn` | shadcn/ui コンポーネントライブラリ統合 |
 
 ## Directory Structure
 
 ```
 claude-code-marketplace/
 ├── .claude-plugin/
-│   └── marketplace.json                    # Marketplace manifest
-│
-├── base-tools/                             # base-tools plugin
-│   ├── .claude-plugin/
-│   │   └── plugin.json                     # Plugin manifest (auto-generated)
-│   ├── .mcp.json                           # MCP server configuration
-│   ├── agents/                             # Agent definitions
-│   │   └── general-purpose-assistant.md    # General-purpose agent
-│   ├── skills/                             # Skill definitions
-│   │   ├── check-library/                  # Library documentation skill
-│   │   │   ├── SKILL.md
-│   │   │   └── examples.md
-│   │   ├── commit-push/                    # Commit and push skill
-│   │   │   ├── SKILL.md
-│   │   │   ├── examples.md
-│   │   │   └── reference.md
-│   │   ├── create-issue/                   # Issue creation skill
-│   │   │   └── SKILL.md
-│   │   ├── create-pr/                      # PR creation skill
-│   │   │   └── SKILL.md
-│   │   ├── exec-issue/                     # Issue execution skill
-│   │   │   └── SKILL.md
-│   │   ├── fix-review-point/               # Review fix skill
-│   │   │   └── SKILL.md
-│   │   ├── read-github-issue/              # GitHub Issue retrieval skill
-│   │   │   └── SKILL.md
-│   │   ├── create-review-fix-plan/          # Review fix plan creation skill
-│   │   │   ├── SKILL.md
-│   │   │   └── scripts/
-│   │   │       └── fetch-unresolved-comments.sh
-│   │   └── resolve-pr-comments/            # PR comment resolution skill
-│   │       ├── SKILL.md
-│   │       └── scripts/
-│   │           └── resolve-pr-comments.sh
-│   ├── scripts/                            # Utility scripts
-│   │   └── remove-merged-worktrees.sh      # Cleanup merged worktrees
-│   └── hooks/                              # Hook definitions
-│       └── hooks.json                      # Event handlers
-│
-├── CLAUDE.md                               # Claude Code guide
-└── README.md                               # This file
+│   └── marketplace.json
+└── base-tools/
+    ├── .claude-plugin/
+    │   └── plugin.json
+    ├── .mcp.json
+    ├── agents/
+    │   ├── general-purpose-assistant.md
+    │   └── requirement-todo-organizer.md
+    ├── skills/
+    │   ├── breakdown-issues/
+    │   ├── check-library/
+    │   ├── commit-push/
+    │   ├── create-issue/
+    │   ├── create-pr/
+    │   ├── create-review-fix-plan/
+    │   ├── create-task-summary/
+    │   ├── exec-issue/
+    │   ├── fix-review-point/
+    │   ├── read-github-issue/
+    │   ├── resolve-pr-comments/
+    │   ├── triage-issues/
+    │   ├── triage-prs/
+    │   └── update-issue/
+    ├── hooks/
+    │   └── hooks.json
+    └── scripts/
+        └── remove-merged-worktrees.sh
 ```
 
-### Marketplace Manifest
+## Customization
 
-`.claude-plugin/marketplace.json` defines marketplace metadata:
+### Skill の追加
 
-```json
-{
-  "name": "getty104",
-  "metadata": {
-    "description": "getty104's marketplace",
-    "version": "0.0.1"
-  },
-  "owner": {
-    "name": "getty104"
-  },
-  "plugins": [
-    {
-      "name": "base-tools",
-      "source": "./base-tools",
-      "description": "This is a getty104's base tool set"
-    }
-  ]
-}
-```
-
-## Development and Customization
-
-### Adding Agents
-
-Create `.md` files in `base-tools/agents/`. Define `name`, `description`, `model`, and `color` in frontmatter:
-
-```markdown
----
-name: custom-agent
-description: Description of when this agent should be used (Claude Code uses for auto-judgment)
-model: sonnet
-color: cyan
----
-
-Write agent prompt content here.
-This prompt will be passed to the sub-agent.
-```
-
-**Best Practices**:
-- Make `description` clear and specific (Claude Code automatically invokes at appropriate times)
-- Create agents with specialized roles
-- Specify communication requirements (e.g., Japanese language)
-
-### Adding Skills
-
-Create a directory in `base-tools/skills/` with a `SKILL.md` file:
+`base-tools/skills/` にディレクトリを作成し、`SKILL.md` を配置：
 
 ```markdown
 ---
 name: skill-name
-description: Description of what this skill does and when to use it
-model: haiku
+description: スキルの説明
+model: sonnet
 ---
 
-# Skill Title
-
-## Instructions
-
-Detailed instructions for executing the skill...
+スキルのプロンプト内容
 ```
 
-Skills can include the following structure:
-```
-skills/
-└── my-skill/
-    ├── SKILL.md              # Main skill definition (required)
-    ├── scripts/              # Shell scripts for automation (optional)
-    │   └── my-script.sh
-    ├── examples.md           # Usage examples (optional)
-    └── reference.md          # Additional reference material (optional)
-```
+### Agent の追加
 
-**Frontmatter Fields**:
-- `name`: Skill name (defaults to directory name if omitted)
-- `description`: Skill description (used by Claude for auto-invocation judgment)
-- `model`: Model to use (`haiku`, `sonnet`, `opus`)
-- `disable-model-invocation`: Set to `true` to disable automatic Claude invocation (user-only)
-- `user-invocable`: Set to `false` to hide from `/` menu (Claude-only)
-- `argument-hint`: Hint displayed during autocomplete (e.g., `"[issue-number]"`)
-- `context`: Set to `fork` to run as sub-agent
-- `agent`: Agent type to use when `context: fork` is set (e.g., `general-purpose`)
+`base-tools/agents/` に `.md` ファイルを作成：
 
-### Configuring Hooks
+```markdown
+---
+name: agent-name
+description: エージェントの説明
+model: inherit
+---
 
-Configure event handlers in `base-tools/hooks/hooks.json`:
-
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "your-command-here"
-          }
-        ]
-      }
-    ]
-  }
-}
+エージェントのプロンプト内容
 ```
 
-Available events: `PreToolUse`, `PostToolUse`, `Stop`, etc.
+### MCP Server の追加
 
-### Adding MCP Servers
-
-Add new MCP servers to `.mcp.json`:
+`base-tools/.mcp.json` にサーバーを追加：
 
 ```json
 {
   "mcpServers": {
     "server-name": {
-      "command": "command",
-      "args": ["arg1", "arg2"]
+      "command": "npx",
+      "args": ["-y", "package-name"]
     }
   }
 }
 ```
 
-For HTTP-based MCP servers:
-
-```json
-{
-  "mcpServers": {
-    "server-name": {
-      "type": "http",
-      "url": "https://example.com/mcp"
-    }
-  }
-}
-```
-
-For Python-based MCP servers (using uv):
-
-```json
-{
-  "mcpServers": {
-    "server-name": {
-      "command": "uvx",
-      "args": ["--from", "git+https://github.com/org/repo", "package", "start-mcp-server"]
-    }
-  }
-}
-```
-
-## Plugin Validation
-
-Always validate plugins before distribution:
+## Validation
 
 ```bash
 claude plugin validate base-tools/
-```
-
-Run local tests:
-
-```bash
 claude plugin install ./base-tools
 ```
-
-## Sharing the Marketplace
-
-To share this marketplace with teams or communities:
-
-### Public Sharing
-
-Publish repository on GitHub and share the URL:
-
-```bash
-https://github.com/getty104/claude-code-marketplace
-```
-
-### Private Sharing
-
-Grant team members access to the repository, then use the same URL.
-
-### Fork and Customize
-
-Fork this marketplace to add your own plugins:
-
-1. Fork the repository
-2. Update `owner` in `.claude-plugin/marketplace.json`
-3. Add new plugins or modify existing ones
-4. Validate and commit
-
-## Troubleshooting
-
-### Plugin Not Recognized
-
-Check with:
-
-```bash
-claude plugin list
-```
-
-Verify that the marketplace has been added correctly.
-
-### MCP Server Won't Start
-
-Ensure the required tools are installed:
-- `npx` for Node.js-based servers
-- `uvx` for Python-based servers (requires uv)
-
-### Command Won't Execute
-
-Verify that skill file names are correct. Directory names become skill names as-is.
-
-## Resources
-
-- [Claude Code Official Documentation](https://docs.claude.com/en/docs/claude-code)
-- [Plugin Marketplace Guide](https://anthropic.mintlify.app/en/docs/claude-code/plugin-marketplaces)
-- [Plugin Reference](https://anthropic.mintlify.app/en/docs/claude-code/plugins-reference)
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss the proposed changes.
 
 ## License
 
@@ -506,7 +247,3 @@ MIT
 ## Author
 
 getty104
-
-## Support
-
-For questions or issues, please report them in [GitHub Issues](https://github.com/getty104/claude-code-marketplace/issues).
