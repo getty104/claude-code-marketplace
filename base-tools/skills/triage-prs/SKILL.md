@@ -1,0 +1,79 @@
+---
+name: triage-prs
+description: Triage GitHub PRs assigned to the user. Fetch PRs where CI has completed and cc-in-progress label is not present, run create-review-fix-plan for each, then either add cc-fix-onetime label (if fixes are needed) or merge the PR (if it's ready to merge as-is).
+argument-hint: ""
+model: opus
+---
+
+# Triage PRs
+
+ユーザーにアサインされたPRを取得し、CIが完了済みかつ`cc-in-progress`ラベルがついていないPRに対して修正プランを確認し、適切なアクション（ラベル付与またはマージ）を実行するスキルです。
+
+# Instructions
+
+## 実行ステップ
+
+### 1. ユーザー情報の取得
+
+```
+gh api user --jq '.login'
+```
+
+### 2. 対象PR一覧の取得
+
+ユーザーにアサインされているPRを取得してください。
+
+```
+gh pr list --assignee <ユーザー名> --json number,title,url,labels,headRefName,statusCheckRollup,reviewDecision --limit 100
+```
+
+取得したPRから以下の条件で**すべて**を満たすものだけをフィルタしてください。
+
+- `cc-in-progress`ラベルが**ついていない**
+- `statusCheckRollup`のすべてのチェックが完了している（`status`が`COMPLETED`）
+  - チェックが存在しないPRも対象に含める
+
+### 3. 各PRに対する修正プラン確認
+
+フィルタされた各PRに対して、`create-review-fix-plan`スキルを実行して修正プランを取得してください。
+
+実行前に対象PRのブランチにcheckoutしてください。
+
+```
+gh pr checkout <PR番号>
+```
+
+その後、`create-review-fix-plan`スキルを実行してください。
+
+### 4. 修正プランに基づく判定とアクション
+
+`create-review-fix-plan`の結果を分析し、以下の2パターンで判定してください。
+
+#### パターンA: 修正が必要な場合
+
+未解決のレビューコメントやCI失敗があり、実際にコード修正が必要と判断した場合：
+
+```
+gh pr edit <PR番号> --add-label "cc-fix-onetime"
+```
+
+#### パターンB: マージ可能な場合
+
+以下のいずれかに該当し、修正せずともマージできると判断した場合：
+
+- 未解決のレビューコメントがない
+- 未解決のレビューコメントがあっても、対応不要な内容（感謝コメント、情報共有のみ、既に対処済みなど）
+- CIがすべて成功している
+
+```
+gh pr merge <PR番号> --merge --delete-branch
+```
+
+### 5. 結果の報告
+
+処理結果を以下の形式で報告してください。
+
+- 処理したPRの総数
+- パターンA（修正が必要）: PR番号とタイトルの一覧、修正が必要な理由の要約
+- パターンB（マージ済み）: PR番号とタイトルの一覧
+- 対象外（フィルタで除外）: PR番号とタイトルの一覧、除外理由
