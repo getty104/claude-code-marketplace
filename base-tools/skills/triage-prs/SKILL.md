@@ -43,6 +43,24 @@ gh pr list --assignee <ユーザー名> --json number,title,url,labels,headRefNa
 gh pr checkout <PR番号>
 ```
 
+checkoutしたら、originのベースブランチとコンフリクトしていないか確認してください。
+
+```
+git fetch origin main && git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main
+```
+
+コンフリクトが検出された場合は、rebaseしてコンフリクトを解消してください。
+
+```
+git rebase origin/main
+```
+
+rebase中にコンフリクトが発生した場合は、コンフリクトを解消し、`git rebase --continue`で続行してください。rebase完了後、force-pushしてください。
+
+```
+git push origin HEAD --force-with-lease
+```
+
 その後、`create-review-fix-plan`スキルを実行してください。
 
 ### 4. 修正プランに基づく判定とアクション
