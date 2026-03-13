@@ -40,7 +40,7 @@ gh pr list --assignee <ユーザー名> --json number,title,url,labels,headRefNa
 実行前に対象PRのブランチにcheckoutしてください。
 
 ```
-gh pr checkout <PR番号>
+git checkout <PRのheadRefName>
 ```
 
 checkoutしたら、originのベースブランチとコンフリクトしていないか確認してください。
@@ -95,3 +95,8 @@ gh pr merge <PR番号> --merge --delete-branch
 - パターンA（修正が必要）: PR番号とタイトルの一覧、修正が必要な理由の要約
 - パターンB（マージ済み）: PR番号とタイトルの一覧
 - 対象外（フィルタで除外）: PR番号とタイトルの一覧、除外理由
+
+## 注意事項
+
+- 作業は全てworktree上で行い、mainブランチで作業は絶対に行わないこと
+- ファイル編集などの作業を行う際は、pwdコマンドでworktree内部であることを確認してから行うこと
