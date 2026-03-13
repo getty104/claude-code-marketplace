@@ -36,7 +36,6 @@ $ARGUMENTS
 #### Issue作成時のルール
 
 - **Assignees**: `gh api user --jq '.login'`で取得したユーザーをアサインする
-- **ラベル**: `cc-created-issue`を付与する
 - **タイトル**: TODOのタスク名をそのまま使用する
 - **本文**: 以下の構造で作成する
 
