@@ -49,7 +49,7 @@ $ARGUMENTS
 
 #### Issueの作成コマンド
 
-`gh issue create --title "タイトル" --body "本文" --label "cc-created-issue"`を使用してください。
+`gh issue create --title "タイトル" --body "本文"`を使用してください。
 
 ### 3. GitHub Issueへ確認事項のコメントを行う
 Issueの作成後、ユーザーにIssueの実施にあたり確認が必要な事項がある場合は、Issueにコメントしてください。
