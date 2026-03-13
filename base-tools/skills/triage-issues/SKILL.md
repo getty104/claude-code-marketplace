@@ -61,7 +61,7 @@ gh issue list --state open --json number,title,labels,body --limit 200
 gh issue view <Issue番号> --json comments --jq '.comments[-1]'
 ```
 
-最後のコメントに確認事項（チェックリスト形式: `- [ ]`）が含まれているか確認してください。
+最後のコメントに確認事項が含まれているか確認してください。
 
 #### 5b. 判定と処理
 
