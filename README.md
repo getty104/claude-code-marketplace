@@ -118,7 +118,7 @@ Analyzes task requirements and creates a GitHub Issue with implementation plan
 Address unresolved review comments on specified branch
 
 **Execution Steps**:
-1. Retrieve unresolved review comments via `read-unresolved-pr-comments` skill
+1. Retrieve unresolved review comments and CI status via `create-review-fix-plan` skill
 2. Implement fixes using `general-purpose-assistant` sub-agent
 3. Commit, push, and resolve comments
 4. Update PR description and request re-review via `/gemini review` comment
@@ -178,17 +178,18 @@ Creates GitHub Pull Request with proper template
 /create-pr
 ```
 
-#### `/read-unresolved-pr-comments`
-Retrieves unresolved PR comments and creates a fix plan
+#### `/create-review-fix-plan`
+Retrieves unresolved PR comments and CI status, then creates a fix plan
 
 **Features**:
 - Fetches unresolved Review threads via GitHub GraphQL API
+- Checks CI status and identifies failure causes
 - Analyzes comment content and identifies required fixes
 - Creates structured fix plan
 
 **Usage Example**:
 ```
-/read-unresolved-pr-comments
+/create-review-fix-plan
 ```
 
 #### `/resolve-pr-comments`
@@ -259,10 +260,10 @@ claude-code-marketplace/
 │   │   │   └── SKILL.md
 │   │   ├── read-github-issue/              # GitHub Issue retrieval skill
 │   │   │   └── SKILL.md
-│   │   ├── read-unresolved-pr-comments/    # PR comment retrieval skill
+│   │   ├── create-review-fix-plan/          # Review fix plan creation skill
 │   │   │   ├── SKILL.md
 │   │   │   └── scripts/
-│   │   │       └── read-unresolved-pr-comments.sh
+│   │   │       └── fetch-unresolved-comments.sh
 │   │   └── resolve-pr-comments/            # PR comment resolution skill
 │   │       ├── SKILL.md
 │   │       └── scripts/

@@ -61,7 +61,7 @@ claude-code-marketplace/
    - `create-pr`: GitHub PRを作成
    - `high-quality-commit`: 適切なgitコミット戦略でコード変更をコミット
    - `read-github-issue`: GitHub Issueの内容を取得
-   - `read-unresolved-pr-comments`: GitHub PRから未対応のコメントを取得
+   - `create-review-fix-plan`: GitHub PRの未解決レビューコメントとCIステータスを確認し、修正プランを作成
    - `resolve-pr-comments`: GitHub PRの未解決Review threadsを一括Resolve
 
 3. **Hooks** (`hooks/hooks.json`): イベントハンドラの設定
