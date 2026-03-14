@@ -1,13 +1,13 @@
 ---
 name: triage-prs
-description: Triage GitHub PRs assigned to the user. Fetch PRs where CI has completed and cc-in-progress label is not present, run create-review-fix-plan for each, then either add cc-fix-onetime label (if fixes are needed) or merge the PR (if it's ready to merge as-is).
+description: Triage open GitHub PRs assigned to the user. Fetch PRs where CI has completed and cc-in-progress label is not present, run create-review-fix-plan for each, then either add cc-fix-onetime label (if fixes are needed) or merge the PR (if it's ready to merge as-is).
 argument-hint: ""
 model: opus
 ---
 
 # Triage PRs
 
-ユーザーにアサインされたPRを取得し、CIが完了済みかつ`cc-in-progress`ラベルがついていないPRに対して修正プランを確認し、適切なアクション（ラベル付与またはマージ）を実行するスキルです。
+ユーザーにアサインされたオープンなPRを取得し、CIが完了済みかつ`cc-in-progress`ラベルがついていないPRに対して修正プランを確認し、適切なアクション（ラベル付与またはマージ）を実行するスキルです。
 
 # Instructions
 
@@ -21,10 +21,10 @@ gh api user --jq '.login'
 
 ### 2. 対象PR一覧の取得
 
-ユーザーにアサインされているPRを取得してください。
+ユーザーにアサインされたオープンなPRを取得してください。
 
 ```
-gh pr list --assignee <ユーザー名> --json number,title,url,labels,headRefName,statusCheckRollup,reviewDecision --limit 100
+gh pr list --assignee <ユーザー名> --state open --json number,title,url,labels,headRefName,statusCheckRollup,reviewDecision --limit 100
 ```
 
 取得したPRから以下の条件で**すべて**を満たすものだけをフィルタしてください。
