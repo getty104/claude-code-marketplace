@@ -20,16 +20,17 @@ isolation: worktree
 
 ### ステップ1: ブランチのcheckoutとコンフリクト確認
 
-対象PRのブランチにcheckoutしてください。
+リモートブランチをfetchし、対象PRのブランチにcheckoutしてください。
 
 ```
-git checkout <PRのheadRefName>
+git fetch origin <PRのheadRefName>:refs/remotes/origin/<PRのheadRefName> main
+git checkout -b <PRのheadRefName> origin/<PRのheadRefName>
 ```
 
 checkoutしたら、originのベースブランチとコンフリクトしていないか確認してください。
 
 ```
-git fetch origin main && git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main
+git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main
 ```
 
 コンフリクトが検出された場合は、rebaseしてコンフリクトを解消してください。
