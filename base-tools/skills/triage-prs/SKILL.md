@@ -7,7 +7,7 @@ model: opus
 
 # Triage PRs
 
-ユーザーにアサインされたオープンなPRを取得し、CIが完了済みかつ`cc-in-progress`ラベルがついていないPRに対して修正プランを確認し、適切なアクション（ラベル付与またはマージ）を実行するスキルです。
+ユーザーにアサインされたオープンなPRを取得し、CIが完了済みかつ`cc-in-progress`と`cc-fix-onetime`ラベルがついていないPRに対して修正プランを確認し、適切なアクション（ラベル付与またはマージ）を実行するスキルです。
 
 # Instructions
 
@@ -29,7 +29,7 @@ gh pr list --assignee <ユーザー名> --state open --json number,title,url,lab
 
 取得したPRから以下の条件で**すべて**を満たすものだけをフィルタしてください。
 
-- `cc-in-progress`ラベルが**ついていない**
+- `cc-in-progress`と`cc-fix-onetime`ラベルどちらも**ついていない**
 - `statusCheckRollup`のすべてのチェックが完了している（`status`が`COMPLETED`）
   - チェックが存在しないPRも対象に含める
 
