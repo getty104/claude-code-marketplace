@@ -15,8 +15,3 @@ if [ -f "$ROOT_DIR/.env" ]; then
     cp "$ROOT_DIR/.env" .env
     echo "Copied .env"
 fi
-
-if [ -d "$ROOT_DIR/node_modules" ]; then
-    cp -r "$ROOT_DIR/node_modules" node_modules
-    echo "Copied node_modules"
-fi
