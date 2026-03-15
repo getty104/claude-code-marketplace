@@ -1,7 +1,7 @@
 ---
 name: pr-fix-plan-evaluator
 description: "Use this agent when a PR fix plan (修正プラン) has been generated from review comments or CI failures, and you need to determine whether each item in the plan should be addressed or can be safely skipped. This agent evaluates the necessity and priority of proposed fixes.\\n\\nExamples:\\n\\n- user: \"/fix-review-point feature-branch\"\\n  assistant: \"レビューコメントから修正プランを作成しました。各修正項目の対応要否を判断します。\"\\n  <commentary>\\n  修正プランが生成されたので、Agent toolを使ってpr-fix-plan-evaluatorエージェントを起動し、各項目の対応要否を判断する。\\n  </commentary>\\n  assistant: \"pr-fix-plan-evaluatorエージェントを使って、修正プランの各項目を評価します。\"\\n\\n- user: \"このPRのレビューコメントに対する修正プランがあるけど、全部対応する必要があるか判断して\"\\n  assistant: \"Agent toolを使ってpr-fix-plan-evaluatorエージェントで修正プランを評価します。\"\\n  <commentary>\\n  ユーザーが修正プランの対応要否判断を求めているので、pr-fix-plan-evaluatorエージェントを起動する。\\n  </commentary>"
-model: opus
+model: sonnet
 memory: user
 ---
 
