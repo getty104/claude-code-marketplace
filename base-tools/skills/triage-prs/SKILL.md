@@ -2,7 +2,7 @@
 name: triage-prs
 description: Triage open GitHub PRs assigned to the user. Fetch PRs where CI has completed and cc-in-progress label is not present, run create-review-fix-plan for each, then either add cc-fix-onetime label (if fixes are needed) or merge the PR (if it's ready to merge as-is).
 argument-hint: ""
-model: opus
+model: sonnet
 ---
 
 # Triage PRs
