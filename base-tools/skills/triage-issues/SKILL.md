@@ -20,6 +20,7 @@ model: sonnet
 !`gh issue list --assignee "$(gh api user --jq '.login')" --json number,title,labels,body --limit 300`
 
 上記のデータを使い、`issue-dependency-analyzer` サブエージェントを起動して依存関係グラフを構築し、各Issueの依存状態（resolved / blocked / circular）を判定する。
+サブエージェントには、Issue一覧のJSONデータをそのまま渡すこと。
 
 サブエージェントの結果から、各Issueの依存状態を把握した上でステップ2に進む。
 
