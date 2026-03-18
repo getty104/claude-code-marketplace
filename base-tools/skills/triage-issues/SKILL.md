@@ -51,7 +51,7 @@ gh issue list --state open --json number,title,labels,body --limit 200
 
 ### 5. 各Issueのトリアージ
 
-ステップ2で取得したIssueのうち、`cc-in-progress`ラベルが**ついていない**ものに対して、以下の判定を行ってください。
+ステップ2で取得したIssueのうち、`cc-create-issue`, `cc-update-issue`, `cc-exec-issue`ラベルが**ついていない**ものに対して、以下の判定を行ってください。
 
 #### 5a. 最後のコメントの確認
 
