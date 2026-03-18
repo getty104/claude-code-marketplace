@@ -15,17 +15,17 @@ model: sonnet
 
 ### 1. Issue取得と依存関係グラフの構築
 
-`issue-dependency-analyzer` サブエージェントを起動し、以下の情報を取得する：
+以下はユーザーにアサインされたIssue一覧です。
 
-- ユーザーにアサインされたIssue一覧
-- 全openなIssue一覧
-- 各Issueの依存関係グラフと依存状態（resolved / blocked / circular）
+!`gh issue list --assignee "$(gh api user --jq '.login')" --json number,title,labels,body --limit 300`
+
+上記のデータを使い、`issue-dependency-analyzer` サブエージェントを起動して依存関係グラフを構築し、各Issueの依存状態（resolved / blocked / circular）を判定する。
 
 サブエージェントの結果から、各Issueの依存状態を把握した上でステップ2に進む。
 
 ### 2. 各Issueのトリアージ
 
-ステップ1で取得したresolvedステータスのIssueのうち、`cc-create-issue`, `cc-update-issue`, `cc-exec-issue`ラベルが**ついていない**ものに対して、それぞれ`issue-triage-processor` サブエージェントを起動し、トリアージ処理を委譲する。
+ステップ1で取得したresolvedステータスのIssueのうち、`cc-create-issue`, `cc-update-issue`, `cc-exec-issue`, `cc-pr-created`ラベルが**ついていない**ものに対して、それぞれ`issue-triage-processor` サブエージェントを起動し、トリアージ処理を委譲する。
 エージェントは**並列で**実行する。
 
 各Issueに対して以下の情報を渡すこと：

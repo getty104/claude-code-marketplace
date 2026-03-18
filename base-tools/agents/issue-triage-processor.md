@@ -85,17 +85,17 @@ gh api repos/{owner}/{repo}/issues/comments/<コメントID> -X PATCH -f body="<
 gh issue edit <Issue番号> --add-label "cc-update-issue"
 ```
 
-#### パターンB: 未解決の依存関係がなく、cc-created-issueラベルがついていない場合
+#### パターンB: 未解決の依存関係がなく、cc-issue-createdラベルがついていない場合
 
-依存関係が全て解決済みで、Issueに`cc-created-issue`ラベルがついていない場合：
+依存関係が全て解決済みで、Issueに`cc-issue-created`ラベルがついていない場合：
 
 ```
 gh issue edit <Issue番号> --add-label "cc-create-issue"
 ```
 
-#### パターンC: 未解決の依存関係がなく、cc-created-issueラベルがついている場合
+#### パターンC: 未解決の依存関係がなく、cc-issue-createdラベルがついている場合
 
-依存関係が全て解決済みで、Issueに`cc-created-issue`ラベルがついている場合：
+依存関係が全て解決済みで、Issueに`cc-issue-created`ラベルがついている場合：
 
 ```
 gh issue edit <Issue番号> --add-label "cc-exec-issue"

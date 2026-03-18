@@ -13,46 +13,33 @@ model: sonnet
 
 ## 実行ステップ
 
-### 1. ユーザー情報の取得
+### 1. 対象PR一覧の確認
 
-```
-gh api user --jq '.login'
-```
+対象対象PR一覧は以下の通り。
 
-### 2. 対象PR一覧の取得
+!`gh pr list --assignee "$(gh api user --jq '.login')" --state open --json number,title,url,labels,headRefName,statusCheckRollup,reviewDecision --limit 100 --jq '[.[] | select(([.labels[].name] | any(. == "cc-fix-onetime")) | not) | select((.statusCheckRollup | length == 0) or (.statusCheckRollup | all(.status == "COMPLETED")))]'`
 
-ユーザーにアサインされたオープンなPRを取得してください。
+対象PRが0件の場合は、その旨を報告して終了する。
 
-```
-gh pr list --assignee <ユーザー名> --state open --json number,title,url,labels,headRefName,statusCheckRollup,reviewDecision --limit 100
-```
+### 2. 各PRに対するトリアージ処理
 
-取得したPRから以下の条件で**すべて**を満たすものだけをフィルタしてください。
+上記の対象PR**すべて**に対して、`pr-triage-processor` エージェントをAgent toolでトリアージ処理を行う。
+エージェントは**並列で**実行する。
 
-- `cc-in-progress`と`cc-fix-onetime`ラベルどちらも**ついていない**
-- `statusCheckRollup`のすべてのチェックが完了している（`status`が`COMPLETED`）
-  - チェックが存在しないPRも対象に含める
-
-### 3. 各PRに対するループ処理
-
-フィルタされた**すべてのPR**に対して、`pr-triage-processor` エージェントをAgent toolでトリアージ処理を行なってください。
-エージェントは**並列で**実行してください。
-
-各PRについて、以下の情報をエージェントに渡してください：
+各PRについて、以下の情報をエージェントに渡す：
 
 - PR番号
 - PRタイトル
 - ブランチ名（headRefName）
 
-エージェントがPRの分析（ブランチのcheckout、コンフリクト確認・解消、修正プラン確認、判定）とアクション（ラベル付与またはマージ）を実行します。すべてのエージェントの結果を収集してください。
+エージェントがPRの分析（ブランチのcheckout、コンフリクト確認・解消、修正プラン確認、判定）とアクション（ラベル付与またはマージ）を実行する。すべてのエージェントの結果を収集する。
 
-各エージェントが作成したworktreeは、エージェントの処理が完了した後にまだ残っていれば削除してください。
+各エージェントが作成したworktreeは、エージェントの処理が完了した後にまだ残っていれば削除する。
 
-### 4. 結果の報告
+### 3. 結果の報告
 
-処理結果を以下の形式で報告してください。
+処理結果を以下の形式で報告する。
 
 - 処理したPRの総数
 - パターンA（修正が必要）: PR番号とタイトルの一覧、修正が必要な理由の要約
 - パターンB（マージ済み）: PR番号とタイトルの一覧
-- 対象外（フィルタで除外）: PR番号とタイトルの一覧、除外理由
