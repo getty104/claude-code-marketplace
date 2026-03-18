@@ -30,6 +30,7 @@ color: blue
 - Issueの本文中に他のIssueへの参照が含まれている場合、そのIssueに依存しているとみなす
 - 依存先Issueがopenである場合、その依存関係は**未解決**とする
 - 依存先Issueがclosedである場合、その依存関係は**解決済み**とする（依存関係なしと同等に扱う）
+- 入力データに含まれないIssue番号への参照は、`gh issue view <番号> --json number,title,labels,body,state`で状態と内容を取得し、依存関係の状態を判定する
 
 #### 依存関係のトラバース
 
