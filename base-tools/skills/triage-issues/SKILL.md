@@ -37,7 +37,6 @@ Issue一覧: !`gh issue list --assignee "$(gh api user --jq '.login')" --label "
 - リポジトリのowner/repo
 
 サブエージェントが各Issueの最後のコメント確認、パターン判定（A: 確認事項回答、B: cc-create-issue付与、C: cc-exec-issue付与、D: スキップ）、ラベル付与を実行する。
-各エージェントが作成したworktreeは、エージェントの処理が完了した後にまだ残っていれば削除する。
 
 ### 3. 結果の報告
 
