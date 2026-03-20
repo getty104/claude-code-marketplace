@@ -10,7 +10,11 @@
     },
     "next-devtools": {
       "command": "npx",
-      "args": ["-y", "next-devtools-mcp@latest"]
+      "args": [
+        "-y",
+        "next-devtools-mcp@latest",
+        "--auto-connect=true"
+      ]
     },
     "shadcn": {
       "command": "npx",
