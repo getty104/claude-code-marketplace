@@ -62,7 +62,7 @@ $ARGUMENTS
 #### Issue作成コマンド
 
 ```bash
-gh issue create --title "タイトル" --body "本文" --assignee "<ユーザー名>"
+gh issue create --title "タイトル" --body "本文" --assignee "<ユーザー名>" --label "cc-triage-scope"
 ```
 
 ### 4. 作成結果の報告

@@ -20,11 +20,21 @@ PRは以下のルールで作成します。
 - PRのdescriptionには`Closes [Issue番号]`と記載すること
 - `gh api user --jq '.login'`で取得したユーザーをAssigneesに追加すること
 - PRのベースブランチはデフォルトブランチにすること
+- `$ARGUMENTS`に`--triage-scope`が含まれている場合は、PRに`cc-triage-scope`ラベルを付与すること
 
-# Command Examples
+## Command Examples
 
+### PR作成の基本コマンド
+
+```bash
+
+gh pr create --title "PRタイトル" --body "PRの本文" --base main --assignee "$(gh api user --jq '.login')"
+
+```
+
+### triage-scopeラベルを付与する場合
 ```bash
 gh api user --jq '.login'
 
-gh pr create --title "PRタイトル" --body "PRの本文" --base main --assignee "$(gh api user --jq '.login')"
+gh pr create --title "PRタイトル" --body "PRの本文" --base main --assignee "$(gh api user --jq '.login')" --label "cc-triage-scope"
 ```

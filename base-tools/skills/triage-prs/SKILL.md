@@ -17,7 +17,7 @@ model: sonnet
 
 対象対象PR一覧は以下の通り。
 
-!`gh pr list --assignee "$(gh api user --jq '.login')" --state open --json number,title,url,labels,headRefName,statusCheckRollup,reviewDecision --limit 100 --jq '[.[] | select(([.labels[].name] | any(. == "cc-fix-onetime")) | not) | select((.statusCheckRollup | length == 0) or (.statusCheckRollup | all(.status == "COMPLETED")))]'`
+!`gh pr list --assignee "$(gh api user --jq '.login')" --label "cc-triage-scope" --state open --json number,title,url,labels,headRefName,statusCheckRollup,reviewDecision --limit 100 --jq '[.[] | select(([.labels[].name] | any(. == "cc-fix-onetime")) | not) | select((.statusCheckRollup | length == 0) or (.statusCheckRollup | all(.status == "COMPLETED")))]'`
 
 対象PRが0件の場合は、その旨を報告して終了する。
 
