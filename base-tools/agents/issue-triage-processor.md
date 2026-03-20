@@ -57,6 +57,8 @@ gh issue view <Issue番号> --json comments --jq '.comments[-1]'
          - 記載するのは依存先のIssue URL
      - アサイナー
        - `gh api user --jq '.login'`で取得したユーザーをアサインする
+     - ラベル
+       - `cc-triage-scope`ラベルを付与する
 3. `cc-update-issue`ラベルを付与する
 
 回答項目の追記フォーマット：
