@@ -1,7 +1,6 @@
 ---
 name: bump-version
 description: base-toolsプラグインのバージョン（patchバージョン）をインクリメントし、commit-pushでコミット・プッシュする。「バージョンを上げて」「バージョンアップ」「bump version」などのリクエストで使用する。
-disable-model-invocation: true
 ---
 
 # Bump Version
