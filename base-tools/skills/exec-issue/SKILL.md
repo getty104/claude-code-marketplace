@@ -16,14 +16,14 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なう
 
 以下のステップでIssueの内容に合わせたタスクの遂行、PRの作成を行ってください。
 
-1. read-github-issue skillを用いて、Issue番号$0のIssueの内容の実装プランを確認する
+1. read-github-issue skillを用いて、Issue番号`$0`のIssueの内容の実装プランを確認する
 2. 実装プランから洗い出した各タスクを、base-tools:general-purpose-assistantサブエージェントを使用して実行する
   - サブエージェントの実行はタスクごとに行い、並列で実行可能なタスクがあれば並列で実行する
 3. 全ての実装が完了したら、base-tools:general-purpose-assistantサブエージェントを使用してテストとLintを実行し、全て通過していることを確認する
   - 問題があればbase-tools:general-purpose-assistantサブエージェントを使用して修正を行う
 4. commit-push skillを用いて、変更内容を適切にコミットし、pushする
 5. create-pr skillを用いて、変更内容を反映したPRを作成する
-   - 第二引数`$1`が`--triage-scope`の場合は、PRに`cc-triage-scope`ラベルを付与する
+   - 第二引数の値: `$1` が`--triage-scope`の場合は、PRに`cc-triage-scope`ラベルを付与する
 6. Dockerを使用していた場合は、作成したDockerのコンテナを削除する
 7. PRのURLを報告する
 
