@@ -21,11 +21,14 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なう
   - サブエージェントの実行はタスクごとに行い、並列で実行可能なタスクがあれば並列で実行する
 3. 全ての実装が完了したら、base-tools:general-purpose-assistantサブエージェントを使用してテストとLintを実行し、全て通過していることを確認する
   - 問題があればbase-tools:general-purpose-assistantサブエージェントを使用して修正を行う
-4. commit-push skillを用いて、変更内容を適切にコミットし、pushする
-5. create-pr skillを用いて、変更内容を反映したPRを作成する
+4. `git status`でコード変更の有無を確認する
+   - コード変更がない場合は、Issue `$0` に「調査の結果、コード変更は不要と判断しました」旨のコメントを`gh issue comment`で追加し、`gh issue close`でIssueをクローズして処理を終了する
+   - コード変更がある場合は、以降のステップに進む
+5. commit-push skillを用いて、変更内容を適切にコミットし、pushする
+6. create-pr skillを用いて、変更内容を反映したPRを作成する
    - 第二引数の値: `$1` が`--triage-scope`の場合は、PRに`cc-triage-scope`ラベルを付与する
-6. Dockerを使用していた場合は、作成したDockerのコンテナを削除する
-7. PRのURLを報告する
+7. Dockerを使用していた場合は、作成したDockerのコンテナを削除する
+8. PRのURLを報告する
 
 ## 注意事項
 
