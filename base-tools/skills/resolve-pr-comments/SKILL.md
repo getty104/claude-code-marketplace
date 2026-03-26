@@ -16,5 +16,5 @@ GitHubのプルリクエスト（PR）における未解決のレビューコメ
 scriptsディレクトリはプラグイン内のskills/resolve-pr-comments/配下に配置されています。
 
 ```
-bash /プラグインルートパス/skills/resolve-pr-comments/scripts/resolve-pr-comments.sh
+bash ${CLAUDE_SKILL_DIR}/scripts/resolve-pr-comments.sh
 ```

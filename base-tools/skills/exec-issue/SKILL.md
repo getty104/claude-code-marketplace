@@ -3,6 +3,12 @@ name: exec-issue
 description: Execute tasks based on GitHub Issue content
 argument-hint: "[issue-number] [--triage-scope]"
 model: opus
+hooks:
+  Stop:
+    - matcher: ""
+      hooks:
+        - type: command
+          command: docker compose down
 ---
 
 # Execute Issue

@@ -18,7 +18,7 @@ GitHubのプルリクエスト（PR）から未解決のレビューコメント
 scriptsディレクトリはプラグイン内のskills/create-review-fix-plan/配下に配置されています。
 
 ```
-bash /プラグインルートパス/skills/create-review-fix-plan/scripts/fetch-unresolved-comments.sh
+bash ${CLAUDE_SKILL_DIR}/scripts/fetch-unresolved-comments.sh
 ```
 
 ### 2. CIのステータスの確認

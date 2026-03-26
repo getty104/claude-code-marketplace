@@ -3,6 +3,12 @@ name: fix-review-point
 description: Address unresolved review comments on specified branch
 argument-hint: "[branch-name]"
 model: opus
+hooks:
+  Stop:
+    - matcher: ""
+      hooks:
+        - type: command
+          command: docker compose down
 ---
 
 # Fix Review Point
