@@ -13,7 +13,6 @@ GitHubのプルリクエスト（PR）における未解決のレビューコメ
 # Instructions
 
 以下のコマンドでResolveしていないレビューコメントをResolveします。
-scriptsディレクトリはプラグイン内のskills/resolve-pr-comments/配下に配置されています。
 
 ```
 bash ${CLAUDE_SKILL_DIR}/scripts/resolve-pr-comments.sh

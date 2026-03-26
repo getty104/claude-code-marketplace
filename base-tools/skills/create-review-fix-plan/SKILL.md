@@ -15,7 +15,6 @@ GitHubのプルリクエスト（PR）から未解決のレビューコメント
 ### 1. 未解決のプルリクエストレビューコメントの取得
 
 以下のコマンドを実行して、未解決のプルリクエストレビューコメントを取得します。
-scriptsディレクトリはプラグイン内のskills/create-review-fix-plan/配下に配置されています。
 
 ```
 bash ${CLAUDE_SKILL_DIR}/scripts/fetch-unresolved-comments.sh
