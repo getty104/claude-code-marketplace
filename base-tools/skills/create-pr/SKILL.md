@@ -2,8 +2,7 @@
 name: create-pr
 description: GitHubでPull Request（PR）を作成します。PRのdescriptionには指定されたテンプレートを使用し、必要な情報を記載します。PR作成後、PRのURLを報告します。
 model: haiku
-agent: general-purpose
-context: fork
+argument-hint: "[issue-number] [--triage-scope]"
 ---
 
 # Create Pull Request
@@ -17,10 +16,10 @@ PRは以下のルールで作成します。
 
 - PRのdescriptionのテンプレートは`.github/PULL_REQUEST_TEMPLATE.md`を参照し、それに従うこと
 - PRのdescriptionのテンプレート内でコメントアウトされている箇所は必ず削除すること
-- PRのdescriptionには`Closes [Issue番号]`と記載すること
+- PRのdescriptionには`Closes #$0`を**必ず**記載すること
 - `gh api user --jq '.login'`で取得したユーザーをAssigneesに追加すること
 - PRのベースブランチはデフォルトブランチにすること
-- `$ARGUMENTS`に`--triage-scope`が含まれている場合は、PRに`cc-triage-scope`ラベルを付与すること
+- `$1`が`--triage-scope`の場合は、PRに`cc-triage-scope`ラベルを付与すること
 
 ## Command Examples
 
