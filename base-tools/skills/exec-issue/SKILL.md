@@ -33,8 +33,7 @@ GitHubのIssueの内容を確認し、タスクを実行する処理を行なう
 5. commit-push skillを用いて、変更内容を適切にコミットし、pushする
 6. create-pr skillを用いて、変更内容を反映したPRを作成する
    - 第二引数の値: `$1` が`--triage-scope`の場合は、作成したPRに`cc-triage-scope`ラベルを付与する
-7. Dockerを使用していた場合は、作成したDockerのコンテナを削除する
-8. PRのURLを報告する
+7. PRのURLを報告する
 
 ## 注意事項
 
