@@ -13,7 +13,7 @@
       "args": [
         "-y",
         "next-devtools-mcp@latest",
-        "--auto-connect=true"
+        "--autoConnect"
       ]
     },
     "shadcn": {
