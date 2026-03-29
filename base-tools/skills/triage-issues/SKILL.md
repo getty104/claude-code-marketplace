@@ -36,7 +36,7 @@ Issue一覧: !`gh issue list --assignee "$(gh api user --jq '.login')" --label "
 - 依存関係の状態（resolved / blocked / circular）
 - リポジトリのowner/repo
 
-サブエージェントが各Issueの最後のコメント確認、パターン判定（A: 確認事項回答、B: cc-create-issue付与、C: cc-exec-issue付与、D: スキップ）、ラベル付与を実行する。
+サブエージェントが各Issueの最後のコメント確認、パターン判定、ラベル付与を実行する。
 
 ### 3. 結果の報告
 
