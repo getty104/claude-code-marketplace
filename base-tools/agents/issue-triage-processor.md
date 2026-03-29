@@ -86,7 +86,28 @@ gh api repos/{owner}/{repo}/issues/comments/<コメントID> -X PATCH -f body="<
 gh issue edit <Issue番号> --add-label "cc-update-issue"
 ```
 
-#### パターンB: 未解決の依存関係がなく、cc-issue-createdラベルがついていない場合
+#### パターンB: Issueの内容が対応不要と判断できる場合
+
+Issueの内容を精査した結果、以下のいずれかに該当する場合：
+
+- すでに別のIssueやPRで対応済み・重複している
+- 要件や仕様の変更により不要になった
+- 誤って起票されたIssueである
+- その他、明らかに対応不要と判断できる
+
+以下を実行する：
+
+1. Issueにクローズ理由をコメントで記載する
+   ```
+   gh issue comment <Issue番号> --body "<クローズ理由の説明>"
+   ```
+
+2. Issueをcloseする
+   ```
+   gh issue close <Issue番号>
+   ```
+
+#### パターンC: 未解決の依存関係がなく、cc-issue-createdラベルがついていない場合
 
 依存関係が全て解決済みで、Issueに`cc-issue-created`ラベルがついていない場合：
 
@@ -94,7 +115,7 @@ gh issue edit <Issue番号> --add-label "cc-update-issue"
 gh issue edit <Issue番号> --add-label "cc-create-issue"
 ```
 
-#### パターンC: 未解決の依存関係がなく、cc-issue-createdラベルがついている場合
+#### パターンD: 未解決の依存関係がなく、cc-issue-createdラベルがついている場合
 
 依存関係が全て解決済みで、Issueに`cc-issue-created`ラベルがついている場合：
 
@@ -102,7 +123,7 @@ gh issue edit <Issue番号> --add-label "cc-create-issue"
 gh issue edit <Issue番号> --add-label "cc-exec-issue"
 ```
 
-#### パターンD: 未解決の依存関係がある場合
+#### パターンE: 未解決の依存関係がある場合
 
 依存先にopenなIssueが1つでも存在する場合は、何もせずスキップする。
 
@@ -149,6 +170,6 @@ gh issue edit <Issue番号> --add-label "cc-exec-issue"
 処理結果を以下の形式で返す：
 
 - Issue番号
-- 適用したパターン（A / B / C / D）
+- 適用したパターン（A / B / C / D / E）
 - 実行したアクション（ラベル付与、コメント編集、Issue作成など）
 - 作成した追加Issue（ある場合はIssue番号とURL）
