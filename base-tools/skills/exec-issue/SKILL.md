@@ -3,6 +3,7 @@ name: exec-issue
 description: Execute tasks based on GitHub Issue content
 argument-hint: "[issue-number] [--triage-scope]"
 model: sonnet
+effort: high
 hooks:
   Stop:
     - matcher: ""
