@@ -2,7 +2,7 @@
 name: requirement-todo-organizer
 description: "タスク、機能リクエスト、漠然としたアイデアを明確な要件と依存関係付きのTODOリストに分解する必要がある場合にこのエージェントを使用します。新機能の計画、プロジェクト要求の分析、実装前の作業構造化などが含まれます。\\n\\nExamples:\\n\\n<example>\\nContext: ユーザーが新しい機能の構築について説明している。\\nuser: \"ユーザー認証機能を追加したい。メール認証とOAuth対応で。\"\\nassistant: \"要件を整理してTODOに分解するために、requirement-todo-organizer エージェントを使います。\"\\n<commentary>\\nユーザーが要件とタスクに分解する必要のある機能を説明しているため、Agent ツールを使って requirement-todo-organizer エージェントを起動します。\\n</commentary>\\n</example>\\n\\n<example>\\nContext: ユーザーが漠然としたアイデアを持っており、構造化が必要。\\nuser: \"ECサイトの検索機能を改善したいんだけど、何から手をつければいいかわからない\"\\nassistant: \"requirement-todo-organizer エージェントを使って、要件を整理し、依存関係付きのTODOリストを作成します。\"\\n<commentary>\\nユーザーの漠然としたリクエストには要件分析とタスク整理が必要です。Agent ツールを使って requirement-todo-organizer エージェントを起動します。\\n</commentary>\\n</example>"
 model: opus
-effort: high
+effort: max
 memory: project
 ---
 

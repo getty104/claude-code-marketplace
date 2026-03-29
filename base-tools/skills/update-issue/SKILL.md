@@ -3,6 +3,7 @@ name: update-issue
 description: Update an existing GitHub Issue's description based on the issue number and request provided as arguments
 argument-hint: "Issue番号: [Issue番号] 依頼内容: [依頼内容]"
 model: opus
+effort: medium
 ---
 
 # Update Issue
