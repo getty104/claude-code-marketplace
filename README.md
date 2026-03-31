@@ -142,6 +142,9 @@ claude
 |---|---|
 | `general-purpose-assistant` | 汎用的な問題解決とタスク実行 |
 | `requirement-todo-organizer` | タスクを要件と依存関係付き TODO リストに分解 |
+| `issue-dependency-analyzer` | GitHub Issue 間の依存関係グラフを構築し、依存状態（resolved / blocked / circular）を判定 |
+| `issue-triage-processor` | 依存関係が解決済みの Issue に対してトリアージ処理（確認事項への回答・ラベル付与）を実行 |
+| `pr-triage-processor` | トリアージ対象の PR を個別処理し、コンフリクト解消・修正プラン評価・マージ判定を実行 |
 
 ## MCP Servers
 
@@ -166,7 +169,10 @@ claude-code-marketplace/
     ├── .mcp.json
     ├── agents/
     │   ├── general-purpose-assistant.md
-    │   └── requirement-todo-organizer.md
+    │   ├── requirement-todo-organizer.md
+    │   ├── issue-dependency-analyzer.md
+    │   ├── issue-triage-processor.md
+    │   └── pr-triage-processor.md
     ├── skills/
     │   ├── breakdown-issues/
     │   ├── check-library/
