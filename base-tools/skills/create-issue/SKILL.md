@@ -68,7 +68,7 @@ Explore サブエージェントでタスクで依頼されている要件をで
 
 #### Issueの作成コマンド
 
-`gh issue create --title "タイトル" --body "本文"`を使用してください。
+`gh issue create --title "タイトル" --body "本文" --label "cc-created-issue"`を使用してください。
 
 ### 5. GitHub Issueへ確認事項のコメントを行う
 Issueの作成後、ユーザーにIssueの実施にあたり確認が必要な事項がある場合は、Issueにコメントしてください。
@@ -125,7 +125,7 @@ Explore サブエージェントで既存Issueのtitleとdescriptionの内容に
 
 #### Issueの更新コマンド
 
-`gh issue edit <Issue番号> --title "タイトル" --body "本文"`を使用してください。
+`gh issue edit <Issue番号> --title "タイトル" --body "本文" --add-label "cc-created-issue"`を使用してください。
 
 ### 6. GitHub Issueへ確認事項のコメントを行う
 Issueの更新後、ユーザーにIssueの実施にあたり確認が必要な事項がある場合は、Issueにコメントしてください。
