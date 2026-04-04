@@ -9,7 +9,7 @@ hooks:
     - matcher: ""
       hooks:
         - type: command
-          command: docker compose down
+          command: docker compose down --volumes --remove-orphans
 ---
 
 # Execute Issue
