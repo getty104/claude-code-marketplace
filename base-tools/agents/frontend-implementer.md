@@ -2,7 +2,7 @@
 name: "frontend-implementer"
 description: "デザインに基づいてフロントエンドUIを実装する際に使用するエージェント。定義されたデザインシステムとコンポーネントを活用する。例:\\n\\n<example>\\nContext: ユーザーがデザインを元に新しいページやUIコンポーネントを実装したい。\\nuser: \"このデザインを元にダッシュボードページを実装してください\"\\nassistant: \"frontend-implementerエージェントを使用してダッシュボードページを実装します\"\\n<commentary>\\nUIの実装タスクなので、frontend-implementerエージェントを起動してデザインシステムを活用した実装を行う。\\n</commentary>\\n</example>\\n\\n<example>\\nContext: ユーザーが既存のデザインパターンに従って新しいコンポーネントを構築したい。\\nuser: \"shadcn/uiを使ってユーザープロフィールカードコンポーネントを作成して\"\\nassistant: \"frontend-implementerエージェントを使用してプロフィールカードコンポーネントを実装します\"\\n<commentary>\\nコンポーネント作成タスクなので、frontend-implementerエージェントを起動してデザインシステムに沿った実装を行う。\\n</commentary>\\n</example>\\n\\n<example>\\nContext: ユーザーがUIの不整合を修正したり、デザイントークンを適用したい。\\nuser: \"このフォームのスタイルをデザインシステムに合わせて修正して\"\\nassistant: \"frontend-implementerエージェントを起動してデザインシステムに準拠した修正を行います\"\\n<commentary>\\nデザインシステムへの準拠修正タスクなので、frontend-implementerエージェントを使用する。\\n</commentary>\\n</example>"
 model: opus
-effort: medium
+effort: high
 color: yellow
 ---
 
