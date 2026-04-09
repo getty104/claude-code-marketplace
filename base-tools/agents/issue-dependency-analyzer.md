@@ -2,6 +2,7 @@
 name: issue-dependency-analyzer
 description: "GitHub Issueの依存関係を分析するエージェント。渡されたIssueデータからIssue本文中の参照（#番号やURL）を抽出し、依存関係グラフを構築して各Issueの依存状態（resolved / blocked / circular）を判定する。\n\nExamples:\n\n- user: \"/triage-issues\"\n  assistant: \"Issueの依存関係を分析するため、issue-dependency-analyzerエージェントを起動します\"\n  <commentary>\n  triage-issuesスキルで取得済みのIssueデータを渡し、依存関係グラフの構築を委譲する。\n  </commentary>\n\n- user: \"アサインされたIssueの依存関係を調べて\"\n  assistant: \"issue-dependency-analyzerエージェントを使って依存関係グラフを構築します\"\n  <commentary>\n  Issue間の依存関係分析が必要なため、issue-dependency-analyzerエージェントを起動する。\n  </commentary>"
 model: sonnet
+effort: medium
 color: blue
 ---
 

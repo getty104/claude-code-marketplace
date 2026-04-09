@@ -2,6 +2,7 @@
 name: pr-triage-processor
 description: "Use this agent to process a single PR during triage. It checks out the branch, resolves conflicts, generates and evaluates a fix plan, then takes action (adds cc-fix-onetime label if fixes are needed, or merges the PR if it's ready).\\n\\nExamples:\\n\\n- user: \"/triage-prs\"\\n  assistant: \"対象PRをフィルタし、各PRについてpr-triage-processorエージェントを起動して分析・アクションを実行します。\"\\n  <commentary>\\n  triage-prsスキルから各PRの処理を委譲されるため、pr-triage-processorエージェントを起動する。\\n  </commentary>"
 model: opus
+effort: medium
 memory: user
 isolation: worktree
 ---
