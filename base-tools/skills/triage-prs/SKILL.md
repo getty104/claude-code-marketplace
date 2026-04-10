@@ -1,7 +1,7 @@
 ---
 name: triage-prs
 description: Triage open GitHub PRs assigned to the user. Fetch PRs where CI has completed and cc-in-progress label is not present, run create-review-fix-plan for each, then either add cc-fix-onetime label (if fixes are needed) or merge the PR (if it's ready to merge as-is).
-argument-hint: ""
+argument-hint: "[limit]"
 model: sonnet
 effort: high
 ---
@@ -18,7 +18,7 @@ effort: high
 
 対象対象PR一覧は以下の通り。
 
-!`gh pr list --assignee "$(gh api user --jq '.login')" --label "cc-triage-scope" --state open --json number,title,url,labels,headRefName,statusCheckRollup,reviewDecision --limit 100 --jq '[.[] | select(([.labels[].name] | any(. == "cc-fix-onetime")) | not) | select((.statusCheckRollup | length == 0) or (.statusCheckRollup | all(.status == "COMPLETED")))]'`
+!`gh pr list --assignee "$(gh api user --jq '.login')" --label "cc-triage-scope" --state open --json number,title,url,labels,headRefName,statusCheckRollup,reviewDecision --limit 100 --jq '[.[] | select(([.labels[].name] | any(. == "cc-fix-onetime")) | not) | select((.statusCheckRollup | length == 0) or (.statusCheckRollup | all(.status == "COMPLETED")))][:$0]'`
 
 対象PRが0件の場合は、その旨を報告して終了する。
 

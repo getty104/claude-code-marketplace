@@ -1,7 +1,7 @@
 ---
 name: triage-issues
 description: Triage GitHub issues assigned to the user. Categorize and process issues by adding appropriate labels (cc-create-issue, cc-exec-issue, or cc-update-issue) based on dependency analysis, issue detail status, and whether confirmation items need answers.
-argument-hint: ""
+argument-hint: "[limit]"
 model: sonnet
 effort: high
 ---
@@ -18,7 +18,7 @@ effort: high
 
 以下はユーザーにアサインされたIssue一覧です。
 
-Issue一覧: !`gh issue list --assignee "$(gh api user --jq '.login')" --label "cc-triage-scope" --search "sort:created-asc" --json number,title,labels,body,state --limit 5`
+Issue一覧: !`gh issue list --assignee "$(gh api user --jq '.login')" --label "cc-triage-scope" --search "sort:created-asc" --json number,title,labels,body,state --limit $0`
 
 上記のデータを使い、`issue-dependency-analyzer` サブエージェントを起動して依存関係グラフを構築し、各Issueの依存状態（resolved / blocked / circular）を判定する。
 サブエージェントには、Issue一覧のJSONデータをそのまま渡すこと。
