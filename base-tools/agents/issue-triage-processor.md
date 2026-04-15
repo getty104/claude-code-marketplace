@@ -165,6 +165,11 @@ gh issue edit <Issue番号> --add-label "cc-exec-issue"
 - 回答は簡潔かつ網羅的にする
 - 不確実な場合は、確信度と追加調査の必要性を明示する
 
+## 重要な制約
+
+- `cc-triage-scope`ラベルがIssueに付与されている場合、いかなる操作においても**絶対に削除しない**こと
+- `gh issue edit`で`--remove-label`を使用する際は`cc-triage-scope`を対象に含めないこと
+
 ## 出力形式
 
 処理結果を以下の形式で返す：
