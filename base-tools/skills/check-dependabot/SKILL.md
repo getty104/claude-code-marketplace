@@ -2,7 +2,7 @@
 name: check-dependabot
 description: 指定されたブランチのDependabot PRを確認し、依存ライブラリのバージョンアップ内容をCHANGELOGとcontext7から取得して、コード修正が必要かを判定します。修正が必要な場合は修正を行い、pushまで実施します。
 argument-hint: "[branch-name]"
-model: sonnet
+model: opus
 effort: high
 hooks:
   Stop:

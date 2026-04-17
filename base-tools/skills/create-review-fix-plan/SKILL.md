@@ -2,7 +2,7 @@
 name: create-review-fix-plan
 description: GitHub PRの未解決レビューコメントとCIステータスを確認し、修正プランを作成します。
 model: opus
-effort: medium
+effort: high
 ---
 
 # Create Review Fix Plan
