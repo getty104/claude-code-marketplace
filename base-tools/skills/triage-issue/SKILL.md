@@ -41,7 +41,7 @@ gh issue view $0 --json body,comments --jq '{body: .body, lastComment: .comments
 最後のコメントに確認事項が存在し、かつ回答がまだ記載されていない項目がある場合：
 
 ```
-gh issue edit $0 --add-label "cc-answer-questions"
+gh issue edit $0 --add-label "cc-answer-issue-questions"
 ```
 
 #### パターンB: Issueの内容が対応不要と判断できる場合
