@@ -4,6 +4,12 @@ description: Create an implementation plan and a GitHub Issue based on the task 
 argument-hint: "[task-description or issue-number]"
 model: opus
 effort: high
+hooks:
+  Stop:
+    - matcher: ""
+      hooks:
+        - type: command
+          command: docker compose down --volumes --remove-orphans
 ---
 
 # Create Issue

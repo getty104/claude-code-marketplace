@@ -3,6 +3,7 @@ name: create-pr
 description: GitHubでPull Request（PR）を作成します。PRのdescriptionには指定されたテンプレートを使用し、必要な情報を記載します。PR作成後、PRのURLを報告します。
 model: sonnet
 effort: medium
+context: fork
 ---
 
 # Create Pull Request

@@ -4,6 +4,12 @@ description: Update an existing GitHub Issue's description based on the issue nu
 argument-hint: "Issue番号: [Issue番号] 依頼内容: [依頼内容]"
 model: opus
 effort: medium
+hooks:
+  Stop:
+    - matcher: ""
+      hooks:
+        - type: command
+          command: docker compose down --volumes --remove-orphans
 ---
 
 # Update Issue
