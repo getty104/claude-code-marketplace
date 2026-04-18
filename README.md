@@ -96,7 +96,7 @@ npx claude-task-worker all
 ```bash
 claude
 > /exec-issue 123
-> /fix-review-point feature-branch
+> /fix-review-point 456
 > /create-issue ユーザー認証機能を追加したい
 ```
 
@@ -111,22 +111,24 @@ claude
 | `/update-issue <Issue番号> <依頼内容>` | 既存 Issue の description を更新 |
 | `/breakdown-issues <タスク内容>` | 要件を TODO に分解し、タスクごとに GitHub Issue を作成 |
 | `/read-github-issue <issue番号>` | Issue の内容を取得し実装プランを作成 |
+| `/answer-issue-questions <issue番号>` | Issue の確認事項をコードベース調査に基づき回答 |
 
 ### PR・レビュー対応
 
 | Skill | Description |
 |---|---|
-| `/fix-review-point <ブランチ名>` | 未解決のレビューコメントに対応 |
+| `/fix-review-point <PR番号>` | 未解決のレビューコメントに対応 |
 | `/create-pr` | PR テンプレートを使用して GitHub PR を作成 |
 | `/create-review-fix-plan` | 未解決レビューコメントと CI ステータスから修正プランを作成 |
 | `/resolve-pr-comments` | PR の未解決 Review threads を一括 Resolve |
+| `/check-dependabot <PR番号>` | Dependabot PR の変更内容を確認し、必要ならコード修正して push |
 
 ### トリアージ
 
 | Skill | Description |
 |---|---|
-| `/triage-issues` | アサインされた Issue に適切なラベルを付与 |
-| `/triage-prs` | CI 完了済み PR を確認し、修正ラベル付与またはマージ |
+| `/triage-issue <Issue番号>` | Issue をトリアージし、依存関係や確認事項に応じたラベルを付与 |
+| `/triage-pr <PR番号>` | PR のコンフリクト解消・修正プラン評価・マージ判定を実行 |
 
 ### 開発ツール
 
@@ -142,9 +144,7 @@ claude
 |---|---|
 | `general-purpose-assistant` | 汎用的な問題解決とタスク実行 |
 | `requirement-todo-organizer` | タスクを要件と依存関係付き TODO リストに分解 |
-| `issue-dependency-analyzer` | GitHub Issue 間の依存関係グラフを構築し、依存状態（resolved / blocked / circular）を判定 |
-| `issue-triage-processor` | 依存関係が解決済みの Issue に対してトリアージ処理（確認事項への回答・ラベル付与）を実行 |
-| `pr-triage-processor` | トリアージ対象の PR を個別処理し、コンフリクト解消・修正プラン評価・マージ判定を実行 |
+| `frontend-implementer` | デザインシステムやコンポーネントに沿ってフロントエンド UI を実装 |
 
 ## MCP Servers
 
@@ -168,13 +168,13 @@ claude-code-marketplace/
     │   └── plugin.json
     ├── .mcp.json
     ├── agents/
+    │   ├── frontend-implementer.md
     │   ├── general-purpose-assistant.md
-    │   ├── requirement-todo-organizer.md
-    │   ├── issue-dependency-analyzer.md
-    │   ├── issue-triage-processor.md
-    │   └── pr-triage-processor.md
+    │   └── requirement-todo-organizer.md
     ├── skills/
+    │   ├── answer-issue-questions/
     │   ├── breakdown-issues/
+    │   ├── check-dependabot/
     │   ├── check-library/
     │   ├── commit-push/
     │   ├── create-issue/
@@ -185,13 +185,13 @@ claude-code-marketplace/
     │   ├── fix-review-point/
     │   ├── read-github-issue/
     │   ├── resolve-pr-comments/
-    │   ├── triage-issues/
-    │   ├── triage-prs/
+    │   ├── triage-issue/
+    │   ├── triage-pr/
     │   └── update-issue/
     ├── hooks/
     │   └── hooks.json
     └── scripts/
-        └── remove-merged-worktrees.sh
+        └── setup-worktree.sh
 ```
 
 ## Customization
