@@ -1,8 +1,8 @@
 ---
 name: create-review-fix-plan
 description: GitHub PRの未解決レビューコメントとCIステータスを確認し、修正プランを作成します。
-model: opus
-effort: medium
+model: sonnet
+effort: high
 context: fork
 ---
 

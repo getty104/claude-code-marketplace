@@ -1,12 +1,5 @@
 {
   "mcpServers": {
-    "chrome-devtools": {
-      "command": "npx",
-      "args": [
-        "chrome-devtools-mcp@latest",
-        "--autoConnect"
-      ]
-    },
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
