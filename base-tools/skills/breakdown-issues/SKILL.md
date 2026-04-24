@@ -3,7 +3,7 @@ name: breakdown-issues
 description: "依頼された内容を要件とTODOに分解し、タスクごとにGitHub Issueを作成するスキル。タスクの整理・分解、複数Issueの一括作成、依存関係の明示が必要な場合に使用する。「この機能をIssueに分けて」「タスクを洗い出してIssueにして」「要件を整理してチケット化して」といったリクエストで発動する。"
 argument-hint: "[task-description]"
 model: opus
-effort: max
+effort: xhigh
 ---
 
 # Breakdown Issues
