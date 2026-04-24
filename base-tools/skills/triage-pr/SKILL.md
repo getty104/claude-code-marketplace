@@ -2,8 +2,6 @@
 name: triage-pr
 description: Triage a single GitHub PR by PR number. Check out the PR's branch, resolve conflicts with main, generate and evaluate a fix plan via create-review-fix-plan, then take action (add cc-fix-onetime label if fixes are needed, or merge the PR if it's ready).
 argument-hint: "[pr-number]"
-model: sonnet
-effort: high
 hooks:
   Stop:
     - matcher: ""

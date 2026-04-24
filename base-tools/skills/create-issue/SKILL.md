@@ -2,8 +2,6 @@
 name: create-issue
 description: Create an implementation plan and a GitHub Issue based on the task description provided as an argument. If an issue number is provided, update the existing issue instead.
 argument-hint: "[task-description or issue-number]"
-model: opus
-effort: high
 hooks:
   Stop:
     - matcher: ""

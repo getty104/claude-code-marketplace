@@ -2,8 +2,6 @@
 name: check-dependabot
 description: 指定されたPR番号のDependabot PRを確認し、依存ライブラリのバージョンアップ内容をCHANGELOGとcontext7から取得して、コード修正が必要かを判定します。修正が必要な場合は修正を行い、pushまで実施します。
 argument-hint: "[pr-number]"
-model: opus
-effort: high
 hooks:
   Stop:
     - matcher: ""

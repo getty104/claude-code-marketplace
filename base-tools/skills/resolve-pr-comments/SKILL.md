@@ -2,7 +2,6 @@
 name: resolve-pr-comments
 description: GitHub PRの未解決Review threadsを一括Resolveします。
 model: haiku
-agent: general-purpose
 context: fork
 ---
 

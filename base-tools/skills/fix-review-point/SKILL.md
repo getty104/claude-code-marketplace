@@ -2,8 +2,6 @@
 name: fix-review-point
 description: Address unresolved review comments on specified PR
 argument-hint: "[pr-number]"
-model: sonnet
-effort: high
 hooks:
   Stop:
     - matcher: ""

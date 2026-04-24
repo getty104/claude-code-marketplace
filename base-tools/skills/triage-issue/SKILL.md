@@ -2,8 +2,6 @@
 name: triage-issue
 description: Triage GitHub issue assigned to the user. Categorize and process issues by adding appropriate labels (cc-create-issue, cc-exec-issue, or cc-update-issue) based on dependency analysis, issue detail status, and whether confirmation items need answers.
 argument-hint: "[Issue number]"
-model: sonnet
-effort: high
 hooks:
   Stop:
     - matcher: ""
