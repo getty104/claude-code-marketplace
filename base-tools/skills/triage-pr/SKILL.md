@@ -100,6 +100,32 @@ gh pr merge $ARGUMENTS --merge --delete-branch
 4. **実用主義**: 各変更のコスト対効果を考慮する
 5. **判断に迷う場合は対応すべきに寄せる**
 
+## PRクローズ時のIssue連動Close
+
+何かしらの理由で`gh pr close`によりPRをクローズする場合、必ず関連するIssueも併せてCloseすること。GitHubはPRが**マージされず**にCloseされた場合、`Closes #<issue番号>`記法で紐づいたIssueを自動Closeしないため、明示的にCloseする必要がある。
+
+手順:
+
+1. PRのdescriptionから関連Issueの番号を取得する。
+
+```
+gh pr view $ARGUMENTS --json body --jq '.body' | grep -ioE '(close[sd]?|fix(e[sd])?|resolve[sd]?)[[:space:]]+#[0-9]+' | grep -oE '[0-9]+'
+```
+
+2. PRをCloseする。
+
+```
+gh pr close $ARGUMENTS --delete-branch
+```
+
+3. 取得したIssue番号それぞれに対してCloseを実行する（複数ある場合は全て）。
+
+```
+gh issue close <issue番号> --reason "not planned"
+```
+
+関連Issueが取得できない場合は、その旨を報告に含めること。
+
 ## 注意事項
 
 - 作業は全てworktree上で行い、mainブランチで作業は絶対に行わないこと
@@ -112,5 +138,5 @@ gh pr merge $ARGUMENTS --merge --delete-branch
 
 処理結果として以下を報告する：
 
-- **判定**: パターンA（修正が必要） / パターンB（マージ済み） / エラー
-- **理由**: 判定の根拠（対応すべき項目の要約、またはマージ可能と判断した理由）
+- **判定**: パターンA（修正が必要） / パターンB（マージ済み） / PRクローズ（関連IssueもClose） / エラー
+- **理由**: 判定の根拠（対応すべき項目の要約、マージ可能と判断した理由、またはクローズ理由と連動Closeした関連Issue番号）
