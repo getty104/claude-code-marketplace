@@ -73,13 +73,13 @@ Closes #123"
 **メリット:**
 - クリーンで意味のあるgitコミット履歴が作成できる
 - レビュアーが理解しやすい
-- mainブランチのgitコミット履歴が整理される
+- デフォルトブランチのgitコミット履歴が整理される
 
 **実行例:**
 
 ```bash
-# mainブランチとの差分で対話的にrebase
-git rebase -i origin/main
+# デフォルトブランチとの差分で対話的にrebase
+git rebase -i "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
 
 # または、最新のN個のコミットをrebase
 git rebase -i HEAD~3
@@ -196,7 +196,7 @@ git commit -m "feat: add login UI components"
 git log --oneline
 
 # Interactive rebaseで整理
-git rebase -i origin/main
+git rebase -i "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
 
 # エディタで不要なコミットをsquash/fixupに変更
 # 意味のあるコミットだけを残す

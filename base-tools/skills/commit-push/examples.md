@@ -19,7 +19,7 @@ git status
 #   modified:   src/api/user.ts
 #   new file:   src/components/ProfileEditForm.tsx
 
-git log --oneline --graph origin/main..HEAD
+git log --oneline --graph "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)..HEAD"
 # (no commits yet on this branch)
 
 # 2. 戦略判断: ブランチに初めてのgitコミット → 新規gitコミット
@@ -54,7 +54,7 @@ PR作成後、レビューで「バリデーションロジックを改善して
 
 ```bash
 # 1. 現在のコミット確認
-git log --oneline --graph origin/main..HEAD
+git log --oneline --graph "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)..HEAD"
 # * a1b2c3d feat: add user profile editing feature
 
 # 2. 指摘箇所を修正
@@ -102,7 +102,7 @@ git push --force-with-lease
 
 ```bash
 # 1. 現在のコミット確認
-git log --oneline --graph origin/main..HEAD
+git log --oneline --graph "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)..HEAD"
 # * a1b2c3d feat: add user profile editing feature
 
 # 2. プロフィール画像アップロード機能を実装
@@ -133,7 +133,7 @@ Closes #235
 
 ```bash
 # 5. 結果確認
-git log --oneline --graph origin/main..HEAD
+git log --oneline --graph "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)..HEAD"
 # * e4f5g6h feat: add profile picture upload
 # * a1b2c3d feat: add user profile editing feature
 ```
@@ -147,7 +147,7 @@ git log --oneline --graph origin/main..HEAD
 ### 現状のコミット履歴
 
 ```bash
-git log --oneline --graph origin/main..HEAD
+git log --oneline --graph "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)..HEAD"
 # * h7i8j9k WIP: fix typo
 # * e4f5g6h WIP: add validation
 # * b2c3d4e feat: add profile form
@@ -160,7 +160,7 @@ git log --oneline --graph origin/main..HEAD
 
 ```bash
 # 1. Interactive rebaseを開始
-git rebase -i origin/main
+git rebase -i "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
 
 # 2. エディタが開く
 ```
@@ -218,7 +218,7 @@ Users can update their profile information with immediate validation.
 ### 結果確認
 
 ```bash
-git log --oneline --graph origin/main..HEAD
+git log --oneline --graph "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)..HEAD"
 # * m1n2o3p feat: add profile editing form
 # * j4k5l6m feat: add user profile model
 
@@ -292,7 +292,7 @@ git push
 ### 最終的な履歴
 
 ```bash
-git log --oneline --graph origin/main..HEAD
+git log --oneline --graph "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)..HEAD"
 # * q5r6s7t feat: add authentication UI components
 # * n2o3p4q feat: add authentication API endpoints
 # * k8l9m0n feat: add authentication model

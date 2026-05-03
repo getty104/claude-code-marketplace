@@ -22,7 +22,7 @@ context: fork
 
 ```bash
 git status
-git log --oneline --graph origin/main..HEAD
+git log --oneline --graph "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)..HEAD"
 ```
 
 確認事項：
@@ -78,7 +78,7 @@ git commit
 **実行方法：**
 
 ```bash
-git rebase -i origin/main
+git rebase -i "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
 ```
 
 エディタで以下の操作を実行：

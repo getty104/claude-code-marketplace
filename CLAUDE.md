@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **重要な特徴**:
 - **Marketplace形式**: 複数のプラグインを一元管理し、チームやコミュニティと簡単に共有できる
-- **git worktree活用**: mainブランチから分離された安全な作業環境を提供
+- **git worktree活用**: デフォルトブランチから分離された安全な作業環境を提供
 - **MCP統合**: chrome-devtools（ブラウザ自動化）、context7（ライブラリドキュメント取得）、next-devtools（Next.js開発ツール）、shadcn（shadcn/ui統合）のMCPサーバーを統合
 
 ## プラグイン検証コマンド

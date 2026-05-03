@@ -1,6 +1,6 @@
 ---
 name: triage-pr
-description: Triage a single GitHub PR by PR number. Check out the PR's branch, resolve conflicts with main, generate and evaluate a fix plan via create-review-fix-plan, then take action (add cc-fix-onetime label if fixes are needed, or merge the PR if it's ready).
+description: Triage a single GitHub PR by PR number. Check out the PR's branch, resolve conflicts with the default branch, generate and evaluate a fix plan via create-review-fix-plan, then take action (add cc-fix-onetime label if fixes are needed, or merge the PR if it's ready).
 argument-hint: "[pr-number]"
 hooks:
   Stop:
@@ -26,16 +26,16 @@ hooks:
 
 ### ステップ1: コンフリクト確認と解消
 
-originのベースブランチとコンフリクトしていないか確認する。
+originのベースブランチとコンフリクトしていないか確認する。デフォルトブランチ名は`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`で動的に取得する。
 
 ```
-git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main
+DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name) && git merge-tree $(git merge-base HEAD "origin/$DEFAULT_BRANCH") HEAD "origin/$DEFAULT_BRANCH"
 ```
 
 コンフリクトが検出された場合は、rebaseしてコンフリクトを解消する。
 
 ```
-git rebase origin/main
+git rebase "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
 ```
 
 rebase中にコンフリクトが発生した場合は、コンフリクトを解消し、`git rebase --continue`で続行する。rebase完了後、force-pushする。
@@ -128,7 +128,7 @@ gh issue close <issue番号> --reason "not planned"
 
 ## 注意事項
 
-- 作業は全てworktree上で行い、mainブランチで作業は絶対に行わないこと
+- 作業は全てworktree上で行い、デフォルトブランチで作業は絶対に行わないこと
 - ファイル編集などの作業を行う際は、pwdコマンドでworktree内部であることを確認してから行うこと
   - 作業ディレクトリ: !`pwd`
 - `cc-triage-scope`ラベルがPRに付与されている場合、いかなる操作においても**絶対に削除しない**こと
