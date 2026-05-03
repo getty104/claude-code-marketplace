@@ -12,13 +12,12 @@ hooks:
 
 # Triage Created Issue
 
-`cc-issue-created`ラベルがついており、すでに着手可能と判断されたIssueに対して、確認事項の有無や実行準備の整合性を判定するトリアージスキルです。
+着手可能と判断されたIssueに対して、確認事項の有無や実行準備の整合性を判定するトリアージスキルです。
 
 # Instructions
 
 ## 前提
 
-- 対象Issueには`cc-issue-created`ラベルがついている
 - 依存関係はすでに解決済みで、着手可能な状態である（依存関係の再確認は不要）
 - まだ`cc-issue-created`ラベルがついていないIssueには `triage-issue` スキルを使用する
 
