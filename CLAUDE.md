@@ -55,7 +55,8 @@ claude-code-marketplace/
    - `/fix-review-point-loop <ブランチ名>`: レビューコメントがなくなるまで繰り返し対応
    - `/general-task <タスク内容>`: general-purpose-assistantを使用して汎用タスクを実行
    - `/create-plan <タスク内容>`: task-requirement-analyzerで実装プランを作成しGitHub Issueを作成
-   - `/triage-issues`: cc-createdラベル付きIssueをトリアージし、適切なラベルを付与
+   - `/triage-issue <Issue番号>`: `cc-issue-created`ラベルがないIssueの依存関係を確認し、`cc-create-issue`ラベルを付与（または不要ならクローズ）
+   - `/triage-created-issue <Issue番号>`: `cc-issue-created`ラベルがあるIssueの確認事項を確認し、`cc-answer-issue-questions`または`cc-exec-issue`ラベルを付与（または不要ならクローズ）
 
    **自動/手動呼び出し可能スキル**:
    - `check-library`: ライブラリの情報をMCPサーバーから取得

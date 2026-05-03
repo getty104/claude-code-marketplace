@@ -75,7 +75,8 @@ claude
 
 | Skill | Description |
 |---|---|
-| `/triage-issue <Issue番号>` | Issue をトリアージし、依存関係や確認事項に応じたラベルを付与 |
+| `/triage-issue <Issue番号>` | `cc-issue-created` ラベルがない Issue をトリアージし、依存関係を確認して `cc-create-issue` ラベルを付与（または不要ならクローズ） |
+| `/triage-created-issue <Issue番号>` | `cc-issue-created` ラベルがついた Issue をトリアージし、確認事項の有無に応じて `cc-answer-issue-questions` または `cc-exec-issue` ラベルを付与（または不要ならクローズ） |
 | `/triage-pr <PR番号>` | PR のコンフリクト解消・修正プラン評価・マージ判定を実行 |
 
 ### 開発ツール
@@ -133,6 +134,7 @@ claude-code-marketplace/
     │   ├── fix-review-point/
     │   ├── read-github-issue/
     │   ├── resolve-pr-comments/
+    │   ├── triage-created-issue/
     │   ├── triage-issue/
     │   ├── triage-pr/
     │   └── update-issue/
