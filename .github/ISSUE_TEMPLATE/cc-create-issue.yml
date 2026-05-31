@@ -1,0 +1,14 @@
+name: "[claude-task-worker] Issue作成依頼"
+description: claude-task-workerでGitHub Issueを作成する
+title: "[claude-task-worker] Issue作成依頼"
+labels:
+  - cc-create-issue
+  - cc-triage-scope
+body:
+  - type: textarea
+    id: request
+    attributes:
+      label: 依頼内容
+      description: 作成してほしいIssueの内容を記述してください
+    validations:
+      required: true

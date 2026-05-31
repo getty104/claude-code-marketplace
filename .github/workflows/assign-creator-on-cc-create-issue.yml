@@ -1,0 +1,22 @@
+name: Assign creator on cc-create-issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  assign:
+    if: contains(github.event.issue.labels.*.name, 'cc-triage-scope')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              assignees: [context.payload.issue.user.login]
+            });
