@@ -1,7 +1,7 @@
 ---
 name: update-issue
-description: Update an existing GitHub Issue's description based on the issue number and request provided as arguments
-argument-hint: "Issue番号: [Issue番号] 依頼内容: [依頼内容]"
+description: Update an existing GitHub Issue's description based on the issue number and request provided as arguments. If the request is omitted, read all issue comments and reflect any items not yet captured in the description.
+argument-hint: "Issue番号: [Issue番号] 依頼内容: [依頼内容] ／ 省略時は [Issue番号] のみ"
 hooks:
   Stop:
     - matcher: ""
@@ -13,6 +13,7 @@ hooks:
 # Update Issue
 
 引数で受け取ったIssue番号と依頼内容をもとにコードを分析し、該当のGitHub Issueのdescriptionを更新するためのスキルです。
+依頼内容が省略された場合は、Issueのコメントを全件読み取って文脈を把握し、まだdescriptionに反映されていない事項を依頼内容の代わりとして扱う（コメント駆動モード）。
 このスキルが呼び出された際には、Instructionsに従って、Issueの内容を確認し、コードの分析を行い、Issueのdescriptionの更新を行ってください。
 
 # Instructions
@@ -93,11 +94,32 @@ git fetch --prune || true
 
 ### 2. 既存Issueの取得
 
-引数で受け取ったIssue番号のIssueを取得し、現在の内容を確認してください。変更ログを verbatim で再掲するには、レンダリング前の raw な本文が必要なので `--json` で取得する。
+まず引数を解釈する。引数は次の2形態のいずれかで渡される。
+
+- **Issue番号のみ**（例: `123`）: 依頼内容なし。コメント駆動モード（ステップ3参照）で動作する
+- **Issue番号 + 依頼内容**（例: `Issue番号: 123 依頼内容: ...`）: 依頼内容ありの通常モードで動作する
+
+いずれの形態でも先頭のIssue番号を取り出し、そのIssueを取得して現在の内容を確認する。変更ログを verbatim で再掲するには、レンダリング前の raw な本文が必要なので `--json` で取得する。
 
 ```
 gh issue view <Issue番号> --json number,title,state,labels,body,url
 ```
+
+#### コメントの取得（依頼内容が省略された場合のみ）
+
+依頼内容が省略され、コメント駆動モード（ステップ3参照）で動く場合は、コメント全件が更新の唯一の入力になるため併せて取得する。依頼内容が与えられている通常モードでは、変更のスコープを依頼内容に絞るためコメントは取得しなくてよい。
+
+```
+gh issue view <Issue番号> --comments
+```
+
+本文・コメントに画像URLがある場合、`gh-asset` でダウンロードして内容を読む。テキストだけでは伝わらない仕様（UIの見た目・エラー画面・図など）がdescription更新の判断に必要なことがあるため、URLを見て終わりにせず、ダウンロードした画像を実際に Read で確認する。
+
+```
+gh-asset download <asset_id> ~/Downloads/
+```
+
+参考: https://github.com/YuitoSato/gh-asset
 
 ### 3. タスクの分析
 
@@ -107,9 +129,18 @@ Pencilファイルはpencil MCPツールを使用して読み込むこと。
 これらの情報をもとに、タスクの背景・目的・関連する仕様を把握してください。
 
 #### 依頼内容
-依頼内容は以下の通りです。
+
+このスキルに渡された引数全体は以下の通り。先頭のIssue番号を除いた残りを依頼内容として扱う。Issue番号のみが渡された場合は依頼内容なしとみなし、下記のコメント駆動モードに従う。
 
 $ARGUMENTS
+
+#### 依頼内容が省略された場合（コメント駆動モード）
+
+上記の依頼内容が空、またはIssue番号のみでこのスキルが呼ばれた場合は、ステップ2で取得したコメント全件を入力として扱う。各コメントを時系列で読み、確認事項への回答・仕様変更・追加要望などを洗い出したうえで、既存descriptionと突き合わせ、**まだ反映されていない事項**を今回の更新対象（＝依頼内容）とする。
+
+- 既にdescriptionへ反映済みの内容は本文・変更ログともに再掲のみとし、重複した変更を加えない
+- コメントが本文と矛盾する場合は、より新しいコメントの合意を優先する
+- 反映すべき未反映事項が1件も無い場合は、descriptionを更新せず（ステップ5の `gh issue edit` をスキップ）、その判断をユーザーに報告して終了する
 
 ### 4. コードの分析
 
@@ -134,6 +165,7 @@ Explore サブエージェントで依頼内容に基づき、コードベース
 - 既存のIssue構造を尊重しつつ、依頼内容を反映する
 - 本文は冒頭の「Issueフォーマット（厳守）」のテンプレートに従って組み立てる。各セクションをステップ2〜4で得た内容で埋め、空になるセクションは「なし」で埋める
 - 末尾の変更ログは「変更ログ（折りたたみ）の追記ルール」に従い、ステップ2で取得した既存本文のエントリを verbatim で再掲したうえで、今回の更新分を1行追記する（旧フォーマットでブロックが無ければ新規作成する）
+- コメント駆動モードでも本文は同じテンプレート・変更ログ追記ルールに従う。今回の変更ログエントリは、コメントから反映した内容が分かる粒度で書く（例: `- YYYY-MM-DD: コメントの〇〇を要件に反映`）。未反映事項が無いと判断した場合はステップ3に従い更新自体をスキップする
 
 #### Issueの更新コマンド
 
