@@ -31,6 +31,17 @@ query {
           }
         }
       }
+      comments(first: 100) {
+        nodes {
+          author {
+            login
+          }
+          body
+          url
+          createdAt
+          isMinimized
+        }
+      }
       reviewThreads(first: 100) {
         pageInfo {
           hasNextPage
@@ -78,6 +89,17 @@ query(\$cursor: String) {
               login
             }
           }
+        }
+      }
+      comments(first: 100) {
+        nodes {
+          author {
+            login
+          }
+          body
+          url
+          createdAt
+          isMinimized
         }
       }
       reviewThreads(first: 100, after: \$cursor) {
@@ -129,6 +151,16 @@ query(\$cursor: String) {
       state: $first_pr.state,
       author: $first_pr.author.login,
       requested_reviewers: [$first_pr.reviewRequests.nodes[].requestedReviewer.login],
+      conversation_comments: [
+        $first_pr.comments.nodes[] |
+        {
+          author: .author.login,
+          body: .body,
+          url: .url,
+          created_at: .createdAt,
+          is_minimized: .isMinimized
+        }
+      ],
       unresolved_threads: [
         .[].data.repository.pullRequest.reviewThreads.edges[] |
         select(.node.isResolved == false) |
