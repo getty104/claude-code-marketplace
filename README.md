@@ -61,6 +61,7 @@ claude
 | `/breakdown-issues <タスク内容>` | 要件を TODO に分解し、タスクごとに GitHub Issue を作成 |
 | `/read-github-issue <issue番号>` | Issue の内容を取得し実装プランを作成 |
 | `/answer-issue-questions <issue番号>` | Issue の確認事項をコードベース調査に基づき回答 |
+| `post-issue-body`（内部用） | Issue 本文の整形・投稿前チェック・`gh issue create/edit` 実行を担う共有スキル。create-issue / create-issue-from-issue-number / update-issue から呼ばれる |
 
 ### PR・レビュー対応
 
@@ -129,6 +130,7 @@ claude-code-marketplace/
     │   ├── commit-push/
     │   ├── create-issue/
     │   ├── create-issue-from-issue-number/
+    │   ├── post-issue-body/
     │   ├── create-pr/
     │   ├── create-review-fix-plan/
     │   ├── create-task-summary/
