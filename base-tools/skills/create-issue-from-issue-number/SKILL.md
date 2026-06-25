@@ -23,7 +23,7 @@ Instructionsの順に最後まで自律的に実行してください。
 
 ### 0-1. 引数の妥当性確認
 
-`$ARGUMENTS` を以下のいずれかに該当することを確認し、Issue番号を抽出する。判定は機械的に行い、ユーザーへの確認は不要。
+`$0` を以下のいずれかに該当することを確認し、Issue番号を抽出する。判定は機械的に行い、ユーザーへの確認は不要。
 
 - 数値のみ（例: `123`）
 - `#`付き数値（例: `#123`）
@@ -59,7 +59,7 @@ git fetch --prune || true
 引数から抽出したIssue番号で対象Issueを取得し、現在の内容を確認する。
 
 ```bash
-gh issue view <Issue番号> --json number,title,state,labels,body,url
+gh issue view $0 --json number,title,state,labels,body,url
 ```
 
 `state` が `CLOSED` の場合は更新せず、その旨を報告して終了する。
@@ -135,7 +135,7 @@ post-issue-body-input:
     - <ステップ3で抽出した未確認事項>
 ```
 
-Skill tool 呼び出しは `Skill(skill='post-issue-body', args='mode=edit issue_number=<番号>')`（必要なら plugin namespace 付きで `base-tools:post-issue-body`）。`post-issue-body` の責務範囲は以下のとおりで、本スキルから重複して実行しない。
+Skill tool 呼び出しは `Skill(skill='post-issue-body', args='mode=edit issue_number=$0')`（必要なら plugin namespace 付きで `base-tools:post-issue-body`）。`post-issue-body` の責務範囲は以下のとおりで、本スキルから重複して実行しない。
 
 - `gh issue view --json body` で既存本文を再取得して変更ログを verbatim で再掲
 - 本文テンプレート・投稿前チェックリストに従って本文を組み立て・検証

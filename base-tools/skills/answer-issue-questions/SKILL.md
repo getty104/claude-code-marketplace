@@ -155,15 +155,22 @@ S / M / L / XL のいずれか1つ
 - **Assignees**: `gh api user --jq '.login'` で取得したユーザーをアサインする
 - **タイトル**: タスク名をそのまま使用する
 - **ラベル**: `cc-triage-scope` を付与する
+- **Projects**: 親Issue（`$0`）が所属している GitHub Project と同じ Project に新Issueも紐付ける（複数Projectに属していれば全てに紐付ける）。親Issueがどの Project にも属していなければスキップする
 
 #### Issue作成コマンド（heredoc で本文を渡す）
 
 `--body "..."` 形式は本文中のバッククォート・`$`・`!`・改行でエスケープに失敗するため、**必ず `--body-file -` + heredoc** を使う。`'EOF'` のようにクォートで囲み、シェル展開を抑止する。
 
+新Issueを作成したあと、親Issueと同じ Project に紐付けるために**新Issue URLを保持**し、`gh project item-add` を呼ぶ必要がある。`gh issue create` 単体ではURLを標準出力に1行で返すので、それを変数に取り込む。
+
 ```bash
 ME=$(gh api user --jq '.login')
 
-gh issue create \
+# 親Issue（$0）が所属するProjectを「<owner>\t<project番号>」形式で取得（0件なら空文字列）
+PARENT_PROJECTS=$(gh issue view $0 --json projectItems --jq '.projectItems[] | "\(.owner.login)\t\(.number)"')
+
+# 新Issueを作成し、URLを保持する
+NEW_ISSUE_URL=$(gh issue create \
   --title "<タイトル>" \
   --assignee "$ME" \
   --label "cc-triage-scope" \
@@ -186,7 +193,17 @@ gh issue create \
 ## 見積もり規模
 ...
 EOF
+)
+
+# 親Issueと同じProjectに新Issueを紐付ける（親Issueが1つもProjectに属していなければスキップ）
+if [ -n "$PARENT_PROJECTS" ]; then
+  while IFS=$'\t' read -r OWNER NUMBER; do
+    gh project item-add "$NUMBER" --owner "$OWNER" --url "$NEW_ISSUE_URL"
+  done <<< "$PARENT_PROJECTS"
+fi
 ```
+
+`gh project item-add` には `project` スコープのトークンが必要。権限不足等で失敗した場合は、新Issue自体は作成済みなのでProject紐付けエラーを出力に残したうえで処理を続行する（Issue作成のロールバックはしない）。
 
 ## 重要な制約
 
@@ -200,4 +217,4 @@ EOF
 - Issue番号
 - 回答した確認事項の数
 - 実行したアクション（コメント編集、Issue作成など）
-- 作成した追加Issue（ある場合はIssue番号とURL）
+- 作成した追加Issue（ある場合はIssue番号とURL、および紐付けたProject名／番号）
