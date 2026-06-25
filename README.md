@@ -56,6 +56,7 @@ claude
 |---|---|
 | `/exec-issue <issue番号>` | Issue を読み込み、実装から PR 作成まで自動化 |
 | `/create-issue <タスク内容>` | タスク要件を分析し、実装プラン付き GitHub Issue を作成 |
+| `/create-issue-from-issue-number <Issue番号>` | 既存 Issue の title/body を起点にコード再分析し、description をリフレッシュ |
 | `/update-issue <Issue番号> <依頼内容>` | 既存 Issue の description を更新 |
 | `/breakdown-issues <タスク内容>` | 要件を TODO に分解し、タスクごとに GitHub Issue を作成 |
 | `/read-github-issue <issue番号>` | Issue の内容を取得し実装プランを作成 |
@@ -127,6 +128,7 @@ claude-code-marketplace/
     │   ├── check-library/
     │   ├── commit-push/
     │   ├── create-issue/
+    │   ├── create-issue-from-issue-number/
     │   ├── create-pr/
     │   ├── create-review-fix-plan/
     │   ├── create-task-summary/
