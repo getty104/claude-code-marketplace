@@ -58,6 +58,7 @@ claude-code-marketplace/
    - `/create-issue-from-issue-number <Issue番号>`: 既存Issueのtitle/bodyを起点にコード再分析し、descriptionをリフレッシュ
    - `/triage-issue <Issue番号>`: `cc-issue-created`ラベルがないIssueの依存関係を確認し、`cc-create-issue`ラベルを付与（または不要ならクローズ）
    - `/triage-created-issue <Issue番号>`: `cc-issue-created`ラベルがあるIssueの確認事項を確認し、`cc-answer-issue-questions`または`cc-exec-issue`ラベルを付与（または不要ならクローズ）
+   - `/create-epic-pr <Issue番号>`: `cc-epic-<Issue番号>`ブランチからデフォルトブランチへの集約PR（Epic PR）を作成。差分コミットログから本文を自動生成し、サブPR/サブIssueを整理して`gh pr create`で投稿（ラベルなし、`Closes #<Issue番号>`入り）
 
    **自動/手動呼び出し可能スキル**:
    - `check-library`: ライブラリの情報をMCPサーバーから取得
