@@ -7,8 +7,11 @@ context: fork
 
 # Commit and Push Code Changes
 
-コード変更を適切なgitコミット戦略でgit commitし、pushするためのスキルです。
-このスキルが呼び出された際には、Instructionsに従って、コード変更のgit commitとpushを行ってください。
+**このスキルが呼び出された時点で、コード変更の git commit と push を実行する依頼は既に確定しています。ユーザーへの挨拶・自己紹介・「何を手伝いますか」「お手伝いできることはありますか」のような確認質問は一切禁止です。Instructions のステップ1（`git status` と `git log` の確認）から即座に実行を開始してください。**
+
+ユーザーから追加の指示や引数は渡されません。デフォルトブランチからの差分・現在の作業ツリーの状態を自分で確認し、Instructions に従って戦略を選択・実行します。
+
+このスキルは、コード変更を適切な git コミット戦略で commit し push するためのものです。基本的には既存の git コミットへの squash 戦略を採用し、必要に応じてブランチ全体の git コミット履歴を再構成します。
 
 # Instructions
 
