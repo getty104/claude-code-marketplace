@@ -1,6 +1,6 @@
 ---
 name: post-issue-body
-description: "INTERNAL/HELPER skill — do NOT invoke directly from a user query. This is the shared formatter/poster used by create-issue, create-issue-from-issue-number, and update-issue. It formats an implementation-ready GitHub Issue body (label cc-issue-created), runs the pre-posting checklist, executes `gh issue create` or `gh issue edit`, and optionally posts a 確認事項 follow-up comment. Invoke this skill ONLY from one of the three parent skills via the Skill tool, after the parent has completed analysis. If a user asks to 'format an issue body' or similar, route them to the appropriate parent skill (/create-issue, /create-issue-from-issue-number, or /update-issue) rather than invoking this one directly."
+description: "INTERNAL/HELPER skill — do NOT invoke directly from a user query. This is the shared formatter/poster used by create-issue, create-issue-from-issue-number, and update-issue. It formats an implementation-ready GitHub Issue body, runs the pre-posting checklist, executes `gh issue create` or `gh issue edit`, and optionally posts a 確認事項 follow-up comment. Invoke this skill ONLY from one of the three parent skills via the Skill tool, after the parent has completed analysis. If a user asks to 'format an issue body' or similar, route them to the appropriate parent skill (/create-issue, /create-issue-from-issue-number, or /update-issue) rather than invoking this one directly."
 user-invocable: false
 context: fork
 argument-hint: "[mode=create|edit issue_number=<N>]"
@@ -67,7 +67,7 @@ post-issue-body-input:
 
 ## Issueフォーマット（厳守）
 
-このスキルが投稿するのは「コード分析済みの実装準備Issue」（ラベル `cc-issue-created`）であり、本文は必ず以下の正規フォーマットに従う。
+このスキルが投稿するのは「コード分析済みの実装準備Issue」であり、本文は必ず以下の正規フォーマットに従う。
 
 `triage-created-issue` や `exec-issue`（`read-github-issue` 経由）といった後続スキルは、Issue本文を読み取ってラベリング・タスク分解・実装を行う。セクションの過不足、順序の入れ替え、見出し名のゆらぎは後続スキルの判断を狂わせ、人がレビューする際の可読性も損なう。どのスキルが作っても同じ構造になるよう、このフォーマットを揃えることが目的なので、独自のアレンジは加えない。
 
@@ -155,7 +155,6 @@ ME=$(gh api user --jq '.login')
 gh issue create \
   --title "<タイトル>" \
   --assignee "$ME" \
-  --label "cc-issue-created" \
   --body-file - <<'EOF'
 ## 概要
 ...
@@ -188,12 +187,11 @@ EOF
 
 #### mode=edit
 
-`--remove-label` は使用しない（既存ラベルは保持する）。`--title` は呼び出し元が変更を希望する場合のみ付ける（無指定なら省略）。
+`--title` は呼び出し元が変更を希望する場合のみ付ける（無指定なら省略）。
 
 ```bash
 gh issue edit <issue_number> \
   --title "<更新後タイトル>" \
-  --add-label "cc-issue-created" \
   --body-file - <<'EOF'
 ## 概要
 ...

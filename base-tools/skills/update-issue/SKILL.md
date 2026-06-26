@@ -117,7 +117,7 @@ Skill tool 呼び出しは `Skill(skill='post-issue-body', args='mode=edit issue
 
 - `gh issue view --json body` で既存本文を再取得して変更ログを verbatim で再掲
 - 本文テンプレート・投稿前チェックリストに従って本文を組み立て・検証
-- `gh issue edit` で更新（`--add-label "cc-issue-created"`、`--remove-label` は不使用）
+- `gh issue edit` で更新（`--remove-label` は不使用）
 - 確認事項が渡されていればコメント投稿
 
 完了後、Issue URL と確認事項コメントの有無が返ってくる。未反映事項が0件と判断した場合は `post-issue-body` を起動せず、その旨をユーザーに報告して終了する。

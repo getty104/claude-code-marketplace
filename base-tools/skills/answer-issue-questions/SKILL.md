@@ -133,11 +133,12 @@ post-scope-issue-body-input:
     参照情報: |
       - ドキュメント: `<path>` — <説明>
       （無ければ "なし"）
-    依存関係: |
-      - #<確定済みIssue番号>
-      （無ければ "なし"）
     優先度: High  # High / Medium / Low のいずれか
     見積もり規模: M  # S / M / L / XL のいずれか
+  # 依存関係は GitHub ネイティブ relationships で表現する。
+  # 必要に応じて以下を渡す（不要なら項目ごと省略）。
+  # blocked_by: [<確定済みIssue番号>, ...]   # 例: $0 をブロック先にする場合
+  # parent: <親Issue番号>                   # 通常は post-creation の --add-sub-issue で best-effort リンクするため未使用
 ```
 
 Skill tool 呼び出しは `Skill(skill='post-scope-issue-body', args='mode=create')`（必要なら plugin namespace 付きで `base-tools:post-scope-issue-body`）。`post-scope-issue-body` が完了後、作成された Issue URL と Issue 番号を返す。
@@ -174,7 +175,7 @@ fi
 
 #### 5-3. 複数Issue作成時の順序
 
-複数の派生タスクを作成する場合は、`post-scope-issue-body` を1つずつ順に呼ぶ。依存関係のあるタスクは、依存先のIssue番号が確定してから（つまり依存先の `post-scope-issue-body` 呼び出しが完了してから）、その番号を `## 依存関係` セクションに書き込んだ YAML で起動する。
+複数の派生タスクを作成する場合は、`post-scope-issue-body` を1つずつ順に呼ぶ。依存関係のあるタスクは、依存先のIssue番号が確定してから（つまり依存先の `post-scope-issue-body` 呼び出しが完了してから）、その番号を `blocked_by:` リストに入れた YAML で起動する。本文への `## 依存関係` セクション書き込みは廃止済み（GitHub ネイティブ relationships に移行）。
 
 ## 重要な制約
 

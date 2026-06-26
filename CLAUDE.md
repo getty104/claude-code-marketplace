@@ -56,7 +56,6 @@ claude-code-marketplace/
    - `/general-task <タスク内容>`: general-purpose-assistantを使用して汎用タスクを実行
    - `/create-plan <タスク内容>`: task-requirement-analyzerで実装プランを作成しGitHub Issueを作成
    - `/create-issue-from-issue-number <Issue番号>`: 既存Issueのtitle/bodyを起点にコード再分析し、descriptionをリフレッシュ
-   - `/triage-issue <Issue番号>`: `cc-issue-created`ラベルがないIssueの依存関係を確認し、`cc-create-issue`ラベルを付与（または不要ならクローズ）
    - `/triage-created-issue <Issue番号>`: `cc-issue-created`ラベルがあるIssueの確認事項を確認し、`cc-answer-issue-questions`または`cc-exec-issue`ラベルを付与（または不要ならクローズ）
    - `/create-epic-pr <Issue番号>`: `cc-epic-<Issue番号>`ブランチからデフォルトブランチへの集約PR（Epic PR）を作成。差分コミットログから本文を自動生成し、サブPR/サブIssueを整理して`gh pr create`で投稿（ラベルなし、`Closes #<Issue番号>`入り）
 
