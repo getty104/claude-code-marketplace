@@ -88,30 +88,29 @@ EPIC_ISSUE_NUMBER=$(basename "$EPIC_ISSUE_URL")
 
 #### 各TODOごとの呼び出し
 
-TODO 1件ごとに、以下の YAML ブロックを**コンテキストに出力したうえで** Skill tool で `post-scope-issue-body` を起動する。`post-scope-issue-body` はこの YAML を機械的に拾って入力として扱う規約になっている。
+TODO 1件ごとに、以下の YAML ブロックを**そのまま args として** Skill tool で `post-scope-issue-body` を起動する。`post-scope-issue-body` は args（`$ARGUMENTS`）を YAML として機械的にパースして入力として扱う規約になっている。
 
 ```yaml
-post-scope-issue-body-input:
-  mode: create
-  title: <TODOのタスク名をそのまま>
-  sections:
-    概要: |
-      （1-3行）
-    要件: |
-      - ...
-      （無ければ "なし"）
-    参照情報: |
-      - ドキュメント: `<path>` — <説明>
-      （無ければ "なし"）
-    優先度: High  # High / Medium / Low のいずれか
-    見積もり規模: M  # S / M / L / XL のいずれか
-  # ステップ4で確定した親Issue番号。全TODOで同じ値を渡す。
-  parent: <EPIC_ISSUE_NUMBER>
-  # 依存先がある場合のみ書く。先行して作成済みのIssue番号を入れる。依存先が無い場合は項目ごと省略。
-  blocked_by: [<先行TODOで確定済みのIssue番号>, ...]
+mode: create
+title: <TODOのタスク名をそのまま>
+sections:
+  概要: |
+    （1-3行）
+  要件: |
+    - ...
+    （無ければ "なし"）
+  参照情報: |
+    - ドキュメント: `<path>` — <説明>
+    （無ければ "なし"）
+  優先度: High  # High / Medium / Low のいずれか
+  見積もり規模: M  # S / M / L / XL のいずれか
+# ステップ4で確定した親Issue番号。全TODOで同じ値を渡す。
+parent: <EPIC_ISSUE_NUMBER>
+# 依存先がある場合のみ書く。先行して作成済みのIssue番号を入れる。依存先が無い場合は項目ごと省略。
+blocked_by: [<先行TODOで確定済みのIssue番号>, ...]
 ```
 
-Skill tool 呼び出しは `Skill(skill='post-scope-issue-body', args='mode=create')`（必要なら plugin namespace 付きで `base-tools:post-scope-issue-body`）。`post-scope-issue-body` が完了後、作成された Issue URL と Issue 番号を返す。番号は次以降のTODOの `blocked_by:` に入れる用途で保持する。
+Skill tool 呼び出しは `Skill(skill='post-scope-issue-body', args=<上記YAML文字列>)`（必要なら plugin namespace 付きで `base-tools:post-scope-issue-body`）。args は改行を含む複数行文字列としてそのまま渡す。`post-scope-issue-body` が完了後、作成された Issue URL と Issue 番号を返す。番号は次以降のTODOの `blocked_by:` に入れる用途で保持する。
 
 `post-scope-issue-body` の失敗（gh コマンド失敗・本文チェック不通過・`--parent`/`--blocked-by` の検証エラー等）はそのまま本ステップの中断条件となる。エラーメッセージを最終報告に含め、既に作成済みのIssue（親Issueと作成済みの子Issue）は残したまま中断する。
 

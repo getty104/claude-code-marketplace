@@ -3,7 +3,7 @@ name: post-issue-body
 description: "INTERNAL/HELPER skill — do NOT invoke directly from a user query. This is the shared formatter/poster used by create-issue, create-issue-from-issue-number, and update-issue. It formats an implementation-ready GitHub Issue body, runs the pre-posting checklist, executes `gh issue create` or `gh issue edit`, and optionally posts a 確認事項 follow-up comment. Invoke this skill ONLY from one of the three parent skills via the Skill tool, after the parent has completed analysis. If a user asks to 'format an issue body' or similar, route them to the appropriate parent skill (/create-issue, /create-issue-from-issue-number, or /update-issue) rather than invoking this one directly."
 user-invocable: false
 context: fork
-argument-hint: "[mode=create|edit issue_number=<N>]"
+argument-hint: "<YAML input — see SKILL.md>"
 ---
 
 # Post Issue Body
@@ -17,53 +17,54 @@ argument-hint: "[mode=create|edit issue_number=<N>]"
 3. `gh issue create` または `gh issue edit` の実行
 4. 確認事項が渡されていればコメントとして投稿
 
-このスキルは**ユーザーから直接呼び出される想定ではない**（親スキル内の「post-issue-bodyスキルで投稿する」というステップから Skill tool 経由で起動される）。直接呼ばれた場合は、分析結果が直前コンテキストに揃っていないことが多いので、親スキル（create-issue 等）の使用を促して終了する。
+このスキルは**ユーザーから直接呼び出される想定ではない**（親スキル内の「post-issue-bodyスキルで投稿する」というステップから Skill tool 経由で起動される）。直接呼ばれた場合は、入力 YAML が args に含まれていないことが多いので、親スキル（create-issue 等）の使用を促して終了する。
 
 # Instructions
 
-## 入力（args + 直前コンテキストの YAML ブロック）
+## 入力（args 経由の YAML ブロック）
 
 ### 呼び出し規約
 
-呼び出し元の親スキル（`create-issue` / `create-issue-from-issue-number` / `update-issue`）は、本スキルを Skill tool で起動する直前に、**以下の YAML ブロックをコンテキストに出力する**こと。本スキルはこの YAML を機械的に拾って入力として扱う。
+呼び出し元の親スキル（`create-issue` / `create-issue-from-issue-number` / `update-issue`）は、**本スキル起動時の `args` に以下の YAML ブロックを文字列として渡す**こと。本スキルは `$ARGUMENTS` を YAML として機械的にパースして入力として扱う。
 
 ```yaml
-post-issue-body-input:
-  mode: create  # create または edit
-  issue_number: 123  # edit時のみ必須、create時は省略
-  title: <Issueタイトル>
-  sections:
-    概要: |
-      （1-3行の概要）
-    要件: |
-      - 要件1
-      - 要件2
-    参照情報: |
-      - ドキュメント: `<path>` — <説明>
-      （無ければ "なし"）
-    直近関連変更: |
-      - `<commit hash>` <subject> — <影響>
-      （無ければ "該当なし"）
-    実装プラン: |
-      1. フェーズ1
-      2. フェーズ2
-    影響範囲: |
-      - `<path>` — <概略>
-  new_changelog_entry: <この作成・更新で変えた点を1行要約>
-  confirmation_items:  # 任意。0件ならキー自体を省略可
-    - <質問1>
-    - <質問2>
+mode: create  # create または edit
+issue_number: 123  # edit時のみ必須、create時は省略
+title: <Issueタイトル>
+sections:
+  概要: |
+    （1-3行の概要）
+  要件: |
+    - 要件1
+    - 要件2
+  参照情報: |
+    - ドキュメント: `<path>` — <説明>
+    （無ければ "なし"）
+  直近関連変更: |
+    - `<commit hash>` <subject> — <影響>
+    （無ければ "該当なし"）
+  実装プラン: |
+    1. フェーズ1
+    2. フェーズ2
+  影響範囲: |
+    - `<path>` — <概略>
+new_changelog_entry: <この作成・更新で変えた点を1行要約>
+confirmation_items:  # 任意。0件ならキー自体を省略可
+  - <質問1>
+  - <質問2>
 ```
 
-### args（Skill tool に渡す）
+args に渡す YAML は上記の通り**トップレベルから直接書く**（ラッパキーなし）。
 
-最低限 `mode=create` または `mode=edit issue_number=<N>` を args として渡す。詳細データは YAML ブロック側に書く（args の文字数制限に配慮）。
+### args の渡し方
+
+`Skill(skill='post-issue-body', args=<上記YAML文字列>)` の形で起動する。args は改行を含む複数行文字列として渡せる。
 
 ### 取り扱い規約
 
 - 空セクションを省略しない。「なし」「該当なし」で埋める（後続スキルが「未記入」と区別できなくなるため）。
-- YAML が壊れていたり項目が欠けている場合は、直前コンテキストから合理的に推定する。`mode` と（edit時の）`issue_number` だけは推定不可なので欠けていたら中断する。
-- 親スキルが YAML ブロックを出力せずに本スキルを呼んだ場合（直接呼び出しなど）は、直前コンテキストの自由形式テキストから best-effort で読み取り、不明箇所は「不明」「該当なし」で埋める。重大な情報が無ければ中断する。
+- args の YAML が壊れていたり項目が欠けている場合は、最低限の推定で埋める。`mode` と（edit時の）`issue_number` だけは推定不可なので欠けていたら中断する。
+- args が空、もしくは YAML として解釈できない場合（直接ユーザー起動など）は、親スキル（`create-issue` / `create-issue-from-issue-number` / `update-issue`）の使用を促して中断する。
 
 ## Issueフォーマット（厳守）
 
@@ -127,7 +128,11 @@ post-issue-body-input:
 
 ## 実行ステップ
 
-### 1. (mode=edit のみ) 既存本文の取得
+### 1. args の YAML パース
+
+`$ARGUMENTS` を YAML として解釈し、`mode` / `issue_number` / `title` / `sections` / `new_changelog_entry` / `confirmation_items` を取り出す。`mode` が読み取れない、`mode=edit` で `issue_number` が読み取れない、または args が空ならば中断条件に従って終了する。
+
+### 2. (mode=edit のみ) 既存本文の取得
 
 変更ログを verbatim で再掲するため、対象 Issue の現在の body を取得する。
 
@@ -139,11 +144,11 @@ gh issue view <issue_number> --json body
 
 対象 Issue の state が `CLOSED` の場合は、その旨を出力して中断する。
 
-### 2. 本文の組み立てと投稿前チェック
+### 3. 本文の組み立てと投稿前チェック
 
 「本文テンプレート」「変更ログ追記ルール」に従って本文を組み立てる。組み立て後、必ず「投稿前チェック」の項目を1つずつ確認する。1つでも満たさない場合は本文を直してから次へ進む。
 
-### 3. `gh` で投稿
+### 4. `gh` で投稿
 
 **`--body "..."` 形式は使わない**。本文中のバッククォート・`$`・`!`・改行でエスケープが頻繁に壊れるため、必ず `--body-file -` + heredoc（`<<'EOF'` でクォート、シェル展開を抑止）を使う。
 
@@ -223,7 +228,7 @@ EOF
 
 成功後、対象 Issue の URL を保持する。
 
-### 4. 確認事項のコメント投稿（任意）
+### 5. 確認事項のコメント投稿（任意）
 
 呼び出し元から渡された「確認事項」が**1件以上**ある場合のみコメントする。0件ならスキップする。コメントも `--body-file -` + heredoc を使う。
 
@@ -235,7 +240,7 @@ gh issue comment <issue_number> --body-file - <<'EOF'
 EOF
 ```
 
-### 5. 呼び出し元への返却
+### 6. 呼び出し元への返却
 
 以下を出力して、呼び出し元の親スキルが「最終報告」で使えるようにする。
 
@@ -247,11 +252,11 @@ EOF
 
 以下のいずれかに該当する場合のみ、理由を1-2行で出力して**即中断**する。
 
+- args が空、もしくは YAML として解釈できない
 - `mode` が `create` でも `edit` でもない
 - `mode=edit` で `issue_number` が解釈できない
 - `mode=edit` で `gh issue view` が失敗、または対象 Issue が `CLOSED`
 - `gh issue create` / `gh issue edit` / `gh issue comment` が失敗し、再試行しても解消しない
-- 親スキルからの分析結果が直前コンテキストに無く、推定もできない（直接ユーザー起動された場合など）
 
 ## 注意事項
 

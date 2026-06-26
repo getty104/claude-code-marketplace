@@ -3,7 +3,7 @@ name: post-scope-issue-body
 description: "INTERNAL/HELPER skill — do NOT invoke directly from a user query. This is the shared formatter/poster used by answer-issue-questions and breakdown-issues. It formats a scope GitHub Issue body (label cc-triage-scope, used before code analysis), runs the pre-posting checklist, and executes `gh issue create`. Invoke this skill ONLY from one of the parent skills via the Skill tool, after the parent has finalized the task breakdown. If a user asks to 'create a scope issue' or similar, route them to the appropriate parent skill (/breakdown-issues for fresh breakdowns, /answer-issue-questions for derived sub-tasks) rather than invoking this one directly."
 user-invocable: false
 context: fork
-argument-hint: "[mode=create]"
+argument-hint: "<YAML input — see SKILL.md>"
 ---
 
 # Post Scope Issue Body
@@ -16,50 +16,51 @@ argument-hint: "[mode=create]"
 2. 投稿前チェックの実施
 3. `gh issue create` の実行
 
-このスキルは**ユーザーから直接呼び出される想定ではない**（親スキル内の「post-scope-issue-bodyスキルで投稿する」というステップから Skill tool 経由で起動される）。直接呼ばれた場合は、分析結果が直前コンテキストに揃っていないことが多いので、親スキル（breakdown-issues / answer-issue-questions）の使用を促して終了する。
+このスキルは**ユーザーから直接呼び出される想定ではない**（親スキル内の「post-scope-issue-bodyスキルで投稿する」というステップから Skill tool 経由で起動される）。直接呼ばれた場合は、入力 YAML が args に含まれていないことが多いので、親スキル（breakdown-issues / answer-issue-questions）の使用を促して終了する。
 
 **親Project紐付けや複数Issueの作成順序・依存関係Issue番号の確定は呼び出し側の責務**で、本スキルは1回の呼び出しで1つのIssueを作成して URL を返すのみ。複数作成したい場合は呼び出し側がループする。
 
 # Instructions
 
-## 入力（args + 直前コンテキストの YAML ブロック）
+## 入力（args 経由の YAML ブロック）
 
 ### 呼び出し規約
 
-呼び出し元の親スキル（`answer-issue-questions` / `breakdown-issues`）は、本スキルを Skill tool で起動する直前に、**以下の YAML ブロックをコンテキストに出力する**こと。本スキルはこの YAML を機械的に拾って入力として扱う。
+呼び出し元の親スキル（`answer-issue-questions` / `breakdown-issues`）は、**本スキル起動時の `args` に以下の YAML ブロックを文字列として渡す**こと。本スキルは `$ARGUMENTS` を YAML として機械的にパースして入力として扱う。
 
 ```yaml
-post-scope-issue-body-input:
-  mode: create  # 現状 create のみサポート
-  title: <Issueタイトル>
-  sections:
-    概要: |
-      （1-3行の概要）
-    要件: |
-      - 要件1
-      - 要件2
-    参照情報: |
-      - ドキュメント: `<path>` — <説明>
-      （無ければ "なし"）
-    優先度: High  # High / Medium / Low のいずれか
-    見積もり規模: M  # S / M / L / XL のいずれか
-  # 以下は GitHub ネイティブ relationships 用のオプション項目。
-  # 不要なら省略する（空配列や null を入れない＝そのまま書かない）。
-  parent: <親Issueの番号>           # 省略可。指定時は --parent で sub-issue として作成される
-  blocked_by: [<Issue番号>, ...]   # 省略可。指定時は --blocked-by で blocked-by relationship が貼られる
-  blocking: [<Issue番号>, ...]     # 省略可。指定時は --blocking で blocking relationship が貼られる
+mode: create  # 現状 create のみサポート
+title: <Issueタイトル>
+sections:
+  概要: |
+    （1-3行の概要）
+  要件: |
+    - 要件1
+    - 要件2
+  参照情報: |
+    - ドキュメント: `<path>` — <説明>
+    （無ければ "なし"）
+  優先度: High  # High / Medium / Low のいずれか
+  見積もり規模: M  # S / M / L / XL のいずれか
+# 以下は GitHub ネイティブ relationships 用のオプション項目。
+# 不要なら省略する（空配列や null を入れない＝そのまま書かない）。
+parent: <親Issueの番号>           # 省略可。指定時は --parent で sub-issue として作成される
+blocked_by: [<Issue番号>, ...]   # 省略可。指定時は --blocked-by で blocked-by relationship が貼られる
+blocking: [<Issue番号>, ...]     # 省略可。指定時は --blocking で blocking relationship が貼られる
 ```
 
-### args（Skill tool に渡す）
+args に渡す YAML は上記の通り**トップレベルから直接書く**（ラッパキーなし）。
 
-最低限 `mode=create` を args として渡す。詳細データは YAML ブロック側に書く（args の文字数制限に配慮）。
+### args の渡し方
+
+`Skill(skill='post-scope-issue-body', args=<上記YAML文字列>)` の形で起動する。args は改行を含む複数行文字列として渡せる。
 
 ### 取り扱い規約
 
 - 空セクションを省略しない。「なし」で埋める（後続スキルが「未記入」と区別できなくなるため）。
 - `parent` / `blocked_by` / `blocking` に書き込む Issue 番号は**呼び出し側で確定済みのもの**であることが前提。本スキルは渡された値をそのまま `gh issue create` のオプションに渡す。先に作成したIssueの番号確定を待つ順序制御は呼び出し側の責務。
-- YAML が壊れていたり項目が欠けている場合は、直前コンテキストから合理的に推定する。`mode` だけは推定不可なので欠けていたら中断する。
-- 親スキルが YAML ブロックを出力せずに本スキルを呼んだ場合（直接呼び出しなど）は、直前コンテキストの自由形式テキストから best-effort で読み取り、不明箇所は「なし」で埋める。重大な情報が無ければ中断する。
+- args の YAML が壊れていたり項目が欠けている場合は、`mode` 以外であれば最低限の推定で埋める（例えば優先度・見積もり規模が空なら `Medium` / `M`）。`mode` だけは推定不可なので欠けていたら中断する。
+- args が空、もしくは YAML として解釈できない場合（直接ユーザー起動など）は、親スキル（`breakdown-issues` / `answer-issue-questions`）の使用を促して中断する。
 
 ## Issueフォーマット（厳守）
 
@@ -101,11 +102,15 @@ S / M / L / XL のいずれか1つ
 
 ## 実行ステップ
 
-### 1. 本文の組み立てと投稿前チェック
+### 1. args の YAML パース
+
+`$ARGUMENTS` を YAML として解釈し、`mode` / `title` / `sections` / `parent` / `blocked_by` / `blocking` を取り出す。`mode` が読み取れない、もしくは args が空ならば中断条件に従って終了する。
+
+### 2. 本文の組み立てと投稿前チェック
 
 「本文テンプレート」に従って本文を組み立てる。組み立て後、必ず「投稿前チェック」の項目を1つずつ確認する。1つでも満たさない場合は本文を直してから次へ進む。
 
-### 2. `gh issue create` で投稿
+### 3. `gh issue create` で投稿
 
 **`--body "..."` 形式は使わない**。本文中のバッククォート・`$`・`!`・改行でエスケープが頻繁に壊れるため、必ず `--body-file -` + heredoc（`<<'EOF'` でクォート、シェル展開を抑止）を使う。
 
@@ -150,12 +155,12 @@ EOF
 
 `--parent` / `--blocked-by` / `--blocking` の検証エラー（存在しない Issue 番号、権限不足、`gh` バージョン未達 等）は `gh issue create` 自体を失敗させ、その場合は Issue 自体が作成されない。これは「relationship が貼れないなら作るな」という fail-fast のため意図的な挙動。失敗を呼び出し元に伝えて中断する（後追いで `gh issue edit --add-sub-issue` 等の best-effort リンクが必要な場合は、呼び出し元側で `parent` を渡さず作成し、別途リンクするフローを使うこと。例: `answer-issue-questions`）。
 
-### 3. 呼び出し元への返却
+### 4. 呼び出し元への返却
 
 以下を出力して、呼び出し元の親スキルが「最終報告」や「親Project紐付け」「次のIssue作成」で使えるようにする。
 
 - 作成された Issue の URL
-- 作成された Issue の番号（後続Issueの `## 依存関係` に書き込む用途に使える）
+- 作成された Issue の番号（後続Issueの `blocked_by` 入力に使える）
 
 親Project紐付けや複数Issue作成のループは本スキルの責務外。呼び出し側で URL/番号を受け取って続きを処理する。
 
@@ -164,8 +169,8 @@ EOF
 以下のいずれかに該当する場合のみ、理由を1-2行で出力して**即中断**する。
 
 - `mode` が `create` 以外（現状 edit はサポートしない）
+- args が空、もしくは YAML として解釈できない
 - `gh issue create` が失敗し、再試行しても解消しない
-- 親スキルからの分析結果が直前コンテキストに無く、推定もできない（直接ユーザー起動された場合など）
 
 ## 注意事項
 

@@ -107,35 +107,34 @@ Explore サブエージェントを起動し、以下を取得する。スコー
 
 ## 4. post-issue-body スキルで Issue を更新
 
-ステップ1〜3の分析結果を **以下の YAML ブロックの形でコンテキストに出力** したうえで、Skill tool で `post-issue-body` を起動する。`post-issue-body` はこの YAML を機械的に拾って入力として扱う規約になっている。
+ステップ1〜3の分析結果を **以下の YAML ブロックの形でそのまま args として** Skill tool で `post-issue-body` を起動する。`post-issue-body` は args（`$ARGUMENTS`）を YAML として機械的にパースして入力として扱う規約になっている。
 
 ```yaml
-post-issue-body-input:
-  mode: edit
-  issue_number: <ステップ1で確定した番号>
-  title: <更新後タイトル — 変えない場合はステップ1で取得した既存タイトルを再掲>
-  sections:
-    概要: |
-      （1-3行、再分析結果を反映）
-    要件: |
-      - ...
-      （無ければ "なし"）
-    参照情報: |
-      - ドキュメント: `<path>` — <説明>
-      （ステップ2で読んだ参照、無ければ "なし"）
-    直近関連変更: |
-      - `<commit hash>` <subject> — <影響>
-      （ステップ3で確認した結果、無ければ "該当なし"）
-    実装プラン: |
-      1. （再分析後の最新版）
-    影響範囲: |
-      - `<path>` — <概略>
-  new_changelog_entry: Explore再分析で実装プランと影響範囲を更新  # 再分析で変えた点を1行
-  confirmation_items:  # 0件ならキーごと省略
-    - <ステップ3で抽出した未確認事項>
+mode: edit
+issue_number: <ステップ1で確定した番号>
+title: <更新後タイトル — 変えない場合はステップ1で取得した既存タイトルを再掲>
+sections:
+  概要: |
+    （1-3行、再分析結果を反映）
+  要件: |
+    - ...
+    （無ければ "なし"）
+  参照情報: |
+    - ドキュメント: `<path>` — <説明>
+    （ステップ2で読んだ参照、無ければ "なし"）
+  直近関連変更: |
+    - `<commit hash>` <subject> — <影響>
+    （ステップ3で確認した結果、無ければ "該当なし"）
+  実装プラン: |
+    1. （再分析後の最新版）
+  影響範囲: |
+    - `<path>` — <概略>
+new_changelog_entry: Explore再分析で実装プランと影響範囲を更新  # 再分析で変えた点を1行
+confirmation_items:  # 0件ならキーごと省略
+  - <ステップ3で抽出した未確認事項>
 ```
 
-Skill tool 呼び出しは `Skill(skill='post-issue-body', args='mode=edit issue_number=$0')`（必要なら plugin namespace 付きで `base-tools:post-issue-body`）。`post-issue-body` の責務範囲は以下のとおりで、本スキルから重複して実行しない。
+Skill tool 呼び出しは `Skill(skill='post-issue-body', args=<上記YAML文字列>)`（必要なら plugin namespace 付きで `base-tools:post-issue-body`）。args は改行を含む複数行文字列としてそのまま渡す。`post-issue-body` の責務範囲は以下のとおりで、本スキルから重複して実行しない。
 
 - `gh issue view --json body` で既存本文を再取得して変更ログを verbatim で再掲
 - 本文テンプレート・投稿前チェックリストに従って本文を組み立て・検証

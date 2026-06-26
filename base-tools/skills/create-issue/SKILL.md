@@ -87,36 +87,35 @@ Explore サブエージェントを起動し、以下を取得する。
 
 ## 3. post-issue-body スキルで Issue を作成
 
-ステップ1・2の分析結果を **以下の YAML ブロックの形でコンテキストに出力** したうえで、Skill tool で `post-issue-body` を起動する。`post-issue-body` はこの YAML を機械的に拾って入力として扱う規約になっている。
+ステップ1・2の分析結果を **以下の YAML ブロックの形でそのまま args として** Skill tool で `post-issue-body` を起動する。`post-issue-body` は args（`$ARGUMENTS`）を YAML として機械的にパースして入力として扱う規約になっている。
 
 ```yaml
-post-issue-body-input:
-  mode: create
-  title: <タスクの目的が分かる簡潔なタイトル>
-  sections:
-    概要: |
-      （1-3行）
-    要件: |
-      - ...
-      （無ければ "なし"）
-    参照情報: |
-      - ドキュメント: `<path>` — <説明>
-      （ステップ1で読んだ参照、無ければ "なし"）
-    直近関連変更: |
-      - `<commit hash>` <subject> — <影響>
-      （ステップ2で確認した結果、無ければ "該当なし"）
-    実装プラン: |
-      1. フェーズ1
-      2. フェーズ2
-    影響範囲: |
-      - `<path>` — <概略>
-  new_changelog_entry: 初版作成 — <タスクの概要を一言>
-  confirmation_items:  # 0件ならキーごと省略
-    - <ステップ2で抽出した未確認事項1>
-    - <ステップ2で抽出した未確認事項2>
+mode: create
+title: <タスクの目的が分かる簡潔なタイトル>
+sections:
+  概要: |
+    （1-3行）
+  要件: |
+    - ...
+    （無ければ "なし"）
+  参照情報: |
+    - ドキュメント: `<path>` — <説明>
+    （ステップ1で読んだ参照、無ければ "なし"）
+  直近関連変更: |
+    - `<commit hash>` <subject> — <影響>
+    （ステップ2で確認した結果、無ければ "該当なし"）
+  実装プラン: |
+    1. フェーズ1
+    2. フェーズ2
+  影響範囲: |
+    - `<path>` — <概略>
+new_changelog_entry: 初版作成 — <タスクの概要を一言>
+confirmation_items:  # 0件ならキーごと省略
+  - <ステップ2で抽出した未確認事項1>
+  - <ステップ2で抽出した未確認事項2>
 ```
 
-Skill tool 呼び出しは `Skill(skill='post-issue-body', args='mode=create')`（必要なら plugin namespace 付きで `base-tools:post-issue-body`）。本文整形・投稿前チェック・`gh issue create` の実行、確認事項があればコメント投稿までを `post-issue-body` が担う。完了後、Issue URL と確認事項コメントの有無が返ってくる。
+Skill tool 呼び出しは `Skill(skill='post-issue-body', args=<上記YAML文字列>)`（必要なら plugin namespace 付きで `base-tools:post-issue-body`）。args は改行を含む複数行文字列としてそのまま渡す。本文整形・投稿前チェック・`gh issue create` の実行、確認事項があればコメント投稿までを `post-issue-body` が担う。完了後、Issue URL と確認事項コメントの有無が返ってくる。
 
 `post-issue-body` の失敗（gh コマンド失敗・本文チェック不通過の解消不能等）はそのまま本スキルの中断条件となる。エラーメッセージを最終報告に含めて中断する。
 

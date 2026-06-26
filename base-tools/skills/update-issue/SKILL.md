@@ -85,35 +85,34 @@ Explore サブエージェントで未反映事項に基づき、コードベー
 
 ### 5. post-issue-body スキルで Issue を更新
 
-ステップ2〜4の分析結果を **以下の YAML ブロックの形でコンテキストに出力** したうえで、Skill tool で `post-issue-body` を起動する。`post-issue-body` はこの YAML を機械的に拾って入力として扱う規約になっている。
+ステップ2〜4の分析結果を **以下の YAML ブロックの形でそのまま args として** Skill tool で `post-issue-body` を起動する。`post-issue-body` は args（`$ARGUMENTS`）を YAML として機械的にパースして入力として扱う規約になっている。
 
 ```yaml
-post-issue-body-input:
-  mode: edit
-  issue_number: <ステップ2で確定した番号>
-  title: <更新後タイトル — 変えない場合はステップ2で取得した既存タイトルを再掲>
-  sections:
-    概要: |
-      （1-3行、コメント由来の更新を反映）
-    要件: |
-      - ...
-      （無ければ "なし"）
-    参照情報: |
-      - ドキュメント: `<path>` — <説明>
-      （無ければ "なし"）
-    直近関連変更: |
-      - `<commit hash>` <subject> — <影響>
-      （ステップ4で確認した結果、無ければ "該当なし"）
-    実装プラン: |
-      1. （コメント反映後の最新版）
-    影響範囲: |
-      - `<path>` — <概略>
-  new_changelog_entry: コメントの〇〇を要件に反映  # コメントから反映した内容が分かる粒度で1行
-  confirmation_items:  # 0件ならキーごと省略
-    - <ステップ4で新たに発生した未確認事項>
+mode: edit
+issue_number: <ステップ2で確定した番号>
+title: <更新後タイトル — 変えない場合はステップ2で取得した既存タイトルを再掲>
+sections:
+  概要: |
+    （1-3行、コメント由来の更新を反映）
+  要件: |
+    - ...
+    （無ければ "なし"）
+  参照情報: |
+    - ドキュメント: `<path>` — <説明>
+    （無ければ "なし"）
+  直近関連変更: |
+    - `<commit hash>` <subject> — <影響>
+    （ステップ4で確認した結果、無ければ "該当なし"）
+  実装プラン: |
+    1. （コメント反映後の最新版）
+  影響範囲: |
+    - `<path>` — <概略>
+new_changelog_entry: コメントの〇〇を要件に反映  # コメントから反映した内容が分かる粒度で1行
+confirmation_items:  # 0件ならキーごと省略
+  - <ステップ4で新たに発生した未確認事項>
 ```
 
-Skill tool 呼び出しは `Skill(skill='post-issue-body', args='mode=edit issue_number=<番号>')`（必要なら plugin namespace 付きで `base-tools:post-issue-body`）。`post-issue-body` の責務範囲は以下のとおりで、本スキルから重複して実行しない。
+Skill tool 呼び出しは `Skill(skill='post-issue-body', args=<上記YAML文字列>)`（必要なら plugin namespace 付きで `base-tools:post-issue-body`）。args は改行を含む複数行文字列としてそのまま渡す。`post-issue-body` の責務範囲は以下のとおりで、本スキルから重複して実行しない。
 
 - `gh issue view --json body` で既存本文を再取得して変更ログを verbatim で再掲
 - 本文テンプレート・投稿前チェックリストに従って本文を組み立て・検証
