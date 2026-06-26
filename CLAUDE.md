@@ -67,6 +67,7 @@ claude-code-marketplace/
    - `create-review-fix-plan`: GitHub PRの未解決レビューコメントとCIステータスを確認し、修正プランを作成
    - `resolve-pr-comments`: GitHub PRの未解決Review threadsを一括Resolve
    - `post-issue-body`: 実装準備用Issueの本文整形・投稿前チェック・`gh issue create/edit`実行を担う共有スキル。`create-issue` / `create-issue-from-issue-number` / `update-issue`からSkill tool経由で呼ばれる（フォーマット定義の単一ソース）
+   - `post-scope-issue-body`: スコープIssue（ラベル`cc-triage-scope`）の本文整形・投稿前チェック・`gh issue create`実行を担う共有スキル。`answer-issue-questions` / `breakdown-issues`からSkill tool経由で呼ばれる（スコープ用フォーマット定義の単一ソース）
 
 3. **Hooks** (`hooks/hooks.json`): イベントハンドラの設定
 
