@@ -20,7 +20,9 @@ memory: project
 ### Step 1: 入力の理解
 - 受け取った内容を精読し、目的・スコープ・制約を把握する
 - `docs/`配下のドキュメントファイルを読み込み、タスクに関連する仕様・背景を把握する
-- `design/`配下のPencilファイルをpencil MCPツールを使用して読み込み、デザイン面の仕様を把握する
+- `design/`配下のPencilファイル（`.pen`）は `inspect-pencil-node` スキルで対象Nodeの属性データとスクリーンショットを取得し、デザイン面の仕様を把握する（`.pen` は暗号化バイナリのため `Read`/`Grep` は使えない）
+
+このエージェントは要件整理とTODO分解が責務で、コードもデザインファイルも自分では編集しない。TODOリスト内に `.pen` の編集を伴うタスクが含まれる場合は、後述の出力フォーマットで担当エージェントとして必ず `pencil-design-updater` を指定する（手で `pencil` コマンドを直接組み立てたり、frontend-implementer や general-purpose-assistant 等で代用したりしない）。これは `edit-pencil-design` スキルに集約された運用ルール（同パス上書き・差分Node特定・`snapshots/` 出力・同時実行衝突回避）を `pencil-design-updater` 経由でのみ正しく履行できるため。
 
 ### Step 2: 要件定義
 以下の構造で要件を整理する：
@@ -42,6 +44,7 @@ memory: project
 - **依存先**: このタスクの前に完了が必要なタスクのID（なければ「なし」）
 - **優先度**: High / Medium / Low
 - **見積もり規模**: S / M / L / XL
+- **担当エージェント**: タスクが `.pen` の編集を伴う場合は **`pencil-design-updater`** を必ず指定する（`edit-pencil-design` スキル経由の運用ルール集約を逸脱しないため）。それ以外の通常タスクは省略可で、後段の `exec-issue` 等が `frontend-implementer` / `lightweight-assistant` / `general-purpose-assistant` から自動選定する
 
 ### Step 4: 依存関係の可視化
 - TODOの依存関係をテキストベースで表現する
@@ -76,10 +79,11 @@ memory: project
 
 # TODOリスト
 
-| ID | タスク名 | 参照情報 | 依存先 | 優先度 | 規模 |
-|----|----------|----------|--------|--------|------|
-| T-1 | ... | `docs/xxx.md`（該当セクション）, `design/xxx.pen`（該当画面） | なし | High | M |
-| T-2 | ... | `docs/yyy.md`（該当セクション） | T-1 | High | S |
+| ID | タスク名 | 参照情報 | 依存先 | 優先度 | 規模 | 担当エージェント |
+|----|----------|----------|--------|--------|------|------------------|
+| T-1 | ... | `docs/xxx.md`（該当セクション）, `design/xxx.pen`（該当画面） | なし | High | M | - |
+| T-2 | `design/xxx.pen` にプロフィール編集セクションを追加 | `design/xxx.pen`（プロフィール画面） | T-1 | High | S | `pencil-design-updater` |
+| T-3 | ... | `docs/yyy.md`（該当セクション） | T-2 | High | S | - |
 
 ---
 

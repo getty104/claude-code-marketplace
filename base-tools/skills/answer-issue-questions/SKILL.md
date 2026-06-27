@@ -38,9 +38,16 @@ gh issue view $0 --json comments --jq '.comments[-1]'
 確認事項の内容を理解するために、以下のドキュメントを読み込む。
 
 - `docs/`配下のドキュメントファイル
-- `design/`配下のPencilファイル（pencil MCPツールを使用して読み込む）
+- `design/`配下のPencilファイル（`.pen`）: `inspect-pencil-node` スキルで対象Nodeの属性データとスクリーンショットを取得して内容を確認する（`.pen` は暗号化バイナリのため `Read`/`Grep` は使えない）
 
 これらの情報をもとに、確認事項の背景・目的・関連する仕様を把握する。
+
+本スキルはコードを変更しない（コメント編集と派生Issue作成のみ）ため、確認事項への回答過程で `.pen` の編集が必要と判明した場合は本スキル内では編集せず、以下のいずれかで後続タスクへ委譲する：
+
+- 確認事項への回答内で「対応には `pencil-design-updater` エージェントによる `<対象 .pen>` の更新が必要」と明示する
+- 独立したタスクとして切り出すべき場合は、ステップ5の派生Issue作成（`post-scope-issue-body` 経由）で「`pencil-design-updater` エージェントで `<対象 .pen>` を更新する」旨を実装プラン/要件に含めて起票する
+
+`.pen` 編集は `pencil-design-updater` 専任で、手で `pencil` コマンドを直接組み立てたり frontend-implementer / general-purpose-assistant 等で代用したりしない（`edit-pencil-design` スキルに集約された運用ルール — 同パス上書き・差分Node特定・`snapshots/` 出力 — を逸脱させないため）。
 
 ### ステップ3: コードの分析
 

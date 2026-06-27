@@ -46,6 +46,7 @@ claude-code-marketplace/
    - `general-purpose-assistant`: 汎用的な問題解決とタスク実行
    - `task-requirement-analyzer`: タスク要件の分析と実装プラン策定
    - `pr-review-planner`: PRレビューコメントの分析と修正プラン作成
+   - `pencil-design-updater`: Pencilの`.pen`デザインファイルをAIプロンプトで更新・編集する。`edit-pencil-design`スキルを通して既存ファイルを上書き更新し、編集Nodeのスクリーンショットを`snapshots/`に残す
 
 2. **Skills** (`skills/*/SKILL.md`): 再利用可能なスキル（スラッシュコマンド含む）
 
@@ -62,6 +63,8 @@ claude-code-marketplace/
    **自動/手動呼び出し可能スキル**:
    - `check-library`: ライブラリの情報をMCPサーバーから取得
    - `create-pr`: GitHub PRを作成
+   - `edit-pencil-design`: Pencil CLI（`pencil`コマンド）のみで完結。エージェントモード（`pencil --in --out --prompt`、`--in`/`--out`は同パス）で既存`.pen`を上書き編集し、インタラクティブモード（`pencil interactive` をheredocで非対話実行）の `get_editor_state` で編集前後のNodeツリーを比較して「編集されたNode」を特定、`get_screenshot` / `export_nodes` でそのNodeだけを `.pen`と同階層の`snapshots/`にPNG出力する（MCP非依存）
+   - `inspect-pencil-node`: Pencil CLIのインタラクティブモード（`pencil interactive`をheredocで非対話実行、`save()`を呼ばないため読み取り専用）で `batch_get` を使い指定したNodeのデザインデータ（属性・構造）を取得し、`get_screenshot` でそのNodeの画像を `.pen`と同階層の`snapshots/`にPNG出力する。Node IDが未指定なら `get_editor_state` でツリーを取って候補を提示（MCP非依存、ファイル不変性を保証）
    - `high-quality-commit`: 適切なgitコミット戦略でコード変更をコミット
    - `read-github-issue`: GitHub Issueの内容を取得
    - `create-review-fix-plan`: GitHub PRの未解決レビューコメントとCIステータスを確認し、修正プランを作成
