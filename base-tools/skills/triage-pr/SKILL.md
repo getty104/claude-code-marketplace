@@ -1,6 +1,6 @@
 ---
 name: triage-pr
-description: Triage a single GitHub PR by PR number. Check out the PR's branch, resolve conflicts with the default branch, generate and evaluate a fix plan via create-review-fix-plan, then take action (add cc-fix-onetime label if fixes are needed, or merge the PR if it's ready).
+description: Triage a single GitHub PR by PR number. Check out the PR's branch, detect conflicts with the target branch via `gh pr status` (and label the PR with `cc-resolve-conflict` if any are found), generate and evaluate a fix plan via create-review-fix-plan, then take action (add cc-fix-onetime label if fixes are needed, or merge the PR if it's ready).
 argument-hint: "[pr-number]"
 hooks:
   Stop:
@@ -18,17 +18,18 @@ hooks:
 ## このスキルがやること・やらないこと
 
 **やること**:
-- ステップ1のコンフリクト解消（rebase + force-push）
+- ステップ1のコンフリクト検知（`gh pr status`で確認し、コンフリクトがあれば`cc-resolve-conflict`ラベル付与のみで終了）
 - ステップ2の修正プラン生成と評価（プランの分析・判定のみ）
 - ステップ3のラベル付与（`cc-fix-onetime`）またはマージ
 
 **絶対にやらないこと**:
-- **PRのコード修正・実装**: 修正プランで「対応すべき」と判定された項目があっても、このスキル内では一切コードを変更しない。修正の実行は`cc-fix-onetime`ラベル付与後に別スキル（fix-review-pointなど）の責務となる
+- **PRのコード修正・実装**: 修正プランで「対応すべき」と判定された項目があっても、このスキル内では一切コードを変更しない。修正の実行は`cc-fix-onetime`ラベル付与後に別スキル（`fix-review-point`など）の責務となる
+- **コンフリクト解消の直接実行**: rebase・コンフリクトファイルの編集・force-pushはこのスキルでは行わない。コンフリクトが検知されたら`cc-resolve-conflict`ラベルを付けて終了する。実際の解消は同ラベルをトリガーに別スキル（`resolve-pr-conflict`等）が担当する
 - **`create-review-fix-plan`が返したプランの実行**: プランはあくまで判定材料として読むだけで、Edit/Write/MultiEdit等の編集ツールでファイルを変更してはならない
-- **新規コミットの作成**: コンフリクト解消のrebaseによるforce-push以外で、コミット・push・commit amendを行わない
+- **新規コミットの作成**: コミット・push・commit amendを行わない
 - **テスト追加・Lint修正・リファクタリング**: 評価対象であっても、このスキルでは実行せずラベル付与にとどめる
 
-例外は **ステップ1のコンフリクト解消のみ**。それ以外のフェーズでファイル編集ツールを呼び出した場合、このスキルの責務を逸脱していると判断し、直ちに中断してラベル付与（ステップ3パターンA）へ切り替えること。
+ファイル編集ツール（`Edit` / `Write` / `MultiEdit` / `NotebookEdit`）はこのスキルの本文では一切呼び出さない。コードを触る作業はすべて「ラベル付与 → 別スキルが拾って実行」の流れに委ねる（ステップ1の`cc-resolve-conflict`、ステップ3パターンAの`cc-fix-onetime`）。
 
 # Instructions
 
@@ -39,27 +40,33 @@ hooks:
 
 以下のステップでPRのトリアージを行ってください。
 
-### ステップ1: コンフリクト確認と解消
+### ステップ1: コンフリクト検知とラベル付与
 
-PRのターゲットブランチ（`baseRefName`）とコンフリクトしていないか確認する。ターゲットブランチ名は`gh pr view $ARGUMENTS --json baseRefName -q .baseRefName`で動的に取得する。デフォルトブランチではなく、PRが実際にマージされる先のブランチを基準にすること（Epic PRなど、デフォルトブランチ以外をターゲットにするケースに対応するため）。
+`gh pr status` でPRのstatus（mergeable / コンフリクト有無）を取得し、コンフリクトがあれば `cc-resolve-conflict` ラベルを付けるだけで終了する。このスキルではrebase・force-push・コンフリクトファイル編集は一切行わない（実際の解消は同ラベルをトリガーに `resolve-pr-conflict` 等の別スキルが拾って実行する）。
 
-```
-TARGET_BRANCH=$(gh pr view $ARGUMENTS --json baseRefName -q .baseRefName) && git merge-tree $(git merge-base HEAD "origin/$TARGET_BRANCH") HEAD "origin/$TARGET_BRANCH"
-```
-
-コンフリクトが検出された場合は、rebaseしてコンフリクトを解消する。
-
-```
-git rebase "origin/$(gh pr view $ARGUMENTS --json baseRefName -q .baseRefName)"
+```bash
+gh pr status
 ```
 
-rebase中にコンフリクトが発生した場合は、コンフリクトを解消し、`git rebase --continue`で続行する。rebase完了後、force-pushする。
+`gh pr status` の出力から `#$ARGUMENTS` の行を特定し、コンフリクト表示（"Conflict" / 衝突マーク等）があるかを判定する。`gh pr status` は現在のユーザーに関連するPR（作成者・レビュアー・assignee）のみ表示するため、対象PRが出力に含まれない場合はフォールバックとして以下で同じ情報を取得する。
 
-```
-git push origin HEAD --force-with-lease
+```bash
+gh pr view $ARGUMENTS --json mergeable -q .mergeable
 ```
 
-コンフリクトの解消を行なった場合はステップ3には進まずこれで終了する。
+返却値 `MERGEABLE` / `CONFLICTING` / `UNKNOWN` のうち `CONFLICTING` のときコンフリクトありと判定する。`UNKNOWN` の場合はGitHub側で判定中のため、少し待ってから再取得する（数秒のスリープ後に1回だけリトライし、それでも `UNKNOWN` ならコンフリクトなし扱いで先に進む）。
+
+判定に応じて以下のように分岐する。
+
+- **コンフリクトあり（`CONFLICTING`）**: `cc-resolve-conflict` ラベルを付与してこのスキルを終了する。ステップ2・ステップ3には進まない（コンフリクト解消前に修正プラン評価やマージを行っても意味がないため）
+
+  ```bash
+  gh pr edit $ARGUMENTS --add-label "cc-resolve-conflict"
+  ```
+
+- **コンフリクトなし（`MERGEABLE` または `UNKNOWN` のリトライ後も判定不能）**: ステップ2に進む
+
+このステップで `Edit` / `Write` / `MultiEdit` / `NotebookEdit` などの編集ツールを呼び出さないこと。コンフリクト解消の実作業はすべて別スキル（`cc-resolve-conflict` ラベル経由）に委譲する。
 
 ### ステップ2: 修正プランの生成と評価（**判定のみ・実行禁止**）
 
@@ -152,11 +159,11 @@ gh issue close <issue番号> --reason "not planned"
   - 作業ディレクトリ: !`pwd`
 - `cc-triage-scope`ラベルがPRに付与されている場合、いかなる操作においても**絶対に削除しない**こと
 - `gh pr edit`で`--remove-label`を使用する際は`cc-triage-scope`を対象に含めないこと
-- **コード変更はステップ1のコンフリクト解消のみ許可**。ステップ2以降でEdit/Write/MultiEdit/NotebookEdit等の編集ツールを呼び出さないこと。プラン上で明らかな問題を見つけても、修正は別スキル（`cc-fix-onetime`ラベル経由のfix-review-point等）に委譲する
+- **このスキル本文では一切コードを変更しない**。コンフリクトの解消もこのスキルでは行わず、`cc-resolve-conflict`ラベルを付与して別スキル（`resolve-pr-conflict`等）に委ねる。ステップ2以降でEdit/Write/MultiEdit/NotebookEdit等の編集ツールを呼び出さないこと。プラン上で明らかな問題を見つけても、修正は別スキル（`cc-fix-onetime`ラベル経由の`fix-review-point`等）に委譲する
 
 ## 出力
 
 処理結果として以下を報告する：
 
-- **判定**: パターンA（修正が必要） / パターンB（マージ済み） / PRクローズ（関連IssueもClose） / エラー
-- **理由**: 判定の根拠（対応すべき項目の要約、マージ可能と判断した理由、またはクローズ理由と連動Closeした関連Issue番号）
+- **判定**: コンフリクト検知（`cc-resolve-conflict`ラベル付与） / パターンA（修正が必要・`cc-fix-onetime`ラベル付与） / パターンB（マージ済み） / PRクローズ（関連IssueもClose） / エラー
+- **理由**: 判定の根拠（コンフリクト検知時はターゲットブランチ名、対応すべき項目の要約、マージ可能と判断した理由、またはクローズ理由と連動Closeした関連Issue番号）

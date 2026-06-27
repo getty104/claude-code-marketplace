@@ -66,6 +66,7 @@ claude-code-marketplace/
    - `read-github-issue`: GitHub Issueの内容を取得
    - `create-review-fix-plan`: GitHub PRの未解決レビューコメントとCIステータスを確認し、修正プランを作成
    - `resolve-pr-comments`: GitHub PRの未解決Review threadsを一括Resolve
+   - `resolve-pr-conflict`: GitHub PRがターゲットブランチとコンフリクトしているか確認し、コンフリクトしていればrebaseで解消して`--force-with-lease`でpushする。`triage-pr`が付与する`cc-resolve-conflict`ラベルをトリガーに起動される想定で、単独実行にも対応
    - `post-issue-body`: 実装準備用Issueの本文整形・投稿前チェック・`gh issue create/edit`実行を担う共有スキル。`create-issue` / `create-issue-from-issue-number` / `update-issue`からSkill tool経由で呼ばれる（フォーマット定義の単一ソース）
    - `post-scope-issue-body`: スコープIssue（ラベル`cc-triage-scope`）の本文整形・投稿前チェック・`gh issue create`実行を担う共有スキル。`answer-issue-questions` / `breakdown-issues`からSkill tool経由で呼ばれる（スコープ用フォーマット定義の単一ソース）
 
