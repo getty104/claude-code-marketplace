@@ -41,16 +41,16 @@ hooks:
 
 ### ステップ1: コンフリクト確認と解消
 
-originのベースブランチとコンフリクトしていないか確認する。デフォルトブランチ名は`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`で動的に取得する。
+PRのターゲットブランチ（`baseRefName`）とコンフリクトしていないか確認する。ターゲットブランチ名は`gh pr view $ARGUMENTS --json baseRefName -q .baseRefName`で動的に取得する。デフォルトブランチではなく、PRが実際にマージされる先のブランチを基準にすること（Epic PRなど、デフォルトブランチ以外をターゲットにするケースに対応するため）。
 
 ```
-DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name) && git merge-tree $(git merge-base HEAD "origin/$DEFAULT_BRANCH") HEAD "origin/$DEFAULT_BRANCH"
+TARGET_BRANCH=$(gh pr view $ARGUMENTS --json baseRefName -q .baseRefName) && git merge-tree $(git merge-base HEAD "origin/$TARGET_BRANCH") HEAD "origin/$TARGET_BRANCH"
 ```
 
 コンフリクトが検出された場合は、rebaseしてコンフリクトを解消する。
 
 ```
-git rebase "origin/$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
+git rebase "origin/$(gh pr view $ARGUMENTS --json baseRefName -q .baseRefName)"
 ```
 
 rebase中にコンフリクトが発生した場合は、コンフリクトを解消し、`git rebase --continue`で続行する。rebase完了後、force-pushする。
