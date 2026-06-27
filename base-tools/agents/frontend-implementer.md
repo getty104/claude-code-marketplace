@@ -63,6 +63,6 @@ color: yellow
 
 - **shadcn MCP**: カスタムコンポーネントを構築する前に利用可能なshadcn/uiコンポーネントを確認する
 - **context7 MCP**: React、Next.js、Tailwind、その他のライブラリの最新ドキュメントを取得する
-- **playwright-cliスキル**: ブラウザを操作してレンダリング結果を視覚的に確認し、レイアウト問題をデバッグする（スクリーンショット取得、要素操作、ページテスト）
+- **claude-in-chrome MCP**: Chromeブラウザを操作してレンダリング結果を視覚的に確認し、レイアウト問題をデバッグする（`mcp__claude-in-chrome__*` ツール群で新規タブ作成・ナビゲーション・スクリーンショット取得・要素操作・コンソールログ確認などを行う。利用前に `claude-in-chrome` スキルでツール群をロードする）
 - **next-devtools MCP**: Next.js固有のパターンと最適化を活用する
 - **inspect-pencil-nodeスキル**: `.pen` ファイルから特定NodeのデザインデータをCLI経由で取得する際に使用する。`batch_get` で属性JSONを取り、`get_screenshot` で画像を `.pen` と同階層の `snapshots/` に出力。**Pencilで作られたデザインを実装の参照元にするときは必ずこのスキルを通す**（`.pen` は暗号化バイナリで `Read`/`Grep` 不可、Pencil MCP には依存せず `pencil` コマンドだけで完結）
