@@ -80,6 +80,93 @@ EOF
 
 **未確定な仕様**: 各シェル内ツール（`batch_get` / `get_screenshot` 等）の完全な引数仕様（出力先パラメータ名、scale、padding 等）は公式ドキュメントに記載がありません。実環境では `pencil interactive --help` でローカル実装を確認し、引数名が想定と異なる場合は調整してください。
 
+### heredoc / シェルの改行展開を正しく扱う（重要）
+
+`pencil interactive` に長いJSON引数（特に `batch_get({ patterns: [{ name: "..." }], parentId: "..." })` の Regex/動的注入）を heredoc で流すとき、シェルが文字列内の `\n` をどう解釈するかを把握していないと、JSON引数が壊れて Pencil 側がパースエラーをサイレントに無視し、**「結果が空でなんとなく取れていないように見える」「想定と違うNodeセットが返る」** といった失敗が起きます。本スキルは読み取り専用（`save()` を呼ばない）なのでファイルは書き換わりませんが、調査結果が壊れる事故は同じく成立するため、姉妹スキル `edit-pencil-design` と同じ改行ルールを必ず守ります。
+
+まずシェルごとの挙動を頭に入れます。
+
+| シェル / コマンド | `"a\nb"` をどう扱うか |
+|---|---|
+| zsh の組み込み `echo` | **`\n` を実改行に展開**（デフォルト挙動） |
+| bash の組み込み `echo` | デフォルトでは展開しない（`-e` で展開） |
+| `printf '%s' "..."` | 移植性ありで `\n` をそのまま2文字として出力 |
+| `print -r -- "..."` (zsh) | エスケープ解釈なし |
+| heredoc `<<'EOF'`（クォート付） | **本文をリテラルとして渡す**（`\n` は2文字のまま、変数展開も無し） |
+| heredoc `<<EOF`（クォート無） | 変数展開・コマンド置換は行うが、リテラル `\n` は2文字のまま |
+
+ポイントは「**JSON文字列リテラル内の `\n` は2文字（バックスラッシュ + n）のままPencilに届かなければならない**」ということ。シェル側で改行に化けるとJSONが構文エラーになります。
+
+#### 改行を確実に2文字のまま渡すための4原則
+
+1. **heredoc は最優先で `<<'EOF'`（シングルクォート付き）を使う**。変数展開もコマンド置換もエスケープ解釈も全部止まるので、本文に書いたJSONがそのままPencilに届きます。
+
+   ```bash
+   pencil interactive -i path/to/design.pen -o path/to/design.pen <<'EOF' > "${WORK_DIR}/nodes.json"
+   batch_get({ patterns: [{ name: "(?i)header|hero" }], readDepth: 2, searchDepth: 4 })
+   exit()
+   EOF
+   ```
+
+   `"(?i)header|hero"` のような Regex 文字列内のバックスラッシュも、`<<'EOF'` で囲んでいる限りそのままPencilに届きます。
+
+2. **動的な値を埋め込む必要があるなら `jq` でJSONエンコード**してから heredoc に差し込みます。`echo "{\"name\": \"$pattern\"}"` のような自前組み立ては絶対に避けます（`$pattern` に改行・ダブルクォート・バックスラッシュが含まれた瞬間に壊れる）。
+
+   ```bash
+   # ユーザー入力（例えば Regex パターン）を安全にJSONリテラルに変換
+   PATTERN_JSON=$(jq -Rs . <<< "(?i)header|hero|nav")
+   # → "(?i)header|hero|nav" という、正しくエスケープされたJSON文字列リテラルになる
+
+   IDS_JSON=$(jq -nc --argjson ids '["main-frame"]' '$ids')
+
+   pencil interactive -i path/to/design.pen -o path/to/design.pen <<EOF > "${WORK_DIR}/nodes.json"
+   batch_get({
+     patterns: [{ name: ${PATTERN_JSON} }],
+     parentId: ${IDS_JSON}[0],
+     readDepth: 2
+   })
+   exit()
+   EOF
+   ```
+
+   `<<EOF`（クォート無し）なら `${PATTERN_JSON}` が展開されますが、`jq -Rs .` が改行・特殊文字を **JSONエスケープ済みの文字列**（前後にダブルクォート付き）に変換してくれているので、heredoc内に貼り込んでも構文が壊れません。
+
+3. **`echo` を使わない、`printf '%s\n'` または `print -r --` を使う**。heredocを使わずに引数文字列を組み立てたい場面では、`echo` は禁止です。
+
+   ```bash
+   # NG (zshで\nが実改行に化けてJSONが壊れる)
+   ARGS=$(echo '{ "name": "line1\nline2" }')
+
+   # OK
+   ARGS=$(printf '%s' '{ "name": "line1\nline2" }')
+   # OK (zsh)
+   ARGS=$(print -r -- '{ "name": "line1\nline2" }')
+   ```
+
+4. **JSON値として改行が必要なら、エディタ上では `\n` の2文字で書く**。heredoc本文に「実際の改行を含むテキスト」を書きたい誘惑がありますが、JSON文字列リテラルは本来改行を含めず `\n` で表現するのが正しいJSONです。シェル経路で改行が化けないかを毎回意識する負担を消すためにも、リテラル `\n` で書く規約に統一します。
+
+   ```bash
+   pencil interactive -i path/to/design.pen -o path/to/design.pen <<'EOF'
+   batch_get({ patterns: [{ name: "line1\nline2" }] })
+   exit()
+   EOF
+   ```
+
+#### 失敗パターンを早く検出するためのセルフチェック
+
+heredoc を組み立てた直後、Pencilに流す前に「シェルが解釈した最終文字列」を `cat` で目視できると事故が減ります。
+
+```bash
+cat > "${WORK_DIR}/cmds.txt" <<'EOF'
+batch_get({ patterns: [{ name: "(?i)header" }] })
+exit()
+EOF
+cat "${WORK_DIR}/cmds.txt"   # JSON文字列リテラル内の \n やバックスラッシュが2文字のまま残っていることを目視
+pencil interactive -i path/to/design.pen -o path/to/design.pen < "${WORK_DIR}/cmds.txt" > "${WORK_DIR}/nodes.json"
+```
+
+`cat` 出力内に JSON文字列リテラル内のはずだった `\n` が **実改行になっていたら即失敗**です。`<<'EOF'`（シングルクォート付き）に修正してやり直します。読み取り専用とはいえ、壊れたクエリは「結果が空」「想定外のNodeセット」を引き起こし、後続の判断を狂わせます。
+
 ## ルール3: 同時実行で競合しない一時ディレクトリを毎回確保する
 
 `batch_get` の返却JSONなど中間ファイルの保存先を固定にすると、同じ `.pen` を別ターミナル・別プロセスから同時に inspect したときに上書き衝突が起きます。ワークフロー開始時に `mktemp -d` で実行ごとに一意なディレクトリを確保し、すべての中間ファイルをそこに置きます。
@@ -466,3 +553,8 @@ EOF
 - **`.pen` ファイルが見つからない**: パスを再確認
 - **大きいNodeで画像取得が遅い/タイムアウト**: `scale` を 1 に下げて再試行。それでも遅ければ親ではなく子Nodeに絞って取得
 - **誤ってファイルを書き換えてしまった気がする**: このスキルは `save()` を呼ばないので原則変わらない。心配な場合は git で diff 確認、もしくは事前に `git status` で対象ファイルが clean であることを確認しておく
+- **`batch_get` の結果が空 / 想定と違うNodeセットになる**: heredoc/シェルの改行展開でJSON引数（特に `patterns: [{ name: "..." }]` の Regex 文字列）が壊れた可能性が高い。ルール2の「heredoc / シェルの改行展開を正しく扱う」を再確認:
+  1. heredocを `<<EOF` で開いていないか → `<<'EOF'`（シングルクォート）に切り替える
+  2. JSON文字列内に `echo` で組み立てた値を埋め込んでいないか → `jq -Rs .` か `printf '%s' ...` に置き換える
+  3. heredoc内に「実改行を含むテキスト」を直接書いていないか → JSON文字列リテラルとして `\n` の2文字で書く
+  4. ルール2のセルフチェック手順で `cat "${WORK_DIR}/cmds.txt"` を流し、`\n` やバックスラッシュが2文字のまま残っていることを目視確認する
