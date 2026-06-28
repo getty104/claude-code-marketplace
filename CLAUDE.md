@@ -59,6 +59,7 @@ claude-code-marketplace/
    - `/create-issue-from-issue-number <Issue番号>`: 既存Issueのtitle/bodyを起点にコード再分析し、descriptionをリフレッシュ
    - `/triage-created-issue <Issue番号>`: `cc-issue-created`ラベルがあるIssueの確認事項を確認し、`cc-answer-issue-questions`または`cc-exec-issue`ラベルを付与（または不要ならクローズ）
    - `/create-epic-pr <Issue番号>`: `cc-epic-<Issue番号>`ブランチからデフォルトブランチへの集約PR（Epic PR）を作成。差分コミットログから本文を自動生成し、サブPR/サブIssueを整理して`gh pr create`で投稿（ラベルなし、`Closes #<Issue番号>`入り）
+   - `/update-coding-guidelines [期間] [関連Issue番号]`: 直近N日（デフォルト1日）のPRレビューコメントを横断収集し、繰り返し指摘されているかつ「対応すべき」と判断できる観点をリポジトリルートの`CODING_GUIDELINES.md`に集約・更新したうえで、`commit-push` + `create-pr`でPRを作成する。クラスタリングはClaudeに意味ベースで行わせ、ドキュメントサイズが膨らみすぎないよう既存ルールとの統合・圧縮も毎回適用する。デフォルトブランチ上で実行された場合は`chore/update-coding-guidelines-<日時>`feature branchを作成してから`commit-push`を呼び、第2引数のIssue番号があれば`create-pr`に渡してPR本文に`Closes #N`を入れる
 
    **自動/手動呼び出し可能スキル**:
    - `check-library`: ライブラリの情報をMCPサーバーから取得
