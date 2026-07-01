@@ -22,7 +22,20 @@ argument-hint: "<YAML input — see SKILL.md>"
 
 **親Project紐付けや複数Issueの作成順序・依存関係Issue番号の確定は呼び出し側の責務**で、本スキルは1回の呼び出しで1つのIssueを作成して URL を返すのみ。複数作成したい場合は呼び出し側がループする。
 
+> **呼び出し側への必須ルール**: 本スキルは `context: fork` のサブエージェントとして起動する場合でも、**絶対にバックグラウンド実行しないこと**。`Skill` / `Agent` ツール呼び出し時に `run_in_background: true` を指定してはならない。呼び出し元（`answer-issue-questions` / `breakdown-issues` — いずれも `claude-task-worker` から自動起動される可能性がある）は本スキルが同期的に `gh issue create` を完了し Issue URL を返したことを確認してから、次のIssue作成ループや後続ラベル遷移に進む設計であり、バックグラウンド化するとIssue作成完了前に制御が戻り、依存関係Issue番号が確定しないまま次のIssue作成に突入して破綻する。
+
 # Instructions
+
+## 実行モードの制約: サブエージェント・サブスキル・Bashをバックグラウンド実行しないこと
+
+本スキルは `context: fork` によりサブエージェントとして起動されるが、**内部で呼び出す `Bash` / `Skill` / `Agent` は絶対にバックグラウンド実行しないこと**。具体的には次を守る。
+
+- `Bash` ツール呼び出し時に `run_in_background: true` を指定しない。特に `gh issue create` は同期実行し、返却された Issue URL を確認してから完了報告する
+- シェルコマンド末尾に `&` を付けたり、`nohup` / `disown` / `setsid` などでプロセスをデタッチしたりしない
+- `Agent` / `Skill` ツールにも `run_in_background: true` を渡さない
+- `ScheduleWakeup` などで処理を後回しにすることも行わない
+
+**理由**: 本スキルは呼び出し元へ「作成された Issue の URL」を同期返却する契約になっており、バックグラウンド化すると `gh issue create` の完了前に制御が戻り、呼び出し元は依存関係 Issue 番号を確定できないまま次のスコープ Issue 作成に進んでしまう。結果として、Issue の依存グラフが壊れ、`claude-task-worker` の `create-issue` ワーカーが正しい順序で Issue を処理できなくなる。
 
 ## 入力（args 経由の YAML ブロック）
 

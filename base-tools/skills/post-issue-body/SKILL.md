@@ -21,7 +21,20 @@ argument-hint: "<YAML input — see SKILL.md>"
 
 このスキルは**ユーザーから直接呼び出される想定ではない**（親スキル内の「post-issue-bodyスキルで投稿する」というステップから Skill tool 経由で起動される）。直接呼ばれた場合は、入力 YAML が args に含まれていないことが多いので、親スキル（create-issue 等）の使用を促して終了する。
 
+> **呼び出し側への必須ルール**: 本スキルは `context: fork` のサブエージェントとして起動する場合でも、**絶対にバックグラウンド実行しないこと**。`Skill` / `Agent` ツール呼び出し時に `run_in_background: true` を指定してはならない。呼び出し元（`create-issue` / `create-issue-from-issue-number` / `update-issue` — いずれも `claude-task-worker` から自動起動される可能性がある）は本スキルが同期的に `gh issue create/edit` を完了し Issue URL を返したことを確認してから、ラベル遷移や後続の確認事項コメント投稿に進む設計であり、バックグラウンド化すると Issue 本文更新前に制御が戻ってしまい、後続処理が古い状態を前提に走って破綻する。
+
 # Instructions
+
+## 実行モードの制約: サブエージェント・サブスキル・Bashをバックグラウンド実行しないこと
+
+本スキルは `context: fork` によりサブエージェントとして起動されるが、**内部で呼び出す `Bash` / `Skill` / `Agent` は絶対にバックグラウンド実行しないこと**。具体的には次を守る。
+
+- `Bash` ツール呼び出し時に `run_in_background: true` を指定しない。特に `gh issue create` / `gh issue edit` / `gh issue comment` は同期実行し、返却された Issue URL や成功ステータスを確認してから完了報告する
+- シェルコマンド末尾に `&` を付けたり、`nohup` / `disown` / `setsid` などでプロセスをデタッチしたりしない
+- `Agent` / `Skill` ツールにも `run_in_background: true` を渡さない
+- `ScheduleWakeup` などで処理を後回しにすることも行わない
+
+**理由**: 本スキルは呼び出し元へ「Issue URL と投稿完了ステータス」を同期返却する契約になっており、バックグラウンド化すると `gh` 実行完了前に制御が戻り、呼び出し元（および `claude-task-worker`）は「Issue が投稿された」と誤認して次のラベル遷移や別ワーカー起動に進んでしまう。結果として、URL 未取得のまま報告されたり、Issue 本文が反映されていないのに `cc-issue-created` が付与される、といった状態壊れが発生する。
 
 ## 入力（args 経由の YAML ブロック）
 
