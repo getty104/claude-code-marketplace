@@ -2,6 +2,8 @@
 name: read-github-issue
 description: GitHub Issueの内容を取得し、並列実行可能な単位に分解します。
 context: fork
+model: sonnet
+effort: xhigh
 argument-hint: "[issue-number]"
 ---
 
