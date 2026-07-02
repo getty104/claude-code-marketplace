@@ -1,20 +1,16 @@
 # Check Library - Examples
 
-このドキュメントでは、check-libraryスキルの具体的な使用例を示します。
+check-libraryスキルの具体的な使用例。
 
-## 例1: Next.jsのApp Routerについて調べる
+## 例1: Next.js関連（App Router / Server Actionsなど）
 
-### シナリオ
-
-Next.js App Routerのレイアウト機能を使ってネストされたレイアウトを実装したい
-
-### 手順
+Next.jsのレイアウト機能やServer Actionsなどを調べるケース。
 
 ```bash
 # 1. Next.js DevTools MCPの初期化
 mcp__plugin_getty104_next-devtools__init
 
-# 2. App Routerのレイアウト機能について検索
+# 2. キーワードで検索
 mcp__plugin_getty104_next-devtools__nextjs_docs
   action: "search"
   query: "nested layouts app router"
@@ -25,40 +21,11 @@ mcp__plugin_getty104_next-devtools__nextjs_docs
   path: "app/building-your-application/routing/layouts-and-templates"
 ```
 
-### 期待される結果
+他のNext.jsトピックも同様に `action: "search"` の `query` を変えて検索する（例: `"server actions forms"`）。
 
-1. Next.jsの最新公式ドキュメントからレイアウト機能の情報を取得
-2. ネストされたレイアウトの実装方法を理解
-3. コード例と使用パターンを確認
+## 例2: shadcn/uiのコンポーネントを追加
 
-## 例2: Next.jsのServer Actionsを実装
-
-### シナリオ
-
-フォーム送信にServer Actionsを使用したい
-
-### 手順
-
-```bash
-# Next.js DevTools MCPでServer Actionsのドキュメントを検索
-mcp__plugin_getty104_next-devtools__nextjs_docs
-  action: "search"
-  query: "server actions forms"
-```
-
-### 期待される結果
-
-1. Server Actionsの基本的な使用方法を取得
-2. フォームとの統合方法を理解
-3. エラーハンドリングとバリデーションのパターンを確認
-
-## 例3: shadcn/uiのButtonコンポーネントを追加
-
-### シナリオ
-
-プロジェクトにshadcn/uiのButtonコンポーネントを追加したい
-
-### 手順
+shadcn/uiのButtonコンポーネントなどをプロジェクトに追加するケース。
 
 ```bash
 # shadcn MCPのツールを確認
@@ -69,163 +36,33 @@ ListMcpResourcesTool
 # (利用可能なツールに応じて適切なツールを使用)
 ```
 
-### 期待される結果
+インストール方法・バリエーション・カスタマイズオプションを取得できる。
 
-1. Buttonコンポーネントのインストール方法を取得
-2. コンポーネントのバリエーションと使用方法を理解
-3. カスタマイズオプションを確認
+## 例3: 一般ライブラリ（context7）
 
-## 例4: shadcn/uiのFormコンポーネントとReact Hook Formの統合
-
-### シナリオ
-
-shadcn/uiのFormコンポーネントとReact Hook Formを組み合わせて、フォームバリデーションを実装したい
-
-### 手順
-
-```bash
-# shadcn MCPでFormコンポーネントの情報を取得
-# (shadcn側のツールを使用)
-
-# Context7 MCPでReact Hook Formのドキュメントを取得
-mcp__plugin_getty104_context7__resolve-library-id
-  libraryName: "react-hook-form"
-
-mcp__plugin_getty104_context7__get-library-docs
-  context7CompatibleLibraryID: "/react-hook-form/react-hook-form"
-  topic: "integration validation"
-  page: 1
-```
-
-### 期待される結果
-
-1. shadcn/uiのFormコンポーネントの使用方法を理解
-2. React Hook Formとの統合パターンを確認
-3. バリデーションの実装方法を取得
-
-## 例5: React Queryでデータフェッチングを実装
-
-### シナリオ
-
-React Query (TanStack Query) を使用してAPIからデータを取得したい
-
-### 手順
+React Query (TanStack Query) の例。Zod / Tailwind CSS / Prisma / React Hook Form など他の一般ライブラリも同じ流れ（`resolve-library-id` → `get-library-docs`）で調べる。
 
 ```bash
 # 1. ライブラリIDを解決
 mcp__plugin_getty104_context7__resolve-library-id
   libraryName: "tanstack query"
 
-# 2. useQueryフックのドキュメントを取得
+# 2. トピックを指定してドキュメントを取得
 mcp__plugin_getty104_context7__get-library-docs
   context7CompatibleLibraryID: "/tanstack/query"
   topic: "useQuery"
   page: 1
 
-# 3. キャッシュ管理について追加で調べる
+# 3. 追加で調べたい場合はtopicを変えて再取得
 mcp__plugin_getty104_context7__get-library-docs
   context7CompatibleLibraryID: "/tanstack/query"
   topic: "cache invalidation"
   page: 1
 ```
 
-### 期待される結果
+## 例4: 複数ライブラリを組み合わせた実装
 
-1. React Queryの最新バージョンのドキュメントを取得
-2. useQueryフックの使用方法を理解
-3. キャッシュ管理のベストプラクティスを確認
-
-## 例6: Zodでスキーマバリデーションを実装
-
-### シナリオ
-
-Zodを使用してフォームデータのバリデーションスキーマを定義したい
-
-### 手順
-
-```bash
-# 1. ライブラリIDを解決
-mcp__plugin_getty104_context7__resolve-library-id
-  libraryName: "zod"
-
-# 2. スキーマ定義のドキュメントを取得
-mcp__plugin_getty104_context7__get-library-docs
-  context7CompatibleLibraryID: "/colinhacks/zod"
-  topic: "schema validation"
-  page: 1
-```
-
-### 期待される結果
-
-1. Zodの基本的なスキーマ定義方法を取得
-2. バリデーションルールの記述方法を理解
-3. TypeScript型推論の活用方法を確認
-
-## 例7: Tailwind CSSのカスタム設定
-
-### シナリオ
-
-Tailwind CSSでカスタムカラーとブレークポイントを設定したい
-
-### 手順
-
-```bash
-# 1. ライブラリIDを解決
-mcp__plugin_getty104_context7__resolve-library-id
-  libraryName: "tailwindcss"
-
-# 2. 設定方法のドキュメントを取得
-mcp__plugin_getty104_context7__get-library-docs
-  context7CompatibleLibraryID: "/tailwindlabs/tailwindcss"
-  topic: "configuration customization"
-  page: 1
-```
-
-### 期待される結果
-
-1. tailwind.config.jsの設定方法を取得
-2. カスタムカラーの定義方法を理解
-3. レスポンシブブレークポイントのカスタマイズ方法を確認
-
-## 例8: Prismaでデータベーススキーマを定義
-
-### シナリオ
-
-Prismaを使用してリレーショナルデータベースのスキーマを定義したい
-
-### 手順
-
-```bash
-# 1. ライブラリIDを解決
-mcp__plugin_getty104_context7__resolve-library-id
-  libraryName: "prisma"
-
-# 2. スキーマ定義のドキュメントを取得
-mcp__plugin_getty104_context7__get-library-docs
-  context7CompatibleLibraryID: "/prisma/prisma"
-  topic: "schema relations"
-  page: 1
-
-# 3. マイグレーションについて追加で調べる
-mcp__plugin_getty104_context7__get-library-docs
-  context7CompatibleLibraryID: "/prisma/prisma"
-  topic: "migrations"
-  page: 1
-```
-
-### 期待される結果
-
-1. Prismaスキーマの基本的な記述方法を取得
-2. リレーションの定義方法を理解
-3. マイグレーション管理のベストプラクティスを確認
-
-## 例9: 複数ライブラリを組み合わせた実装
-
-### シナリオ
-
-Next.js App Router + React Hook Form + Zod + Server Actionsでフォームを実装したい
-
-### 手順
+Next.js App Router + React Hook Form + Zod + Server Actionsでフォームを実装するケース。各ライブラリを担当するMCPを順に使い、統合パターンを調べる。
 
 ```bash
 # 1. Next.js Server Actionsのドキュメントを確認
@@ -252,33 +89,28 @@ mcp__plugin_getty104_context7__get-library-docs
   page: 1
 ```
 
-### 期待される結果
-
-1. 各ライブラリの最新ドキュメントを取得
-2. ライブラリ間の統合パターンを理解
-3. ベストプラクティスに基づいた実装方法を確認
+shadcn/uiコンポーネントと一般ライブラリの組み合わせ（例: shadcnのForm + React Hook Form）も同様に、shadcn MCPとcontext7を併用する。
 
 ## ライブラリ選択のポイント
 
-### 1. Next.js関連の判定基準
+### 1. Next.js関連の判定基準（Next.js DevTools MCPを使用）
 
-以下のキーワードが含まれる場合は、Next.js DevTools MCPを使用：
+以下のキーワードが含まれる場合:
 - Next.js、App Router、Pages Router
 - Server Components、Server Actions
 - Route Handlers、Middleware
 - next/image、next/link、next/font
 - generateStaticParams、generateMetadata
 
-### 2. shadcn/ui関連の判定基準
+### 2. shadcn/ui関連の判定基準（shadcn MCPを使用）
 
-以下のキーワードが含まれる場合は、shadcn MCPを使用：
+以下のキーワードが含まれる場合:
 - shadcn/ui、shadcn
 - Radix UI（shadcnのベース）
 - Button、Card、Dialog、Form などのshadcnコンポーネント名
 
-### 3. Context7使用の判定基準
+### 3. Context7使用の判定基準（上記以外の一般的なライブラリ）
 
-上記以外の一般的なライブラリ：
 - React Query (TanStack Query)
 - Zod、Yup などのバリデーションライブラリ
 - Tailwind CSS
@@ -290,7 +122,7 @@ mcp__plugin_getty104_context7__get-library-docs
 
 ### トピック指定のコツ
 
-Context7でドキュメントを取得する際は、具体的なトピックを指定すると効果的：
+Context7でドキュメントを取得する際は、具体的なトピックを指定すると効果的:
 
 ```bash
 # 悪い例：トピック指定なし
@@ -306,46 +138,16 @@ mcp__plugin_getty104_context7__get-library-docs
 
 ### ページネーション活用
 
-情報が不足している場合は、pageパラメータを変更して追加情報を取得：
-
-```bash
-# 1ページ目で基本情報を取得
-mcp__plugin_getty104_context7__get-library-docs
-  context7CompatibleLibraryID: "/prisma/prisma"
-  topic: "schema"
-  page: 1
-
-# 2ページ目で詳細情報を取得
-mcp__plugin_getty104_context7__get-library-docs
-  context7CompatibleLibraryID: "/prisma/prisma"
-  topic: "schema"
-  page: 2
-```
+情報が不足している場合は、`page`パラメータを増やして追加情報を取得する（`page: 1`で基本情報 → `page: 2`で詳細情報）。
 
 ### ライブラリ名解決のコツ
 
-`resolve-library-id`では、正式なライブラリ名だけでなく、一般的な呼び方でも検索可能：
-
-```bash
-# どちらでも動作
-mcp__plugin_getty104_context7__resolve-library-id
-  libraryName: "react-hook-form"
-
-mcp__plugin_getty104_context7__resolve-library-id
-  libraryName: "react hook form"
-
-mcp__plugin_getty104_context7__resolve-library-id
-  libraryName: "rhf"
-```
+`resolve-library-id`は正式なライブラリ名だけでなく、一般的な呼び方でも検索可能（例: `"react-hook-form"` / `"react hook form"` / `"rhf"` のいずれでも動作）。
 
 ## まとめ
-
-check-libraryスキルを効果的に使用するためのポイント：
 
 1. **ライブラリの種類を正しく判定**: Next.js、shadcn、その他を適切に区別
 2. **具体的なトピックを指定**: 必要な情報を効率的に取得
 3. **複数のMCPを組み合わせる**: 統合パターンを理解するために複数のライブラリを調査
 4. **最新情報を確認**: 各MCPは最新のドキュメントを提供
 5. **段階的に深掘り**: まず概要を取得し、必要に応じて詳細を調査
-
-これらの原則に従うことで、ライブラリの正しい使用方法を迅速に理解し、品質の高い実装が可能になります。

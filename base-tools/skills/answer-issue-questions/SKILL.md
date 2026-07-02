@@ -18,14 +18,14 @@ GitHub Issueの最後のコメントに含まれる確認事項を調査し、�
 
 ## 実行モードの制約: サブエージェント・サブスキル・Bashをバックグラウンド実行しないこと
 
-本スキルは `claude-task-worker` の `cc-answer-issue-questions` ラベルをトリガーに自動起動される想定である。ワーカーはスキルプロセスの同期完了を根拠に `cc-answer-issue-questions` の除去や `cc-update-issue` の付与を進めるため、**本スキル内部で呼び出す `Agent` / `Skill` / `Bash` を絶対にバックグラウンド実行しないこと**。具体的には次を守る。
+本スキルは `claude-task-worker` の `cc-answer-issue-questions` ラベルをトリガーに自動起動される想定で、ワーカーはスキルプロセスの同期完了を根拠に `cc-answer-issue-questions` の除去や `cc-update-issue` の付与を進める。**本スキル内部で呼び出す `Agent` / `Skill` / `Bash` を絶対にバックグラウンド実行しないこと**。
 
-- `Agent` / `Skill` ツール呼び出し時に `run_in_background: true` を指定しない。既定の同期実行（フォアグラウンド）で最終出力を受け取ってから次の処理に進む
+- `Agent` / `Skill` に `run_in_background: true` を指定しない。既定の同期実行（フォアグラウンド）で最終出力を受け取ってから次の処理に進む
 - 同一メッセージ内で複数の `Agent` / `Skill` を並列に投げるのは「並列実行」であって「バックグラウンド実行」ではないため許容される（各サブエージェントの完了はその場で同期的に待つ）
-- `Bash` ツール呼び出し時にも `run_in_background: true` を指定しない。シェルコマンド末尾に `&` を付けたり、`nohup` / `disown` / `setsid` などでプロセスをデタッチしたりしない
-- `ScheduleWakeup` などで処理を後回しにすることも行わない
+- `Bash` にも `run_in_background: true` を指定しない。コマンド末尾に `&` を付けたり、`nohup` / `disown` / `setsid` でデタッチしたりしない
+- `ScheduleWakeup` などで処理を後回しにしない
 
-**理由**: バックグラウンド化するとサブエージェント/子スキル/子プロセスの完了前に本スキルが終了してしまい、`claude-task-worker` は「スキルが正常完了した」と誤認して次のラベル遷移に進む。結果として、回答コメントの投稿前に `cc-update-issue` が付与されて `update-issue` ワーカーが未反映のIssueをそのまま update してしまうなど、Issue のライフサイクルが壊れる。ワーカー連携の同期性を担保するため、本スキルの内部処理はすべて同期実行で完結させる必要がある。
+**理由**: バックグラウンド化すると子処理の完了前に本スキルが終了し、ワーカーが「正常完了」と誤認して次のラベル遷移に進む。回答コメントの投稿前に `cc-update-issue` が付与されて `update-issue` ワーカーが未反映のIssueをそのまま update してしまうなど、Issue のライフサイクルが壊れるため、内部処理はすべて同期実行で完結させる。
 
 ## 入力
 
@@ -46,14 +46,12 @@ gh issue view $0 --json comments --jq '.comments[-1]'
 
 ### ステップ2: タスクの分析
 
-確認事項の内容を理解するために、以下のドキュメントを読み込む。
+確認事項の内容を理解するために、以下のドキュメントを読み込み、確認事項の背景・目的・関連する仕様を把握する。
 
 - `docs/`配下のドキュメントファイル
 - `design/`配下のPencilファイル（`.pen`）: `inspect-pencil-node` スキルで対象Nodeの属性データとスクリーンショットを取得して内容を確認する（`.pen` は暗号化バイナリのため `Read`/`Grep` は使えない）
 
-これらの情報をもとに、確認事項の背景・目的・関連する仕様を把握する。
-
-本スキルはコードを変更しない（コメント編集と派生Issue作成のみ）ため、確認事項への回答過程で `.pen` の編集が必要と判明した場合は本スキル内では編集せず、以下のいずれかで後続タスクへ委譲する：
+本スキルはコードを変更しない（コメント編集と派生Issue作成のみ）ため、回答過程で `.pen` の編集が必要と判明した場合は本スキル内では編集せず、以下のいずれかで後続タスクへ委譲する：
 
 - 確認事項への回答内で「対応には `pencil-design-updater` エージェントによる `<対象 .pen>` の更新が必要」と明示する
 - 独立したタスクとして切り出すべき場合は、ステップ5の派生Issue作成（`post-scope-issue-body` 経由）で「`pencil-design-updater` エージェントで `<対象 .pen>` を更新する」旨を実装プラン/要件に含めて起票する
@@ -119,9 +117,8 @@ gh api repos/{owner}/{repo}/issues/comments/<コメントID> -X PATCH -f body="<
 
 ### ステップ5: 関連Issueの作成（post-scope-issue-body へ委譲）
 
-確認事項・回答内容から、現在のIssueとは別に対応が必要なタスクがあると判断された場合は、追加でIssueを作成すること。
+確認事項・回答内容から、現在のIssueとは別に対応が必要なタスクがあると判断された場合は、追加でIssueを作成する。以下のいずれかに該当する場合が対象：
 
-以下のいずれかに該当する場合が対象：
 - 現在のIssueのスコープに含めるべきではない独立したタスクがある場合
 - 前提条件として先に対応すべき別タスクが見つかった場合
 - 関連するが別途管理すべきバグや改善点が発見された場合
@@ -130,13 +127,11 @@ gh api repos/{owner}/{repo}/issues/comments/<コメントID> -X PATCH -f body="<
 
 #### 責務の分担
 
-本文整形・投稿前チェック・`gh issue create` の実行は `post-scope-issue-body` スキルに委譲する。本文テンプレート・投稿前チェックリスト・heredoc 投稿コマンドはすべて `post-scope-issue-body` 側に集約されているため、本スキル内では再記述しない（重複を避けるため、また `post-scope-issue-body` との不整合を生まないため）。
-
-本スキルでは「派生タスクの抽出」と「`$0` と同じ親Issueへの sub-issue 紐付け」のみを担う。
+本文整形・投稿前チェック・`gh issue create` の実行は `post-scope-issue-body` スキルに委譲する。本文テンプレート・投稿前チェックリスト・heredoc 投稿コマンドはすべて `post-scope-issue-body` 側に集約されているため、本スキル内では再記述しない。本スキルでは「派生タスクの抽出」と「`$0` と同じ親Issueへの sub-issue 紐付け」のみを担う。
 
 #### 5-1. post-scope-issue-body スキルで Issue を作成
 
-該当するタスクごとに、以下の YAML ブロックを**そのまま args として** Skill tool で `post-scope-issue-body` を起動する。`post-scope-issue-body` は args（`$ARGUMENTS`）を YAML として機械的にパースして入力として扱う規約になっている。
+該当するタスクごとに、以下の YAML ブロックを**そのまま args として** Skill tool で `post-scope-issue-body` を起動する（`post-scope-issue-body` は args を YAML として機械的にパースする規約）。
 
 ```yaml
 mode: create
@@ -158,15 +153,15 @@ sections:
 # parent: <親Issue番号>                   # 通常は post-creation の --add-sub-issue で best-effort リンクするため未使用
 ```
 
-Skill tool 呼び出しは `Skill(skill='post-scope-issue-body', args=<上記YAML文字列>)`（必要なら plugin namespace 付きで `base-tools:post-scope-issue-body`）。args は改行を含む複数行文字列としてそのまま渡す。`post-scope-issue-body` が完了後、作成された Issue URL と Issue 番号を返す。
+Skill tool 呼び出しは `Skill(skill='post-scope-issue-body', args=<上記YAML文字列>)`（必要なら plugin namespace 付きで `base-tools:post-scope-issue-body`）。args は改行を含む複数行文字列としてそのまま渡す。完了後、作成された Issue URL と Issue 番号が返ってくる。
 
 `post-scope-issue-body` の失敗（gh コマンド失敗・本文チェック不通過の解消不能等）はそのまま本ステップの中断条件となる。エラーメッセージを最終報告に含めて中断する（既に作成済みのIssueは残すこと）。
 
 #### 5-2. `$0` と同じ親Issueに新Issueを sub-issue として紐付け
 
-`post-scope-issue-body` が返した新Issue URL を、`$0` の親Issueに sub-issue として紐付ける。これにより新Issueは `$0` の兄弟（同じ親の下にぶら下がる sub-issue）になる。`$0` に親Issueが無い場合はスキップする。
+`post-scope-issue-body` が返した新Issue URL を、`$0` の親Issueに sub-issue として紐付ける（新Issueは `$0` の兄弟になる）。`$0` に親Issueが無い場合はスキップする。
 
-親Issueの番号取得は GitHub REST `/parent` エンドポイントを `gh api` 経由で利用し、sub-issue 紐付け自体は `gh` CLI v2.94.0 以降で追加された `gh issue edit --add-sub-issue` ネイティブコマンドを使う（database ID の自前取得が不要）。`gh api` のパス中 `{owner}` / `{repo}` プレースホルダは現在のリポジトリで自動展開される。
+親Issueの番号取得は GitHub REST `/parent` エンドポイントを `gh api` 経由で利用し、sub-issue 紐付けは `gh` CLI v2.94.0 以降の `gh issue edit --add-sub-issue` ネイティブコマンドを使う（database ID の自前取得が不要）。`gh api` のパス中 `{owner}` / `{repo}` プレースホルダは現在のリポジトリで自動展開される。
 
 ```bash
 # 1. $0 の親Issueの番号を取得。
@@ -186,13 +181,13 @@ if [ -n "$PARENT_NUMBER" ]; then
 fi
 ```
 
-`gh issue edit --add-sub-issue` が失敗した場合（権限不足、`gh` バージョン要件未達、API 仕様変更等）は、新Issue自体は既に作成済みなので sub-issue 紐付けエラーを出力に残したうえで処理を続行する（Issue作成のロールバックはしない）。
+`gh issue edit --add-sub-issue` が失敗した場合（権限不足、`gh` バージョン要件未達、API 仕様変更等）は、新Issue自体は既に作成済みなので紐付けエラーを出力に残したうえで処理を続行する（Issue作成のロールバックはしない）。
 
-`$0` に親Issueが無い場合は `PARENT_NUMBER` が空文字列になるので紐付けをスキップする。新Issueは親Issueにぶら下げず単独の Issue として残る。最終報告に「親Issueが無いため sub-issue 紐付けはスキップ」と1行で記録するだけで良い。
+`$0` に親Issueが無い場合は `PARENT_NUMBER` が空文字列になるので紐付けをスキップし、新Issueは単独の Issue として残す。最終報告に「親Issueが無いため sub-issue 紐付けはスキップ」と1行で記録する。
 
 #### 5-3. 複数Issue作成時の順序
 
-複数の派生タスクを作成する場合は、`post-scope-issue-body` を1つずつ順に呼ぶ。依存関係のあるタスクは、依存先のIssue番号が確定してから（つまり依存先の `post-scope-issue-body` 呼び出しが完了してから）、その番号を `blocked_by:` リストに入れた YAML を args として渡して起動する。本文への `## 依存関係` セクション書き込みは廃止済み（GitHub ネイティブ relationships に移行）。
+複数の派生タスクを作成する場合は、`post-scope-issue-body` を1つずつ順に呼ぶ。依存関係のあるタスクは、依存先のIssue番号が確定してから（＝依存先の呼び出しが完了してから）、その番号を `blocked_by:` リストに入れた YAML を args として渡して起動する。本文への `## 依存関係` セクション書き込みは廃止済み（GitHub ネイティブ relationships に移行）。
 
 ## 重要な制約
 

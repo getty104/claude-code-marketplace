@@ -7,7 +7,7 @@ context: fork
 
 # Check Library
 
-このスキルは、ライブラリの情報を確認するために適切なMCPサーバーを選択して利用するためのスキルです。Next.js、shadcn/ui、その他のライブラリに対して、最新のドキュメントと使用方法を取得します。
+ライブラリの情報確認のために適切なMCPサーバーを選択して利用するスキル。Next.js、shadcn/ui、その他のライブラリの最新ドキュメントと使用方法を取得する。
 
 # Instructions
 
@@ -15,9 +15,7 @@ context: fork
 
 ## 実行ルール
 
-### 1. Next.js関連の場合
-
-Next.jsに関する質問や実装の場合は、next-devtools MCPを使用します。
+### 1. Next.js関連の場合 → next-devtools MCP
 
 ```
 # 最初に初期化（セッション開始時に1回のみ）
@@ -34,18 +32,14 @@ mcp__plugin_getty104_next-devtools__nextjs_docs
   path: "<ドキュメントパス>"
 ```
 
-### 2. shadcn関連の場合
-
-shadcn/uiに関する質問や実装の場合は、shadcn MCPを使用します。
+### 2. shadcn関連の場合 → shadcn MCP
 
 ```
 # shadcn MCPツールを使用
 # 利用可能なツールはListMcpResourcesToolで確認可能
 ```
 
-### 3. その他のライブラリの場合
-
-上記以外のライブラリについては、context7 MCPを使用します。
+### 3. その他のライブラリの場合 → context7 MCP
 
 ```
 # ライブラリIDの解決
@@ -65,6 +59,6 @@ examples.mdを参照してください。
 
 ## 注意事項
 
-- ライブラリ名が曖昧な場合は、ユーザーに確認してから適切なMCPを選択してください
-- Next.jsとshadcnは専用のMCPがあるため、優先的に使用してください
-- context7を使用する場合は、必ず `resolve-library-id` でライブラリIDを解決してから `get-library-docs` を使用してください
+- ライブラリ名が曖昧な場合は、ユーザーに確認してから適切なMCPを選択する
+- Next.jsとshadcnは専用のMCPがあるため優先的に使用する
+- context7を使用する場合は、必ず `resolve-library-id` でライブラリIDを解決してから `get-library-docs` を使用する
