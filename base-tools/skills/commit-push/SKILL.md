@@ -1,7 +1,8 @@
 ---
 name: commit-push
 description: コード変更を適切なgitコミット戦略でgit commitし、pushします。基本的には既存のgitコミットへのsquash戦略を採用し、必要に応じてブランチ全体のgitコミット履歴を再構成します。実装完了時やユーザーがgit commitを依頼した時に使用します。
-model: haiku
+model: sonnet
+effort: high
 context: fork
 ---
 
@@ -29,6 +30,23 @@ context: fork
 
 ## 実行ステップ
 
+### ステップ0: 作業ディレクトリの確認
+
+本スキルは単独でも他スキル（`exec-issue` / `fix-review-point` / `create-pr` 等）からの委譲でも起動される。いずれのケースでも、呼び出し元が用意した作業コンテキストを尊重するため、**現在地を変更しない・新規worktreeを作らない**ことを徹底する。
+
+```bash
+pwd
+```
+
+判定:
+
+- **`.claude/worktrees/` 配下にいる場合**: そのworktree内で全ての作業（`git status` / `git commit` / `git push` 等）を完結させる。`cd`でworktreeの外やリポジトリのルートに移動しない。新規worktreeも作らない
+- **`.claude/worktrees/` 配下にいない場合（リポジトリのルート・通常のクローン等）**: その場で作業する。`.claude/worktrees/` 配下への移動や新規worktree作成はしない
+
+**理由**: 本スキルは `context: fork` のサブエージェントとして起動される場合、親エージェントと同じ作業ディレクトリで実行される。親がworktree内で作業していたなら、そのworktreeでcommit/pushを完結させる必要がある。作業ディレクトリを勝手に動かすと、親の期待する変更対象と実際にcommitされる変更対象がずれ、リモートに誤った差分がpushされる。
+
+fail-safeとして、デフォルトブランチで直接commit / pushする事故を避けるため、ステップ1で現在ブランチがデフォルトブランチと一致しないことも確認する。
+
 ### ステップ1: ブランチとgitコミット履歴の確認
 
 ```bash
@@ -37,6 +55,8 @@ git log --oneline --graph "origin/$(gh repo view --json defaultBranchRef -q .def
 ```
 
 確認事項: 現在のブランチ名／デフォルトブランチから何gitコミット進んでいるか／各gitコミットの内容と粒度
+
+デフォルトブランチ上で作業している場合は、意図しないデフォルトブランチへのcommit / pushを防ぐため中断する（`gh repo view --json defaultBranchRef -q .defaultBranchRef.name` と `git rev-parse --abbrev-ref HEAD` が一致する場合）。デフォルトブランチ名の取得に失敗した場合も判定不能として中断する（fail-safe）。
 
 ### ステップ2: gitコミット戦略の判断
 
@@ -105,6 +125,8 @@ git push origin HEAD --force-with-lease
 1. **コメントは残さない**: コード内の説明コメントは削除する
 2. **原子的なgitコミット**: 各gitコミットは独立して意味を持たせる
 3. **一貫性**: プロジェクトの既存のgitコミットスタイルに従う
+4. **作業ディレクトリを動かさない**: ステップ0の判定に従い、worktree内で起動されたら外に出ず、worktree外で起動されたら勝手にworktreeへ移動しない。新規worktreeも作らない
+5. **デフォルトブランチでcommit / pushしない**: ステップ1で現在ブランチがデフォルトブランチと一致する場合は中断する
 
 ## 戦略選択のフローチャート
 

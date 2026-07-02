@@ -27,4 +27,4 @@ cat base-tools/.claude-plugin/plugin.json | jq -r '.version'
 
 ### ステップ4: コミットとプッシュ
 
-`/base-tools:commit-push` スキルを呼び出して、変更をコミット・プッシュする。
+変更を現在のブランチにコミット・プッシュする。
