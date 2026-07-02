@@ -20,7 +20,7 @@ argument-hint: "<YAML input — see SKILL.md>"
 
 **親Project紐付けや複数Issueの作成順序・依存関係Issue番号の確定は呼び出し側の責務**。本スキルは1回の呼び出しで1つのIssueを作成して URL を返すのみ。複数作成したい場合は呼び出し側がループする。
 
-> **呼び出し側への必須ルール**: 本スキルを**絶対にバックグラウンド実行しないこと**。`Skill` / `Agent` ツール呼び出し時に `run_in_background: true` を指定してはならない。呼び出し元（`answer-issue-questions` / `breakdown-issues` — いずれも `claude-task-worker` から自動起動される可能性がある）は、本スキルが同期的に `gh issue create` を完了し Issue URL を返したことを確認してから次のIssue作成ループや後続ラベル遷移に進む設計であり、バックグラウンド化すると依存関係Issue番号が確定しないまま次のIssue作成に突入して破綻する。
+> **呼び出し側への必須ルール**: 本スキルを**絶対にバックグラウンド実行しないこと**。`Agent` ツール経由で呼び出す場合は **既定が `run_in_background: true`（バックグラウンド）** のため、**必ず `run_in_background: false` を明示指定** すること。`Skill` ツール経由の場合も `run_in_background: true` を指定してはならない（既定は同期）。呼び出し元（`answer-issue-questions` / `breakdown-issues` — いずれも `claude-task-worker` から自動起動される可能性がある）は、本スキルが同期的に `gh issue create` を完了し Issue URL を返したことを確認してから次のIssue作成ループや後続ラベル遷移に進む設計であり、バックグラウンド化すると依存関係Issue番号が確定しないまま次のIssue作成に突入して破綻する。
 
 # Instructions
 
@@ -30,7 +30,8 @@ argument-hint: "<YAML input — see SKILL.md>"
 
 - `Bash` に `run_in_background: true` を指定しない。特に `gh issue create` は同期実行し、返却された Issue URL を確認してから完了報告する
 - コマンド末尾に `&` を付けたり、`nohup` / `disown` / `setsid` でデタッチしたりしない
-- `Agent` / `Skill` にも `run_in_background: true` を渡さない
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。指定を省略した場合はバックグラウンドで走り、本スキルが未完のまま終了する
+- `Skill` にも `run_in_background: true` を渡さない（既定は同期）
 - `ScheduleWakeup` などで処理を後回しにしない
 
 **理由**: 本スキルは「作成された Issue の URL」を同期返却する契約であり、バックグラウンド化すると呼び出し元が依存関係 Issue 番号を確定できないまま次のスコープ Issue 作成に進み、Issue の依存グラフが壊れて `claude-task-worker` の `create-issue` ワーカーが正しい順序で処理できなくなる。

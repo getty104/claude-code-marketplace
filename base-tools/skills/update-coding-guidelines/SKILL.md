@@ -31,6 +31,14 @@ allowed-tools: Bash(gh:*), Bash(git:*), Bash(jq:*), Bash(bash:*), Bash(pwd), Bas
 
 # Instructions
 
+## 実行モードの制約: サブエージェント・サブスキル・Bashをバックグラウンド実行しないこと
+
+本スキルは `commit-push` → `create-pr` の順に同期完了を保証しなければならない（push 未完了のまま PR 作成に進むとリモート未反映を前提に走って破綻する）。**本スキル内部で呼び出す `Agent` / `Skill` / `Bash` を絶対にバックグラウンド実行しないこと**。
+
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む
+- `Skill` に `run_in_background: true` を指定しない（既定は同期）。特に `commit-push` / `create-pr` は返却完了を確認してから次のステップに進む
+- `Bash` にも `run_in_background: true` を指定しない。`gh` や `git` は同期完了を stdout で確認してから次のステップへ進む
+
 !`pwd`
 
 ## フェーズ0: 事前チェック・引数パース

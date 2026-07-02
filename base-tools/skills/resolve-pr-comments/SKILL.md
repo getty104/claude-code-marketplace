@@ -9,7 +9,7 @@ context: fork
 
 GitHubのプルリクエスト（PR）における未解決のレビューコメントを一括でResolveします。
 
-> **呼び出し側への必須ルール**: 本スキルは `context: fork` のサブエージェントとして起動する場合でも、**絶対にバックグラウンド実行しないこと**。`Skill` / `Agent` ツール呼び出し時に `run_in_background: true` を指定してはならない。呼び出し元（`fix-review-point` — `claude-task-worker` の `cc-fix-onetime` から自動起動される）は本スキルが同期的に Resolve 処理を完了したことを確認してから、コールバックコメントや再レビュー依頼に進む設計であり、バックグラウンド化すると Resolve 未完了のまま `cc-fix-onetime` が外れて次のワーカー起動に進んでしまう。
+> **呼び出し側への必須ルール**: 本スキルは `context: fork` のサブエージェントとして起動する場合でも、**絶対にバックグラウンド実行しないこと**。`Agent` ツール経由で呼び出す場合は **既定が `run_in_background: true`（バックグラウンド）** のため、**必ず `run_in_background: false` を明示指定** すること。`Skill` ツール経由の場合も `run_in_background: true` を指定してはならない（既定は同期）。呼び出し元（`fix-review-point` — `claude-task-worker` の `cc-fix-onetime` から自動起動される）は本スキルが同期的に Resolve 処理を完了したことを確認してから、コールバックコメントや再レビュー依頼に進む設計であり、バックグラウンド化すると Resolve 未完了のまま `cc-fix-onetime` が外れて次のワーカー起動に進んでしまう。
 
 # Instructions
 

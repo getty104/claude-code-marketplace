@@ -23,7 +23,8 @@ Dependabot PRに対して、依存ライブラリのバージョンアップに�
 
 本スキルは `claude-task-worker` の `check-dependabot` ワーカー（`dependencies` ラベル）から自動起動される想定。ワーカーはスキルプロセスの同期完了を根拠に `cc-triage-scope` の付与や `triage-pr` への引き継ぎを進めるため、バックグラウンド化すると修正コミット未 push のまま `triage-pr` が古い差分でトリアージしたり、破壊的変更の調査未完でマージ判定に進む状態壊れが起きる。内部処理はすべて同期実行で完結させること。
 
-- `Agent` / `Skill` / `Bash` ツール呼び出し時に `run_in_background: true` を指定しない。特に `check-library` や Explore サブエージェントは調査結果を受け取ってから修正・push 判定に進み、テスト実行・Lint実行・`git push` は同期実行で完了を確認してから完了報告する
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。指定を省略した場合はバックグラウンドで走り、本スキルが未完のまま終了する
+- `Skill` / `Bash` ツール呼び出し時に `run_in_background: true` を指定しない（既定は同期）。特に `check-library` や Explore サブエージェントは調査結果を受け取ってから修正・push 判定に進み、テスト実行・Lint実行・`git push` は同期実行で完了を確認してから完了報告する
 - シェルコマンド末尾に `&` を付けない。`nohup` / `disown` / `setsid` でのデタッチ、`ScheduleWakeup` 等での後回しも禁止
 - 同一メッセージ内で複数の `Agent` / `Skill` を並列に投げるのは「並列実行」であって「バックグラウンド実行」ではないため許容される（各完了はその場で同期的に待つ）
 

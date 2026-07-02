@@ -2,7 +2,7 @@
 name: breakdown-issues
 description: "依頼された内容を要件とTODOに分解し、タスクごとにGitHub Issueを作成するスキル。タスクの整理・分解、複数Issueの一括作成、依存関係の明示が必要な場合に使用する。「この機能をIssueに分けて」「タスクを洗い出してIssueにして」「要件を整理してチケット化して」といったリクエストで発動する。"
 argument-hint: "[task-description]"
-model: opus
+model: sonnet
 effort: max
 ---
 
@@ -11,6 +11,15 @@ effort: max
 依頼された内容を requirement-todo-organizer エージェントで要件・TODOに分解し、各タスクをGitHub Issueとして作成するスキルです。
 
 # Instructions
+
+## 実行モードの制約: サブエージェント・サブスキル・Bashをバックグラウンド実行しないこと
+
+本スキルは Issue 番号の連鎖（親Epic → 子Issue の順で番号を確定させる）に依存するため、途中で制御が戻るとリンク切れ・依存関係欠落の Issue 群になる。**本スキル内部で呼び出す `Agent` / `Skill` / `Bash` を絶対にバックグラウンド実行しないこと**。
+
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。特に `requirement-todo-organizer` エージェント起動時は指定を省略しないこと
+- `Skill` に `run_in_background: true` を指定しない（既定は同期）。特に `post-scope-issue-body` は Issue 番号を返却するため、返却完了を確認してから次のTODOの `blocked_by:` を組み立てる
+- `Bash` にも `run_in_background: true` を指定しない。`gh issue create` などは同期完了を確認してから次のステップへ進む
+- 同一メッセージ内で複数の `Agent` / `Skill` を並列に投げるのは「並列実行」であって「バックグラウンド実行」ではないため許容される。ただし **`Agent` は個別に `run_in_background: false` を指定** すること
 
 ## 実行ステップ
 

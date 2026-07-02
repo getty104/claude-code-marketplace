@@ -16,6 +16,15 @@ argument-hint: "[task-description]"
 
 # Instructions
 
+## 実行モードの制約: サブエージェント・サブスキル・Bashをバックグラウンド実行しないこと
+
+本スキルは分析結果を `post-issue-body` に同期的に渡して Issue URL を受け取る契約になっており、途中でバックグラウンド化すると分析未完のまま次工程へ制御が戻り、Issue が未生成・空のまま完了扱いになる事故が起きる。**本スキル内部で呼び出す `Agent` / `Skill` / `Bash` を絶対にバックグラウンド実行しないこと**。
+
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。特に Explore サブエージェント起動時は指定を省略しないこと
+- `Skill` に `run_in_background: true` を指定しない（既定は同期）。特に `post-issue-body` / `inspect-pencil-node` は返却完了を確認してから次のフェーズに進む
+- `Bash` にも `run_in_background: true` を指定しない
+- 同一メッセージ内で複数の `Agent` / `Skill` を並列に投げるのは「並列実行」であって「バックグラウンド実行」ではないため許容される。ただし **`Agent` は個別に `run_in_background: false` を指定** すること
+
 ## フェーズ0: 事前チェック
 
 ### 0-1. 引数の妥当性確認

@@ -27,7 +27,8 @@ argument-hint: "[pr-number]"
 
 本スキルは `claude-task-worker` の `resolve-conflict` ワーカー（`cc-resolve-conflict` ラベル）から自動起動される想定。ワーカーはスキルプロセスの同期完了を根拠に `cc-resolve-conflict` の除去を進めるため、バックグラウンド化するとrebase未完了のまま `triage-pr` ワーカーが再度PRを拾ってコンフリクトを再検知する無限ループや、リモート未反映のまま次工程に進む状態壊れが起きる。内部処理はすべて同期実行で完結させること。
 
-- `Agent` / `Skill` / `Bash` ツール呼び出し時に `run_in_background: true` を指定しない。特に `git rebase` / `git push --force-with-lease` は同期実行で完了を確認してから完了報告する
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。指定を省略した場合はバックグラウンドで走り、本スキルが未完のまま終了する
+- `Skill` / `Bash` ツール呼び出し時に `run_in_background: true` を指定しない（既定は同期）。特に `git rebase` / `git push --force-with-lease` は同期実行で完了を確認してから完了報告する
 - シェルコマンド末尾に `&` を付けない。`nohup` / `disown` / `setsid` でのデタッチ、`ScheduleWakeup` 等での後回しも禁止
 - 同一メッセージ内で複数の `Agent` / `Skill` を並列に投げるのは「並列実行」であって「バックグラウンド実行」ではないため許容される（各完了はその場で同期的に待つ）
 

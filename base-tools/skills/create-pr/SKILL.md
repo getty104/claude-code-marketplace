@@ -3,6 +3,7 @@ name: create-pr
 description: GitHubでPull Request（PR）を作成します。PRのdescriptionには指定されたテンプレートを使用し、必要な情報を記載します。PR作成後、PRのURLを報告します。
 argument-hint: "[issue-number]"
 model: sonnet
+effort: high
 context: fork
 ---
 
@@ -10,7 +11,7 @@ context: fork
 
 GitHubでPull Request（PR）を作成するスキルです。呼び出された際には、Instructionsに従ってPRの作成を行ってください。
 
-> **呼び出し側への必須ルール**: 本スキルは `context: fork` のサブエージェントとして起動する場合でも、**絶対にバックグラウンド実行しないこと**（`Skill` / `Agent` に `run_in_background: true` を指定しない）。呼び出し元は本スキルが同期的にPRを作成しURLを返した後に後続処理（レビュアー通知・追加ラベル付与・関連Issueリンク等）に進める設計であり、バックグラウンド化するとPR URL未取得の状態を前提に後続処理が走って破綻する。他スキル（`exec-issue` / `create-epic-pr` 等）や上位エージェントから呼ぶ際もこの制約を守ること。
+> **呼び出し側への必須ルール**: 本スキルは `context: fork` のサブエージェントとして起動する場合でも、**絶対にバックグラウンド実行しないこと**。`Agent` ツール経由で呼び出す場合は **既定が `run_in_background: true`（バックグラウンド）** のため、**必ず `run_in_background: false` を明示指定** すること。`Skill` ツール経由の場合も `run_in_background: true` を指定してはならない（既定は同期）。呼び出し元は本スキルが同期的にPRを作成しURLを返した後に後続処理（レビュアー通知・追加ラベル付与・関連Issueリンク等）に進める設計であり、バックグラウンド化するとPR URL未取得の状態を前提に後続処理が走って破綻する。他スキル（`exec-issue` / `create-epic-pr` 等）や上位エージェントから呼ぶ際もこの制約を守ること。
 
 # Instructions
 
@@ -18,7 +19,8 @@ GitHubでPull Request（PR）を作成するスキルです。呼び出された
 
 本スキルは `context: fork` によりサブエージェントとして起動されるが、**内部で呼び出す Bash・Skill・Agent は絶対にバックグラウンド実行しないこと**。PR作成はGitHub側の状態を確定させる副作用のあるステップであり、完了前に制御が戻ると呼び出し元がPR URL未取得のまま後続処理を走らせ、レビュアー通知漏れ・Issueリンク欠落・重複PR作成などが発生するため。同期完了とURL返却の保証が本スキルの契約。
 
-- `Bash` / `Agent` / `Skill` ツール呼び出し時に `run_in_background: true` を指定しない。既定の同期実行でstdoutを受け取ってから次の処理に進む
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。指定を省略した場合はバックグラウンドで走り、本スキルが未完のまま終了する
+- `Bash` / `Skill` ツール呼び出し時に `run_in_background: true` を指定しない（既定は同期）。既定の同期実行でstdoutを受け取ってから次の処理に進む
 - シェルコマンド末尾に `&` を付けない。`nohup` / `disown` / `setsid` でのデタッチ、`ScheduleWakeup` 等での後回しも禁止
 - `gh pr create` は同期実行し、標準出力で返るPR URLを取得してから完了報告する。URL未取得のまま次のステップに進まないこと
 

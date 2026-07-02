@@ -19,7 +19,7 @@ argument-hint: "<YAML input — see SKILL.md>"
 
 ユーザーから直接呼び出される想定ではない（親スキル内のステップから Skill tool 経由で起動される）。直接呼ばれ、入力 YAML が args に無い場合は、親スキル（create-issue 等）の使用を促して終了する。
 
-> **呼び出し側への必須ルール**: 本スキルを**絶対にバックグラウンド実行しないこと**。`Skill` / `Agent` ツール呼び出し時に `run_in_background: true` を指定してはならない。呼び出し元（いずれも `claude-task-worker` から自動起動される可能性がある）は、本スキルが同期的に `gh issue create/edit` を完了し Issue URL を返したことを確認してからラベル遷移や後続の確認事項コメント投稿に進む設計であり、バックグラウンド化すると本文更新前に制御が戻り、後続処理が古い状態を前提に走って破綻する。
+> **呼び出し側への必須ルール**: 本スキルを**絶対にバックグラウンド実行しないこと**。`Agent` ツール経由で呼び出す場合は **既定が `run_in_background: true`（バックグラウンド）** のため、**必ず `run_in_background: false` を明示指定** すること。`Skill` ツール経由の場合も `run_in_background: true` を指定してはならない（既定は同期）。呼び出し元（いずれも `claude-task-worker` から自動起動される可能性がある）は、本スキルが同期的に `gh issue create/edit` を完了し Issue URL を返したことを確認してからラベル遷移や後続の確認事項コメント投稿に進む設計であり、バックグラウンド化すると本文更新前に制御が戻り、後続処理が古い状態を前提に走って破綻する。
 
 # Instructions
 
@@ -29,7 +29,8 @@ argument-hint: "<YAML input — see SKILL.md>"
 
 - `Bash` に `run_in_background: true` を指定しない。特に `gh issue create` / `gh issue edit` / `gh issue comment` は同期実行し、返却された Issue URL や成功ステータスを確認してから完了報告する
 - コマンド末尾に `&` を付けたり、`nohup` / `disown` / `setsid` でデタッチしたりしない
-- `Agent` / `Skill` にも `run_in_background: true` を渡さない
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。指定を省略した場合はバックグラウンドで走り、本スキルが未完のまま終了する
+- `Skill` にも `run_in_background: true` を渡さない（既定は同期）
 - `ScheduleWakeup` などで処理を後回しにしない
 
 **理由**: 本スキルは呼び出し元へ「Issue URL と投稿完了ステータス」を同期返却する契約であり、バックグラウンド化すると `gh` 完了前に制御が戻り、URL 未取得のまま報告される・本文未反映のまま `cc-issue-created` が付与される、といった状態壊れが起きる。

@@ -22,9 +22,22 @@ GitHub PR `$0` の未解決レビューコメントに対応し、修正のコ�
 
 本スキルは `claude-task-worker` の `cc-fix-onetime` ラベルをトリガーに自動起動される想定。ワーカーはスキルプロセスの同期完了を根拠に `cc-fix-onetime` の除去やコールバックコメント投稿を進めるため、バックグラウンド化すると修正コミット未 push のまま Resolve だけ済まされたり、レビュー未対応のまま fix ラベルが外れて放置される状態壊れが起きる。内部処理はすべて同期実行で完結させること。
 
-- `Agent` / `Skill` / `Bash` ツール呼び出し時に `run_in_background: true` を指定しない。特に `create-review-fix-plan` / `commit-push` / `resolve-pr-comments` / 並列修正エージェントは、返却された修正プラン・push完了・resolve完了を受け取ってから次のフェーズに進む
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。そのため呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。指定を省略した場合はバックグラウンドで走り、本スキルが未完のまま終了する
+- `Skill` ツール呼び出しには `run_in_background: true` を指定しない（既定は同期）。特に `create-review-fix-plan` / `commit-push` / `resolve-pr-comments` は、返却された修正プラン・push完了・resolve完了を受け取ってから次のフェーズに進む
+- `Bash` ツールにも `run_in_background: true` を指定しない。既定の同期実行で結果を受け取ってから次の処理に進む
 - シェルコマンド末尾に `&` を付けない。`nohup` / `disown` / `setsid` でのデタッチ、`ScheduleWakeup` 等での後回しも禁止
-- 同一メッセージ内で複数の `Agent` / `Skill` を並列に投げるのは「並列実行」であって「バックグラウンド実行」ではないため許容される（各完了はその場で同期的に待つ）
+- 同一メッセージ内で複数の `Agent` / `Skill` を並列に投げるのは「並列実行」であって「バックグラウンド実行」ではないため許容される。ただし **`Agent` は個別に `run_in_background: false` を指定** し、その場で同期的に完了を待つ
+
+**理由**: `Agent` ツールの既定が background であることを見落として `run_in_background` を省略すると、修正コミット未 push のままスキルプロセスが終了し、ワーカーが「正常完了」と誤認して `cc-fix-onetime` が外れる事故が確実に起きる。
+
+## 実行モードの制約: TaskCreate は1コール1タスクで発火する
+
+進捗管理などで `TaskCreate` を使う場合、以下のルールを厳守すること。違反するとバリデーションエラー（`missing subject/description` や `unexpected parameter tasks`）で中断し、フェーズが未完のまま外側のワーカーが「正常完了」と誤認して `cc-fix-onetime` が外れてしまう。
+
+- **1コール = 1タスク**。`tasks` / `todos` などの配列パラメータは存在しない。複数タスクを登録したい場合は、同一メッセージ内で `TaskCreate` を複数回発行する（並列可）
+- 必須パラメータは `subject`（短いタイトル）と `description`（何をするか）の2つ。いずれもトップレベル文字列として渡し、ネストしたオブジェクトの中に入れない
+- `TaskCreate` は deferred tool のため、セッション開始時点ではスキーマがプロンプトに含まれない。使用前に必ず `ToolSearch(query: "select:TaskCreate")` で1回だけスキーマをロードする。ロードせずに呼ぶと typed parameters が文字列化されてクライアント側でも弾かれる
+- そもそも本スキルは TaskCreate を必須としない。フェーズ1〜6の「並列/逐次グループ」内部管理で十分な場合は、TaskCreate を使わず直接次フェーズへ進んでよい
 
 ## フェーズ0: 事前チェックとPRチェックアウト
 

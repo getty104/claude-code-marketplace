@@ -1,10 +1,9 @@
 ---
 name: read-github-issue
 description: GitHub Issueの内容を取得し、並列実行可能な単位に分解します。
-context: fork
-model: sonnet
-effort: xhigh
 argument-hint: "[issue-number]"
+model: sonnet
+effort: high
 ---
 
 # Read GitHub Issue
@@ -12,7 +11,7 @@ argument-hint: "[issue-number]"
 GitHub Issue `$1` を読み取り、後続フェーズが機械的に扱える形へ構造化して返すスキル。
 推測で穴埋めせず、Issueに書かれている事実と、書かれていない不確実性を分けて返すこと。
 
-> **呼び出し側への必須ルール**: 本スキルを**絶対にバックグラウンド実行しないこと**。`Skill` / `Agent` ツール呼び出し時に `run_in_background: true` を指定してはならない。呼び出し元は本スキルの構造化サマリ（手順3の返却フォーマット）を同期的に受け取って初めて後続のタスク実行・並列実装フェーズに進める設計であり、バックグラウンド化すると分解結果を待たずに制御が戻って後続処理が空振りする。他スキル（`create-issue` / `create-plan` / `exec-issue` 等）や上位エージェントから呼ぶ際もこの制約を守ること。
+> **呼び出し側への必須ルール**: 本スキルを**絶対にバックグラウンド実行しないこと**。`Agent` ツール経由で呼び出す場合は **既定が `run_in_background: true`（バックグラウンド）** のため、**必ず `run_in_background: false` を明示指定** すること。`Skill` ツール経由の場合も `run_in_background: true` を指定してはならない（既定は同期）。呼び出し元は本スキルの構造化サマリ（手順3の返却フォーマット）を同期的に受け取って初めて後続のタスク実行・並列実装フェーズに進める設計であり、バックグラウンド化すると分解結果を待たずに制御が戻って後続処理が空振りする。他スキル（`create-issue` / `create-plan` / `exec-issue` 等）や上位エージェントから呼ぶ際もこの制約を守ること。
 
 # Instructions
 
@@ -22,7 +21,8 @@ GitHub Issue `$1` を読み取り、後続フェーズが機械的に扱える�
 
 - Bash に `run_in_background: true` を指定しない。既定の同期実行（フォアグラウンド）でstdoutを受け取ってから次の処理に進む
 - コマンド末尾に `&` を付けない。`nohup` / `disown` / `setsid` 等でのデタッチも禁止
-- `Agent` / `Skill` にも `run_in_background: true` を渡さない。手順2で並列起動する `Explore` サブエージェントも、同一メッセージ内で並列に投げるだけであり「バックグラウンド」ではない
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。指定を省略した場合はバックグラウンドで走り、本スキルが未完のまま終了する。手順2で並列起動する `Explore` サブエージェントも、同一メッセージ内で並列に投げるだけであり「バックグラウンド」ではない（各 `Agent` 呼び出しは `run_in_background: false` で個別発火する）
+- `Skill` にも `run_in_background: true` を渡さない（既定は同期）
 - ScheduleWakeup 等で処理を後回しにしない。呼び出し元は本スキルの返却値を同期的に受け取る前提で待機している
 
 **理由**: 本スキルは「Issueを分解した構造化サマリ」を同期返却する契約であり、バックグラウンド化するとサマリ生成前に制御が戻り、後続のタスク実行が空振りするため。

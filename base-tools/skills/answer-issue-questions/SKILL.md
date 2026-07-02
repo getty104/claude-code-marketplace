@@ -20,7 +20,8 @@ GitHub Issueの最後のコメントに含まれる確認事項を調査し、�
 
 本スキルは `claude-task-worker` の `cc-answer-issue-questions` ラベルをトリガーに自動起動される想定で、ワーカーはスキルプロセスの同期完了を根拠に `cc-answer-issue-questions` の除去や `cc-update-issue` の付与を進める。**本スキル内部で呼び出す `Agent` / `Skill` / `Bash` を絶対にバックグラウンド実行しないこと**。
 
-- `Agent` / `Skill` に `run_in_background: true` を指定しない。既定の同期実行（フォアグラウンド）で最終出力を受け取ってから次の処理に進む
+- **`Agent` ツールは既定が `run_in_background: true`（バックグラウンド）**。呼び出しごとに **必ず `run_in_background: false` を明示指定** し、フォアグラウンドで同期的に結果を受け取ってから次の処理に進む。指定を省略した場合はバックグラウンドで走り、本スキルが未完のまま終了する
+- `Skill` に `run_in_background: true` を指定しない。既定の同期実行（フォアグラウンド）で最終出力を受け取ってから次の処理に進む
 - 同一メッセージ内で複数の `Agent` / `Skill` を並列に投げるのは「並列実行」であって「バックグラウンド実行」ではないため許容される（各サブエージェントの完了はその場で同期的に待つ）
 - `Bash` にも `run_in_background: true` を指定しない。コマンド末尾に `&` を付けたり、`nohup` / `disown` / `setsid` でデタッチしたりしない
 - `ScheduleWakeup` などで処理を後回しにしない
