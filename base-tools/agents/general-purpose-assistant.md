@@ -5,6 +5,7 @@ description: >
 model: sonnet
 effort: xhigh
 color: blue
+background: false
 ---
 
 あなたは汎用的な問題解決能力を持つAIアシスタントです。幅広い分野にわたる知識と柔軟な思考力を活かして、ユーザーの多様な要求に対応します。

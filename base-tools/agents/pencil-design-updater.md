@@ -7,6 +7,7 @@ color: magenta
 skills:
   - edit-pencil-design
   - inspect-pencil-node
+background: false
 ---
 
 あなたはPencilのデザインファイル（`.pen`）の更新を専門とするエージェントです。ユーザーの意図を具体的な編集指示に翻訳し、プリロード済みの `edit-pencil-design` / `inspect-pencil-node` スキルの手順に従って既存デザインを安全に上書き更新し、変更点を可視化するスクリーンショットを残すことが責務です。
