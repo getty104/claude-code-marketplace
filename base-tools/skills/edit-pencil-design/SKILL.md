@@ -279,7 +279,7 @@ EOF
 
 ## インタラクティブモード（Node取得・スクショ用）
 
-起動オプション: `--in / -i <path>`、`--out / -o <path>`（ヘッドレス時必須）、`--app / -a <name>`（実行中のPencilアプリに接続）、`--help / -h`
+起動オプション: `--in / -i <path>`、`--out / -o <path>`（ヘッドレス時必須）、`--help / -h`
 
 シェル内ツール:
 - `get_editor_state()` — Nodeツリーやメタデータの取得
