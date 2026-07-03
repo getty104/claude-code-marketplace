@@ -81,12 +81,26 @@ CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 PRのターゲットブランチを`baseRefName`から動的に取得する。デフォルトブランチではなく、PRが実際にマージされる先のブランチを基準にすること（Epic PRなど、デフォルトブランチ以外をターゲットにするケースに対応するため）。
 
+コンフリクト有無の一次判定には、呼び出し元の`triage-pr`と同じGitHubの`mergeable`フィールドを使う。判定基準を呼び出し元と揃えないと、「`triage-pr`はコンフリクトありと判定したのに本スキルはなしと判定して何もせず終了する」という食い違いが起き、`cc-resolve-conflict`ラベルの付与と除去が繰り返される無限ループになる。
+
 ```bash
 TARGET_BRANCH=$(gh pr view $ARGUMENTS --json baseRefName -q .baseRefName)
-git merge-tree $(git merge-base HEAD "origin/$TARGET_BRANCH") HEAD "origin/$TARGET_BRANCH"
+MERGEABLE=$(gh pr view $ARGUMENTS --json mergeable -q .mergeable)
 ```
 
-判定基準: `git merge-tree`の標準出力にコンフリクトマーカー（`<<<<<<<` / `=======` / `>>>>>>>`）が含まれていれば「コンフリクトあり」、含まれていなければ「コンフリクトなし」。
+判定基準:
+
+- **`CONFLICTING`**: コンフリクトありと判定し、ステップ3に進む
+- **`MERGEABLE`**: コンフリクトなしと判定する
+- **`UNKNOWN`**: GitHub側で判定中のため、数秒スリープして1回だけ再取得する。それでも`UNKNOWN`の場合は、ローカルで実マージ相当の判定にフォールバックする
+
+  ```bash
+  git merge-tree --write-tree "origin/$TARGET_BRANCH" HEAD
+  ```
+
+  終了コードが`1`なら「コンフリクトあり」、`0`なら「コンフリクトなし」。`--write-tree`モードは実際のマージと同じmerge-ortエンジンで判定するため、コンテンツ競合だけでなくrename・modify/delete・バイナリ・ファイルモード変更のコンフリクトも検知できる（Git 2.38以上が必要。コマンド自体が失敗して判定できない場合は「コンフリクトあり」側に倒してステップ3に進む）
+
+**禁止**: 旧形式の`git merge-tree <base-tree> <branch1> <branch2>`（trivial mergeモード）の出力にコンフリクトマーカー（`<<<<<<<`等）が含まれるかで判定してはならない。旧形式はrename検知を行わず、modify/delete・バイナリ・モード変更などのコンフリクトではマーカーを出力しないため、GitHubが`CONFLICTING`と判定しているPRを「コンフリクトなし」と誤判定し、`triage-pr`との間で無限ループを引き起こす。
 
 ### コンフリクトなしの場合
 
@@ -103,6 +117,8 @@ git merge-tree $(git merge-base HEAD "origin/$TARGET_BRANCH") HEAD "origin/$TARG
 ```bash
 git rebase "origin/$TARGET_BRANCH"
 ```
+
+rebaseがコンフリクトなしで完走した場合も、そのままステップ4のpushに進む（GitHubの`CONFLICTING`判定はマージ試行に基づくため、rebase自体はクリーンに完走することがある。ここでpushせず終了するとリモートが変わらず、`triage-pr`が再度コンフリクトを検知してループする）。
 
 rebase中にコンフリクトが発生した場合は、`git status`でコンフリクト中のファイルを特定し、それぞれを **両者の変更意図を尊重する形** で解消する。片方の変更を機械的に捨てると、PR側のレビュー意図かターゲットブランチ側の最新仕様のどちらかを取りこぼすため、必要に応じて以下を行ってから解消する。
 
@@ -137,7 +153,7 @@ git push origin HEAD --force-with-lease
 
 - **判定**: `no-conflict` / `resolved-and-pushed` / `aborted` のいずれか
 - **詳細**:
-  - `no-conflict`: ターゲットブランチ名
+  - `no-conflict`: ターゲットブランチ名と判定根拠（`mergeable`の値、またはフォールバック時は`git merge-tree --write-tree`の結果）
   - `resolved-and-pushed`: 解消したファイル一覧と各ファイルの解消方針の要点
   - `aborted`: 中断理由（PRがOPENでない / checkout失敗 / コンフリクト解消困難 / push失敗 など）と、その時点のgitの状態（`git status`の要約）
 
