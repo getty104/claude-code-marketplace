@@ -1,6 +1,6 @@
 ---
 name: update-issue
-description: Update an existing GitHub Issue's description based on the issue number. Reads all issue comments and reflects any items not yet captured in the description.
+description: Update an existing GitHub Issue's description based on the issue number. Reads all issue comments and reflects any items not yet captured in the description. After refreshing the description, reviews it for remaining ambiguities or unclear requirements and posts any open questions as a follow-up 確認事項 comment.
 argument-hint: "[Issue番号]"
 hooks:
   Stop:
@@ -109,9 +109,26 @@ Explore サブエージェントで未反映事項に基づき、コードベー
 - 直近 commit に大規模リファクタ・共通ヘルパー追加などの大きな変更が含まれる場合や、未マージの関連 PR がある場合は、その内容を `post-issue-body` に渡す「直近関連変更」セクション（必要に応じて「参照情報」にも）に必ず記載し、実装プランが既存実装と重複していないか検証する
 - git 履歴のない新規機能要求など確認が困難なケースでは「該当なし」と記載してスキップしてよい
 
+### 4.5. 反映後 description の曖昧点レビュー（確認事項の補強）
+
+ステップ3〜4で反映内容（更新後の `概要` `要件` `実装プラン` など）が固まったら、その内容を「実装者がそのまま着手できる解像度になっているか」という観点で読み直す。コメントを反映してもなお、**要件が曖昧・前提が未確定・複数の解釈が残る箇所**があれば、それを確認事項として洗い出す。
+
+descriptionは実装者や後続スキル（`exec-issue` など）が着手時の唯一の入力になるため、曖昧なまま更新すると気づかれずそのまま手戻りになる。反映で埋めきれなかった不明点をその場で質問に変換してコメントに残しておけば、着手前に人が答えられる状態を作れる。これがこのステップの狙いで、descriptionを「更新して終わり」にせず「更新した内容の穴を突く」ことに価値がある。
+
+洗い出す観点の例:
+
+- 要件の受け入れ条件（どうなれば完了と言えるか）が本文から判断できない
+- コメント同士、またはコメントと既存本文で結論が食い違い、どちらを採るか確定できない
+- 実装プランの分岐（対象範囲・非対応ケース・既存挙動との整合）が仕様として未確定
+- ステップ4のコード分析で前提と既存実装が食い違い、意図を確認しないと進められない
+
+ここで洗い出した確認事項は、ステップ4で既に把握していた未確認事項と**マージして重複を除いたうえで**、ステップ5で `post-issue-body` の `confirmation_items` としてまとめて渡す（`post-issue-body` がそれらを1つの `## 確認事項` コメントとして投稿する）。コメントを二重に投稿しないよう、確認事項の投稿口はこの `confirmation_items` に一本化する。
+
+曖昧点が本当に無ければ `confirmation_items` は省略してよい（穴埋めのために無理に質問を作らない — 中身の薄い確認事項はノイズになり、かえって着手を遅らせる）。なお、途中でユーザーへ直接質問せず必ずコメントに残す方針は本スキル全体で共通（ステップ4の注記と同じ）。
+
 ### 5. post-issue-body スキルで Issue を更新
 
-ステップ2〜4の分析結果を **以下の YAML ブロックの形でそのまま args として** Skill tool で `post-issue-body` を起動する（`post-issue-body` は args を YAML として機械的にパースする規約）。
+ステップ2〜4.5の分析結果を **以下の YAML ブロックの形でそのまま args として** Skill tool で `post-issue-body` を起動する（`post-issue-body` は args を YAML として機械的にパースする規約）。
 
 ```yaml
 mode: edit
@@ -134,8 +151,8 @@ sections:
   影響範囲: |
     - `<path>` — <概略>
 new_changelog_entry: コメントの〇〇を要件に反映  # コメントから反映した内容が分かる粒度で1行
-confirmation_items:  # 0件ならキーごと省略
-  - <ステップ4で新たに発生した未確認事項>
+confirmation_items:  # ステップ4の未確認事項＋ステップ4.5の残曖昧点をマージ（重複除去）。0件ならキーごと省略
+  - <ステップ4で新たに発生した未確認事項、またはステップ4.5で洗い出した反映後の残曖昧点>
 ```
 
 **`sections.依頼内容` は本スキルからは絶対に渡さない**。ステップ2.5のとおり、既存の依頼内容ブロック（新旧フォーマットとも）の verbatim 再掲は `post-issue-body` 側の責務（`args.sections.依頼内容` 未指定なら既存bodyの中身を verbatim 再掲する規約）。既存bodyに依頼内容が無ければ追加もしない。コメントで発生した仕様変更は `概要` `要件` `実装プラン` 側で反映する。
@@ -181,6 +198,7 @@ Skill tool 呼び出しは `Skill(skill='post-issue-body', args=<上記YAML文�
 
 - このスキルは**コードを一切変更しない**。Issue の更新・コメントは原則 `post-issue-body` 経由で行う（本スキル内で直接 `gh issue edit` を呼ぶのはステップ5.5のフォールバック用途に限る）
 - 途中でユーザーに質問しない。確認したいことは `post-issue-body` へ「確認事項」として渡し、コメントとして残す
+- description を反映しただけで終わらせず、ステップ4.5で「反映後もなお残る不明点・曖昧な要件」を見直し、あればステップ4の未確認事項とマージして `confirmation_items` として渡す（`## 確認事項` コメントに一本化する。曖昧点が無ければ無理に作らない）
 - **依頼内容ブロック（`<details><summary>依頼内容</summary>`）を新規追加しない**（理由は冒頭「『依頼内容』の扱い」を参照）
 - 既存bodyに依頼内容ブロックがあった場合、その保持は `post-issue-body` の verbatim 再掲規約に委ねる。args の `sections.依頼内容` は本スキルからは渡さない（渡すと原文とのズレを生む可能性がある）。ステップ5.5で実際に保持されかつ折りたたみで書き出されたかを検証する
 - Pencil ファイル（`.pen`）の読み込みは `inspect-pencil-node` スキル経由でのみ行う（暗号化バイナリのため `Read`/`Grep` は使えない）
