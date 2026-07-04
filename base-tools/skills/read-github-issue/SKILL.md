@@ -29,23 +29,21 @@ GitHub Issue `$1` を読み取り、後続フェーズが機械的に扱える�
 
 ## 1. Issueと付随情報の取得
 
-本文・状態・ラベル・コメントをまとめて取得する。
+本文・状態・ラベルをまとめて取得する。コメントは取得しない（本文のみを分析対象とする）。
 
 ```
-gh issue view $1 --comments
 gh issue view $1 --json number,title,state,labels,assignees,milestone,url,body
 ```
 
 以下も併せて確認：
 
-- **コメント全文**: 確認事項への回答や仕様の追補が含まれることが多い。本文より優先される最新コメントを見落とさない
-- **画像/添付**: 本文・コメントに画像URLがある場合、`gh-asset` でダウンロードして内容を読む
+- **画像/添付**: 本文に画像URLがある場合、`gh-asset` でダウンロードして内容を読む
   ```
   gh-asset download <asset_id> ~/Downloads/
   ```
   参考: https://github.com/YuitoSato/gh-asset
 - **リンクされたIssue/PR**: `#123` 形式や URL での参照は依存関係の手がかり。必要に応じて `gh issue view <num>` / `gh pr view <num>` で内容を確認
-- **コード参照**: 本文/コメントに登場するファイルパス・関数名は対象範囲特定の起点。実際の所在・周辺実装の確認は手順2で `Explore` に委譲する
+- **コード参照**: 本文に登場するファイルパス・関数名は対象範囲特定の起点。実際の所在・周辺実装の確認は手順2で `Explore` に委譲する
 
 Issueが `CLOSED` の場合、その旨を明記してそのまま返す（タスク分解は行わない）。
 
