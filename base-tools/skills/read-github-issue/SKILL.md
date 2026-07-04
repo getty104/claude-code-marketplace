@@ -4,6 +4,7 @@ description: GitHub Issueの内容を取得し、並列実行可能な単位に�
 argument-hint: "[issue-number]"
 model: sonnet
 effort: high
+context: fork
 ---
 
 # Read GitHub Issue
