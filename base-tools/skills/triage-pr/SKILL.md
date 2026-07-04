@@ -112,13 +112,38 @@ gh pr edit $ARGUMENTS --add-label "cc-fix-onetime"
 
 #### パターンB: マージ可能な場合
 
-すべての項目が「対応不要」、または修正プランに項目がない場合、**必ず以下のコマンドを実行してマージする。判定だけで終了しないこと。**
+すべての項目が「対応不要」、または修正プランに項目がない場合、以下の手順でマージし、**必要に応じて関連Issueを明示的にクローズする。判定だけで終了しないこと。**
 
+1. マージ前に、PRのbaseブランチとデフォルトブランチ名を取得する。
+
+```bash
+BASE_BRANCH=$(gh pr view $ARGUMENTS --json baseRefName -q .baseRefName)
+DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)
 ```
+
+2. **必ず以下のコマンドを実行してマージする。**
+
+```bash
 gh pr merge $ARGUMENTS --merge --delete-branch
 ```
 
-マージコマンドが失敗した場合は、エラー内容を記録して報告する。
+マージコマンドが失敗した場合は、エラー内容を記録して報告し、以降の手順に進まない。
+
+3. マージ成功後、`BASE_BRANCH` が `DEFAULT_BRANCH` と **一致しない**（`cc-epic-<N>` のような非デフォルトブランチへのマージ）場合のみ、関連Issueを明示的にクローズする。GitHubの`Closes #<issue番号>`記法によるIssue自動クローズは**PRがデフォルトブランチへマージされた場合にのみ**発動し、非デフォルトブランチへのマージでは発動しないため、EpicフローでサブIssueが閉じられずEpic PR作成が止まるのを防ぐ必要がある。`BASE_BRANCH` が `DEFAULT_BRANCH` と一致する場合はGitHubが自動でクローズするため、この手順はスキップする。
+
+   3-1. PR本文から関連Issueの番号を抽出する（「PRクローズ時のIssue連動Close」と同じ抽出コマンドを流用）。
+
+   ```bash
+   gh pr view $ARGUMENTS --json body --jq '.body' | grep -ioE '(close[sd]?|fix(e[sd])?|resolve[sd]?)[[:space:]]+#[0-9]+' | grep -oE '[0-9]+'
+   ```
+
+   3-2. 抽出したIssue番号それぞれに対して、完了クローズを実行する（複数ある場合は全て）。実装がEpicブランチに取り込まれた完了クローズのため、マージせずクローズする場合の`--reason "not planned"`とは異なり`--reason completed`を用いる。
+
+   ```bash
+   gh issue close <issue番号> --reason completed
+   ```
+
+   関連Issueが抽出できない場合は、その旨を報告に含めること。
 
 ## 意思決定の原則
 
@@ -166,5 +191,5 @@ gh issue close <issue番号> --reason "not planned"
 
 処理結果として以下を報告する：
 
-- **判定**: コンフリクト検知（`cc-resolve-conflict`ラベル付与） / パターンA（修正が必要・`cc-fix-onetime`ラベル付与） / パターンB（マージ済み） / PRクローズ（関連IssueもClose） / エラー
-- **理由**: 判定の根拠（コンフリクト検知時はターゲットブランチ名、対応すべき項目の要約、マージ可能と判断した理由、またはクローズ理由と連動Closeした関連Issue番号）
+- **判定**: コンフリクト検知（`cc-resolve-conflict`ラベル付与） / パターンA（修正が必要・`cc-fix-onetime`ラベル付与） / パターンB（マージ済み。非デフォルトブランチへのマージ時は連動Closeした関連Issue番号も明記） / PRクローズ（関連IssueもClose） / エラー
+- **理由**: 判定の根拠（コンフリクト検知時はターゲットブランチ名、対応すべき項目の要約、マージ可能と判断した理由、非デフォルトブランチへのマージで`--reason completed`により連動Closeした関連Issue番号、またはクローズ理由と連動Closeした関連Issue番号）
