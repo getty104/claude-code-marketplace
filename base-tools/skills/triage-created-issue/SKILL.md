@@ -1,6 +1,6 @@
 ---
 name: triage-created-issue
-description: Triage a GitHub issue that already has the cc-issue-created label and is assumed to be ready to start. First inspect the comment history to decide whether human confirmation is needed (cc-need-human-check, highest priority); otherwise decide whether the issue should be closed as not needed, unanswered confirmation items remain (cc-answer-issue-questions), or it can move to execution (cc-exec-issue). Dependency checks are out of scope.
+description: Triage a GitHub issue that already has the cc-issue-created label and is assumed to be ready to start. First inspect the comment history to decide whether human confirmation is needed (cc-need-human-check, highest priority); otherwise decide whether the issue should be closed as not needed, unanswered confirmation items remain (cc-answer-issue-questions), the description is stale relative to settled comment-history content and must be refreshed before execution (cc-update-issue), or it can move to execution (cc-exec-issue). Dependency checks are out of scope.
 argument-hint: "[Issue number]"
 hooks:
   Stop:
@@ -26,7 +26,8 @@ hooks:
 1. コメント履歴の精査による人の確認要否の判断と`cc-need-human-check`ラベルの付与
 2. Issue内容の精査によるクローズ判断
 3. 確認事項への未回答チェックによる`cc-answer-issue-questions`ラベルの付与
-4. 着手準備が整っている場合の`cc-exec-issue`ラベルの付与
+4. コメント履歴で確定した内容がdescriptionに未反映な場合の`cc-update-issue`ラベルの付与
+5. 着手準備が整っている場合の`cc-exec-issue`ラベルの付与
 
 ## 注意事項
 
@@ -79,8 +80,9 @@ gh pr view <参照先のPR番号> --json state,title,mergedAt
 
 - **コメント履歴全体から見た人間確認シグナル**（確認事項の内容とは独立に判定する。未決着の議論、明示的な承認依頼など）に該当する場合は、他の判定に先立ってパターンAとして処理し、以降の判定はすべて打ち切る。この「最初に該当したら以降は評価しない」という排他ルールは、この人間確認シグナルの判定にのみ適用される
 - 上記に該当しない場合、パターンB（対応不要判断）を評価する。該当すればクローズして終了する
-- どちらにも該当しない場合、最後のコメントの**確認事項を項目ごとに個別評価**し、事実確認で自動回答可能かどうかに応じてパターンA・C・Dのいずれかのラベルを付与する（判定基準はパターンAとパターンCを参照）
-- ラベルの排他性として、`cc-need-human-check`と`cc-answer-issue-questions`は同一Issueに同時に付与しない
+- どちらにも該当しない場合、最後のコメントの**確認事項を項目ごとに個別評価**し、事実確認で自動回答可能かどうかに応じてパターンAまたはパターンCを判定する（判定基準はパターンAとパターンCを参照）。未回答の確認事項が残りパターンCに該当する場合はそこで終了する
+- 確認事項がない、または全て回答済みで着手可能に見える場合は、着手（パターンE）に進む前にパターンD（コメント履歴のdescription反映チェック）を評価する。コメントで確定した内容がdescriptionに未反映であれば`cc-update-issue`を付与して終了し、反映済みで整合している場合に限りパターンE（`cc-exec-issue`）を付与する
+- ラベルの排他性として、各トリアージ実行で付与する遷移ラベル（`cc-need-human-check` / `cc-answer-issue-questions` / `cc-update-issue` / `cc-exec-issue`）は同一Issueに複数付与しない。特に`cc-need-human-check`と`cc-answer-issue-questions`は同時に付与しない
 
 #### パターンA: 人の確認が必要と判断できる場合（最優先）
 
@@ -119,7 +121,7 @@ gh pr view <参照先のPR番号> --json state,title,mergedAt
 
 ##### 該当する場合の処理
 
-経路1・経路2のいずれかに該当する場合、以下を実行してこのIssueの処理を終了する。**他のラベル（クローズ・`cc-answer-issue-questions`・`cc-exec-issue`）は付与しない。**
+経路1・経路2のいずれかに該当する場合、以下を実行してこのIssueの処理を終了する。**他のラベル（クローズ・`cc-answer-issue-questions`・`cc-update-issue`・`cc-exec-issue`）は付与しない。**
 
 1. 人の確認が必要と判断した理由を、根拠となるコメントを引用しつつ簡潔にコメントする
    ```
@@ -162,9 +164,33 @@ gh issue edit $0 --add-label "cc-answer-issue-questions"
 
 未回答項目の一部が人間判断を要すると評価された場合でも、本スキルでは`cc-need-human-check`は付与しない。人間判断が必要である旨を回答として明示する対応は、`answer-issue-questions`スキル側の回答フェーズに委ねる。
 
-#### パターンD: 着手準備が整っている場合
+#### パターンD: コメント履歴で確定した内容がdescriptionに未反映の場合
 
-確認事項がない、または全ての確認事項に回答済みである場合、実行可能と判断して`cc-exec-issue`ラベルを付与する：
+パターンA〜Cのいずれにも該当せず着手可能に見える状態でも、実行担当（executor）はdescriptionを唯一の入力として作業する。そのため、コメント履歴で**確定した実質的な内容**（確認事項への回答、合意された方針・仕様の変更、スコープや制約の追加・修正など）がdescriptionに反映されていないと、その決定が実行時に取りこぼされる。着手に進む前に、descriptionがコメント履歴の確定内容を過不足なく自己完結的に表現できているかを検証する。
+
+反映済みかを判定する対象は、コメントで確定した実質的な内容に限る。以下は反映対象に含めない：
+
+- 未回答の確認事項そのもの（パターンCで扱う。回答が出た後に反映対象となる）
+- 本スキルやワーカーが付与したトリアージ用コメント（判定理由の記録など）や、`/gemini review`のような処理上のノイズコメント
+- 雑談・相槌など、Issueの内容に影響しないコメント
+
+上記を除いた確定内容のうち、descriptionに書かれていない、または古いまま食い違っている項目が一つでもある場合は、descriptionが陳腐化しているとみなす。この場合は着手（パターンE）に進めず、以下を実行してこのIssueの処理を終了する。**他のラベル（`cc-exec-issue`など）は付与しない。**
+
+1. descriptionに未反映と判断した内容を、根拠となるコメントを引用しつつ簡潔にコメントする
+   ```
+   gh issue comment $0 --body "<descriptionに未反映と判断した内容の説明>"
+   ```
+
+2. `cc-update-issue`ラベルを付与する
+   ```
+   gh issue edit $0 --add-label "cc-update-issue"
+   ```
+
+コメント履歴の確定内容がすべてdescriptionに反映済みで整合している場合は、このパターンには該当せず、パターンEに進む。
+
+#### パターンE: 着手準備が整っている場合
+
+確認事項がない、または全ての確認事項に回答済みであり、かつパターンDでコメント履歴の確定内容がdescriptionに反映済みと確認できた場合、実行可能と判断して`cc-exec-issue`ラベルを付与する：
 
 ```
 gh issue edit $0 --add-label "cc-exec-issue"
