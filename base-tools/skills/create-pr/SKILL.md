@@ -30,28 +30,52 @@ GitHubでPull Request（PR）を作成するスキルです。呼び出された
 - テンプレート内でコメントアウトされている箇所は必ず削除すること
 - PRのdescriptionには`Closes #$0`と記載すること
 - `gh api user --jq '.login'`で取得したユーザーをAssigneesに追加すること
-- PRのベースブランチは現在のブランチの分岐元ブランチにすること
+- PRのベースブランチは「ベースブランチの決定」の手順で決定したブランチにすること
 - PRに`cc-triage-scope`ラベルを付与すること
 
-## ベースブランチの推定
+## ベースブランチの決定
+
+ベースブランチは以下の優先順で決定する。必ず 1 → 2 の順に試すこと。
+
+1. **Epicブランチの確定的導出**: Issue `$0` が parent（Epic Issue）を持つ場合、`cc-epic-<parent番号>` をベースにする
+2. **分岐元ブランチの推定（fallback）**: parentが無い場合やepicブランチがremoteに存在しない場合、merge-base距離で分岐元を推定する
+
+### 1. Epicブランチの確定的導出
+
+サブIssue（parentを持つIssue）の作業ブランチは `cc-epic-<parent番号>` から派生しているため、PRも同ブランチへ向ける。後述のmerge-base推定は、epicブランチ作成直後（デフォルトブランチと同一コミットを指す状態）に複数の候補ブランチが同点になり、アルファベット順のタイブレークで**誤ったepicブランチ**を選ぶことがある。そのためparentからの確定的導出を必ず先に試す。
+
+```bash
+git fetch origin --prune
+
+BASE_BRANCH=""
+PARENT=$(gh issue view "$0" --json parent --jq '.parent.number // empty' 2>/dev/null)
+if [ -n "${PARENT}" ] && git rev-parse --verify --quiet "refs/remotes/origin/cc-epic-${PARENT}" >/dev/null; then
+  BASE_BRANCH="cc-epic-${PARENT}"
+fi
+```
+
+引数のIssue番号が渡されていない場合は本ステップをスキップし、`BASE_BRANCH` を空のままステップ2へ進む。
+
+### 2. 分岐元ブランチの推定（fallback）
 
 「現在のブランチの分岐元ブランチ」は、リモートトラッキングブランチ（`refs/remotes/origin/`配下）のうち、現在のブランチ自身を除き、HEADから最も近い merge-base を持つものとして推定する。Epic ブランチや任意の中間ブランチから派生した作業ブランチでも、その派生元へPRを向けられるようにするための仕組み。
 
 ```bash
-CURRENT=$(git rev-parse --abbrev-ref HEAD)
-git fetch origin --prune
+if [ -z "${BASE_BRANCH}" ]; then
+  CURRENT=$(git rev-parse --abbrev-ref HEAD)
 
-BASE_BRANCH=$(
-  git for-each-ref --format='%(refname:short)' refs/remotes/origin/ |
-    grep '^origin/' | grep -v '^origin/HEAD$' |
-    while read b; do
-      [ "$b" = "origin/${CURRENT}" ] && continue
-      mb=$(git merge-base "$b" HEAD 2>/dev/null) || continue
-      [ -n "$mb" ] || continue
-      dist=$(git rev-list --count "${mb}..HEAD" 2>/dev/null) || continue
-      echo "$dist $b"
-    done | sort -n | head -1 | awk '{print $2}' | sed 's|^origin/||'
-)
+  BASE_BRANCH=$(
+    git for-each-ref --format='%(refname:short)' refs/remotes/origin/ |
+      grep '^origin/' | grep -v '^origin/HEAD$' |
+      while read b; do
+        [ "$b" = "origin/${CURRENT}" ] && continue
+        mb=$(git merge-base "$b" HEAD 2>/dev/null) || continue
+        [ -n "$mb" ] || continue
+        dist=$(git rev-list --count "${mb}..HEAD" 2>/dev/null) || continue
+        echo "$dist $b"
+      done | sort -n | head -1 | awk '{print $2}' | sed 's|^origin/||'
+  )
+fi
 
 # 候補が見つからない場合（孤立ブランチ等）はデフォルトブランチに fallback する
 if [ -z "${BASE_BRANCH}" ]; then
