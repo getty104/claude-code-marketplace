@@ -176,9 +176,20 @@ Instructionsに従って順に実行し、各フェーズの「完了条件」�
 
 ## フェーズ6: 変更の有無で分岐
 
+まず差分の基準ブランチ（`BASE_BRANCH`）を決定する。Issue `$0` が parent（Epic Issue）を持つ場合、worktree は `cc-epic-<parent番号>` ブランチから派生しているため、epic ブランチを基準にする。デフォルトブランチを基準にすると、epic ブランチへマージ済みの**他サブIssueの差分が混ざり**、「本Issueでのコード変更の有無」を誤判定する（create-pr スキルのベースブランチ決定と同じ確定的導出を用いる）。
+
 ```bash
+BASE_BRANCH=$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's@^origin/@@')
+if ! PARENT=$(gh issue view "$0" --json parent --jq '.parent.number // empty'); then
+  echo "failed to resolve issue parent" >&2
+  exit 1
+fi
+if [ -n "${PARENT}" ] && git rev-parse --verify --quiet "refs/remotes/origin/cc-epic-${PARENT}" >/dev/null; then
+  BASE_BRANCH="cc-epic-${PARENT}"
+fi
+
 git status --short
-git diff origin/$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's@^origin/@@')..HEAD --stat
+git diff "origin/${BASE_BRANCH}..HEAD" --stat
 ```
 
 - **コード変更がない場合（PRを作成しない場合）**:
