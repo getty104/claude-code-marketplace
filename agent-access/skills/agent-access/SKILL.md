@@ -75,7 +75,12 @@ aac run --domain example.com --env-all -- sh -c 'echo "username_len=${#AAC_USERN
 - 要求を出す前に「手元で承認画面が出るので承認してください」と伝える
 - 承認待ちのデフォルトタイムアウトは120秒（`--timeout` で変更可）
 - フィールド: `username`, `password`, `totp`, `uri`, `notes`, `domain`, `credential_id`
-- `totp` はワンタイムコードではなく **TOTP シークレット**。コードはスクリプト内で生成する
+- `totp` はワンタイムコードではなく **TOTP シークレット**。コードは `scripts/totp.cjs` で `aac run` の中で生成し、出力しない
+
+```shell
+aac run --id <vault-item-id> --env-all -- \
+  sh -c 'some-cli login --user "$AAC_USERNAME" --password "$AAC_PASSWORD" --otp "$(node ${CLAUDE_PLUGIN_ROOT}/skills/agent-access/scripts/totp.cjs)"'
+```
 
 ## 5. ブラウザでログインする
 

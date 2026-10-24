@@ -1,16 +1,27 @@
 const { chromium } = require('playwright');
+const { generateTotp, secondsRemaining } = require('./totp.cjs');
 
-const [url, userSel, passSel, submitSel] = process.argv.slice(2);
-const { AAC_USERNAME, AAC_PASSWORD, CDP_ENDPOINT = 'http://localhost:9222' } = process.env;
+const [url, userSel, passSel, submitSel, totpSel, totpSubmitSel] = process.argv.slice(2);
+const { AAC_USERNAME, AAC_PASSWORD, AAC_TOTP, CDP_ENDPOINT = 'http://localhost:9222' } = process.env;
 
 if (!url || !userSel || !passSel || !submitSel) {
-  console.error('usage: node cdp-login.cjs <login-url> <username-selector> <password-selector> <submit-selector>');
+  console.error('usage: node cdp-login.cjs <login-url> <username-selector> <password-selector> <submit-selector> [totp-selector] [totp-submit-selector]');
   process.exit(2);
 }
 if (!AAC_USERNAME || !AAC_PASSWORD) {
   console.error('AAC_USERNAME / AAC_PASSWORD are not set. Run via: aac run ... --env-all -- node cdp-login.cjs ...');
   process.exit(2);
 }
+if (totpSel && !AAC_TOTP) {
+  console.error('totp-selector was given but AAC_TOTP is not set. The vault item has no TOTP secret.');
+  process.exit(2);
+}
+
+const submit = async (page, selector, fallbackSel) => {
+  const action = selector ? page.click(selector) : page.press(fallbackSel, 'Enter');
+  await Promise.all([page.waitForLoadState('load'), action]);
+  await page.waitForLoadState('networkidle').catch(() => {});
+};
 
 (async () => {
   const browser = await chromium.connectOverCDP(CDP_ENDPOINT);
@@ -19,8 +30,13 @@ if (!AAC_USERNAME || !AAC_PASSWORD) {
   await page.goto(url);
   await page.fill(userSel, AAC_USERNAME);
   await page.fill(passSel, AAC_PASSWORD);
-  await Promise.all([page.waitForLoadState('load'), page.click(submitSel)]);
-  await page.waitForLoadState('networkidle').catch(() => {});
+  await submit(page, submitSel);
+  if (totpSel) {
+    await page.waitForSelector(totpSel);
+    if (secondsRemaining(AAC_TOTP) < 3) await page.waitForTimeout(secondsRemaining(AAC_TOTP) * 1000 + 200);
+    await page.fill(totpSel, generateTotp(AAC_TOTP));
+    await submit(page, totpSubmitSel, totpSel);
+  }
   console.log(`after login: ${page.url()}`);
   await browser.close();
 })().catch((e) => {

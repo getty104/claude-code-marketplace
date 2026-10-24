@@ -56,10 +56,27 @@ aac run --domain www.example.com --env-all -- \
   https://www.example.com/login '#username' '#password' 'button[type=submit]'
 ```
 
-- 引数: `<ログインURL> <ユーザー名欄> <パスワード欄> <送信ボタン>`
+- 引数: `<ログインURL> <ユーザー名欄> <パスワード欄> <送信ボタン> [TOTP欄] [TOTP送信ボタン]`
 - `CDP_ENDPOINT` で接続先を変更できる（デフォルト `http://localhost:9222`）
 - 出力はログイン後の URL だけ。ログインページに戻っていなければ成功と判断する
 - `playwright` はグローバルインストールを `require` で読み込む。見つからない場合は `NODE_PATH=$(npm root -g)` を付ける
+
+### TOTP（二段階認証）がある場合
+
+`[TOTP欄]` を渡すと、パスワードの送信後に TOTP 欄が現れるのを待ち、`AAC_TOTP` から生成したワンタイムコードを入力して送信する。
+
+```shell
+aac run --domain www.example.com --env-all -- \
+  node ${CLAUDE_PLUGIN_ROOT}/skills/agent-access/scripts/cdp-login.cjs \
+  https://www.example.com/login '#username' '#password' 'button[type=submit]' \
+  'input[autocomplete=one-time-code]' 'button[type=submit]'
+```
+
+- `[TOTP送信ボタン]` を省略すると、TOTP 欄で Enter を押して送信する
+- コードの有効期限が残り3秒未満なら、次のコードに切り替わるまで待ってから入力する
+- 保管庫の項目に TOTP がない（`AAC_TOTP` が空）場合は exit 2 で止まる
+- TOTP 欄のセレクタが分からない場合は、まず TOTP 欄の引数なしで実行する。タブが TOTP の入力画面で止まるので、スナップショットでセレクタを調べてから、TOTP 欄の引数付きで実行し直す
+- コードの生成は `scripts/totp.cjs` が行う。RFC 6238 準拠で、otpauth URI（digits / period / algorithm 指定を含む）と Base32 の鍵の両方に対応している。Steam Guard 形式（`steam://`）には対応していない
 
 ## 4. MCP で操作する
 
@@ -70,7 +87,7 @@ aac run --domain www.example.com --env-all -- \
 | ケース | 理由 |
 |---|---|
 | パスキー、メールや SMS のコード | Agent Access で値を受け取れない |
-| TOTP | `cdp-login.cjs` は未対応。`AAC_TOTP`（シークレット）からコードを生成する処理を追加する必要がある |
+| Steam Guard 形式の TOTP | `totp.cjs` が未対応 |
 | CAPTCHA、追加の本人確認 | クラウドの IP アドレスから自動ではログインできないことがある。ユーザーに伝えて中止する |
 | ユーザー名とパスワードが別画面のフォーム | `cdp-login.cjs` は1画面のフォームを前提にしている |
 
