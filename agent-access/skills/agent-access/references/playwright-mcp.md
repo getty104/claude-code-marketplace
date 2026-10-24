@@ -78,6 +78,14 @@ aac run --domain www.example.com --env-all -- \
 - TOTP 欄のセレクタが分からない場合は、まず TOTP 欄の引数なしで実行する。タブが TOTP の入力画面で止まるので、スナップショットでセレクタを調べてから、TOTP 欄の引数付きで実行し直す
 - コードの生成は `scripts/totp.cjs` が行う。RFC 6238 準拠で、otpauth URI（digits / period / algorithm 指定を含む）と Base32 の鍵の両方に対応している。Steam Guard 形式（`steam://`）には対応していない
 
+### メールや SMS の認証コードがある場合
+
+1. TOTP 欄の引数なしで `cdp-login.cjs` を実行する。パスワードの送信後、タブはコード入力画面で止まる
+2. SKILL.md の手順6に従い、メール（または SMS）からコードを取り出す
+3. `browser_tabs` でそのタブを選び、`browser_snapshot` で入力欄を調べてから、`browser_type` でコードを入力して送信する。認証用リンクの場合は `browser_navigate` で開く
+
+認証コードは使い捨ての値なので、MCP のツールで入力してよい。パスワードと TOTP の鍵は、引き続き MCP のツールでは扱わない。
+
 ## 4. MCP で操作する
 
 `browser_tabs`（`action: list`）でログイン後のタブを探し、`select` で選んでから操作する。ログインが切れたら、手順3をもう一度実行する。
@@ -86,7 +94,8 @@ aac run --domain www.example.com --env-all -- \
 
 | ケース | 理由 |
 |---|---|
-| パスキー、メールや SMS のコード | Agent Access で値を受け取れない |
+| パスキー | Agent Access で値を受け取れない |
+| メールや SMS のコードで、読み取れるツールがない | ユーザーにコードを教えてもらう |
 | Steam Guard 形式の TOTP | `totp.cjs` が未対応 |
 | CAPTCHA、追加の本人確認 | クラウドの IP アドレスから自動ではログインできないことがある。ユーザーに伝えて中止する |
 | ユーザー名とパスワードが別画面のフォーム | `cdp-login.cjs` は1画面のフォームを前提にしている |
