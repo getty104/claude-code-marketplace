@@ -1,6 +1,6 @@
 ---
 name: agent-access
-description: AIエージェントが Bitwarden Agent Access（aac CLI）を使い、ユーザーの Bitwarden 保管庫から承認付きで認証情報を受け取り、パスワードを会話コンテキストに出さずにコマンドやブラウザログインへ注入する手順。ALWAYS invoke this skill when the user mentions Agent Access, aac, Bitwarden から認証情報を取得, 保管庫のパスワードを使ってログイン, クラウドセッションで Bitwarden, or ブラウザツールで認証. パスキーは扱えない。
+description: AIエージェントが Bitwarden Agent Access（aac CLI）を使い、ユーザーの Bitwarden 保管庫から承認付きで認証情報を受け取り、パスワードを会話コンテキストに出さずにコマンドやブラウザログインへ注入する手順。ブラウザでのログインや認証が必要な場面（ブラウザツールでログインが必要なサイトを操作する、ログイン画面に到達した等）では必ずこのスキルを使う。ALWAYS invoke this skill when the user mentions Agent Access, aac, Bitwarden から認証情報を取得, 保管庫のパスワードを使ってログイン, クラウドセッションで Bitwarden, ブラウザツールで認証, ブラウザでログイン, or ログインが必要なサイトの操作. パスキーは扱えない。
 argument-hint: "[domain | vault item id]"
 ---
 
