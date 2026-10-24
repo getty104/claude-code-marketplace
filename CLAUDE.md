@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-このリポジトリはClaude Code Plugin Marketplaceです。登録プラグイン: `agent-access`（Bitwarden Agent Access のスキル。ブラウザツール別の認証手順は `skills/agent-access/references/` に1ツール1ファイルで追加する）
+このリポジトリはClaude Code Plugin Marketplaceです。登録プラグイン: `agent-access`（Bitwarden Agent Access のスキル。ブラウザツール別の認証手順は `agent-access/skills/agent-access/references/` に1ツール1ファイルで追加する）
 
 ## プラグイン検証コマンド
 

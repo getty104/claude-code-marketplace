@@ -21,13 +21,17 @@
 ## 1. CDP 付きで Chromium を起動する
 
 ```shell
+PROFILE="${TMPDIR:-/tmp}/agent-access-cdp-profile"
+rm -rf "$PROFILE" && mkdir -m 700 "$PROFILE"
 CHROME=$(node -e "console.log(require('playwright').chromium.executablePath())")
-"$CHROME" --headless=new --no-sandbox --remote-debugging-port=9222 \
-  --user-data-dir="$(mktemp -d)" about:blank >/dev/null 2>&1 &
+NO_SANDBOX=$([ "$(id -u)" = 0 ] && echo --no-sandbox)
+"$CHROME" --headless=new $NO_SANDBOX --remote-debugging-port=9222 \
+  --user-data-dir="$PROFILE" about:blank >/dev/null 2>&1 &
 ```
 
-- CDP ポートに届く人はブラウザを完全に操作できる。localhost 以外に公開しない
-- `--user-data-dir` は使い捨てのディレクトリにする（ログイン済みの Cookie が残るため）
+- **実行場所**: CDP ポートに届くプロセスはブラウザを完全に操作でき、ログイン済みのセッションも使える。localhost に限定していても、同じホスト上の別プロセスからは接続できる。共有ホストでは実行せず、使い捨てのコンテナや専用 VM で実行する。ポートを localhost 以外に公開しない
+- **サンドボックス**: 通常は Chromium のサンドボックスを有効にしたまま起動する。root で動くコンテナでは Chromium がサンドボックスなしでないと起動しないため、そのときだけ `--no-sandbox` を付ける（上のコマンドは root のときだけ付ける）。この場合はコンテナが唯一の隔離になるので、使い捨てのコンテナに限る
+- **プロファイル**: ログイン済みの Cookie が残るので、起動のたびに作り直し、後片付けで必ず削除する。シェル変数は次のコマンドに引き継がれないため、決まったパスを使う
 
 ## 2. Playwright MCP を CDP 接続で登録する
 
@@ -52,13 +56,14 @@ MCP の設定を反映するには読み込み直しが必要。エージェン�
 
 ```shell
 aac run --domain www.example.com --env-all -- \
-  node ${CLAUDE_PLUGIN_ROOT}/skills/agent-access/scripts/cdp-login.cjs \
+  node "${CLAUDE_PLUGIN_ROOT}/skills/agent-access/scripts/cdp-login.cjs" \
   https://www.example.com/login '#username' '#password' 'button[type=submit]'
 ```
 
 - 引数: `<ログインURL> <ユーザー名欄> <パスワード欄> <送信ボタン> [TOTP欄] [TOTP送信ボタン]`
 - `CDP_ENDPOINT` で接続先を変更できる（デフォルト `http://localhost:9222`）
-- 出力はログイン後の URL だけ。ログインページに戻っていなければ成功と判断する
+- 出力はログイン後の URL の origin と path だけ（クエリとフラグメントは出さない）。ログインページに戻っていなければ成功と判断する
+- 成功・失敗にかかわらず、終了時にパスワード欄が残っていれば空にする（MCP のスナップショットにパスワードが写らないようにするため）
 - `playwright` はグローバルインストールを `require` で読み込む。見つからない場合は `NODE_PATH=$(npm root -g)` を付ける
 
 ### TOTP（二段階認証）がある場合
@@ -67,7 +72,7 @@ aac run --domain www.example.com --env-all -- \
 
 ```shell
 aac run --domain www.example.com --env-all -- \
-  node ${CLAUDE_PLUGIN_ROOT}/skills/agent-access/scripts/cdp-login.cjs \
+  node "${CLAUDE_PLUGIN_ROOT}/skills/agent-access/scripts/cdp-login.cjs" \
   https://www.example.com/login '#username' '#password' 'button[type=submit]' \
   'input[autocomplete=one-time-code]' 'button[type=submit]'
 ```
@@ -103,7 +108,6 @@ aac run --domain www.example.com --env-all -- \
 ## 後片付け
 
 ```shell
-pkill -f -- '--remote-debugging-port=9222'
+pkill -f -- '--remote-debugging-port=922[2]'
+rm -rf "${TMPDIR:-/tmp}/agent-access-cdp-profile"
 ```
-
-`--user-data-dir` に指定したディレクトリも削除する。

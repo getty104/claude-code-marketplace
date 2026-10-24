@@ -22,15 +22,32 @@ argument-hint: "[domain | vault item id]"
 
 ## 1. エージェント環境に aac を導入する
 
+バージョンを固定し、SHA-256 が一致した場合だけ展開する。
+
 ```shell
-command -v aac || {
+command -v aac || (
+  set -e
+  ver=v0.11.0 asset=aac-linux-x86_64.tar.gz
+  sum=a05b35bcc2cb9c87bc32c2ffaf83a1e8f29ac32590e609621f92e8b94d86e368
+  tmp=$(mktemp -d)
+  curl -fsSL -o "$tmp/$asset" "https://github.com/bitwarden/agent-access/releases/download/$ver/$asset"
+  echo "$sum  $tmp/$asset" | sha256sum -c -
   mkdir -p ~/.local/bin
-  curl -sSL https://github.com/bitwarden/agent-access/releases/latest/download/aac-linux-x86_64.tar.gz | tar xz -C ~/.local/bin
-}
+  tar xzf "$tmp/$asset" -C ~/.local/bin
+  rm -rf "$tmp"
+)
 aac --version
 ```
 
-macOS では `aac-macos-aarch64.tar.gz` / `aac-macos-x86_64.tar.gz` を使う。
+| asset | SHA-256 (v0.11.0) |
+|---|---|
+| `aac-linux-x86_64.tar.gz` | `a05b35bcc2cb9c87bc32c2ffaf83a1e8f29ac32590e609621f92e8b94d86e368` |
+| `aac-macos-aarch64.tar.gz` | `5d20923e4bb9649ef5df2798d9aa0e95b4a1840ce663d3091534177a118231c1` |
+| `aac-macos-x86_64.tar.gz` | `13bd3535a63285a48bfcc7007b8010223eefa8ef1d1ad73a49ef5cbf72906938` |
+
+- macOS では `sha256sum -c -` の代わりに `shasum -a 256 -c -` を使う
+- 公式のチェックサムや署名は公開されていない。上の値は v0.11.0 の公開アセットから記録したもの。一致しなければ展開せず、ユーザーに報告する
+- バージョンを上げるときは、このファイルのバージョンとハッシュを一緒に更新する
 
 ## 2. ユーザーにローカルのセットアップをお願いする
 
@@ -53,8 +70,10 @@ macOS では `aac-macos-aarch64.tar.gz` / `aac-macos-x86_64.tar.gz` を使う。
 ## 3. ペアリングする
 
 ```shell
-aac connect --token <ペアリングトークン> --domain example.com --output json
+aac connect --token <ペアリングトークン> --output json
 ```
+
+`--domain` / `--id` を付けると、ペアリングと同時に認証情報を取得してパスワードを標準出力に出すので、付けない。
 
 - 接続は `~/.access-protocol/` にキャッシュされ、以後トークンは不要になる。残したくない場合は `--ephemeral-connection` を付ける
 - 接続が複数あると `Multiple cached connections found` になる。`aac connections list` で fingerprint を確認し、`--session <fingerprint か一意な prefix>` を付ける
@@ -79,7 +98,7 @@ aac run --domain example.com --env-all -- sh -c 'echo "username_len=${#AAC_USERN
 
 ```shell
 aac run --id <vault-item-id> --env-all -- \
-  sh -c 'some-cli login --user "$AAC_USERNAME" --password "$AAC_PASSWORD" --otp "$(node ${CLAUDE_PLUGIN_ROOT}/skills/agent-access/scripts/totp.cjs)"'
+  sh -c 'some-cli login --user "$AAC_USERNAME" --password "$AAC_PASSWORD" --otp "$(node "${CLAUDE_PLUGIN_ROOT}/skills/agent-access/scripts/totp.cjs")"'
 ```
 
 ## 5. ブラウザでログインする
@@ -114,10 +133,10 @@ Agent Access では受け取れない。代わりに、使えるツールで次�
 | 症状 | 原因 | ユーザーへのお願い・対処 |
 |---|---|---|
 | 数秒で `Request denied` | 手元の `bw get item <検索語>` が失敗し、承認画面を出さずに自動拒否された | 手元の `aac listen` に出ている表示を教えてもらい、下の3つで切り分ける |
-| ↳ 一致が複数ある | `bw get item` は一致がちょうど1件のときしか成功しない | `bw list items --search <語> \| jq -r '.[] \| "\(.id)  \(.name)"'` を実行して ID を教えてもらい、`--id` で要求し直す |
+| ↳ 一致が複数ある | `bw get item` は一致がちょうど1件のときしか成功しない | `bw list items --search '<検索語>' \| jq -r '.[] \| "\(.id)  \(.name)"'` を実行して ID を教えてもらい、`--id` で要求し直す |
 | ↳ ID 指定でも拒否 | `aac listen` が持つ保管庫のセッションが古い。この状態の `bw` はロックではなく `Not found` を返す | `export BW_SESSION=$(bw unlock --raw)` の後で `aac listen` を起動し直すか、`/unlock` をやり直してもらう |
 | ↳ ログイン以外の項目 | `login` を持たない項目（カード、メモなど）は対象外 | 対象外であることを伝える |
-| 約120秒でタイムアウト | 手元で承認されていない | 承認画面を確認してもらう |
+| 約120秒でタイムアウト | 手元で承認されていない | 承認画面を確認してもらう。再試行する前に、残っている古い承認要求は `[n]` で拒否してもらう（古い要求は絶対に承認しない。要求元はすでに切断されており、次の要求との応答もずれる） |
 | `Rendezvous resolution failed` | ペアリングトークンが無効、期限切れ、または使用済み | 新しいトークンを発行してもらう |
 | `Multiple cached connections found` | 複数回ペアリングした | `--session` で指定する。不要なら `aac connections clear connections --client-type remote` で消し、再ペアリングする |
 
