@@ -22,6 +22,14 @@ getty104 の Claude Code プラグインマーケットプレイスです。
 
 - [Claude Code CLI](https://docs.claude.com/en/docs/claude-code/installation)
 
+### 全プラグインを一括インストール
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/getty104/claude-code-marketplace/main/install.sh | bash
+```
+
+Marketplace を追加（追加済みなら更新）し、登録されている全プラグインをインストールします。
+
 ### Marketplace の追加
 
 ```bash
