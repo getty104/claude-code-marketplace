@@ -4,23 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-このリポジトリはClaude Code Plugin Marketplaceであり、TDD（テスト駆動開発）ベースの開発ワークフローを自動化する専用プラグインを提供します。
-
-**重要な特徴**:
-- **Marketplace形式**: 複数のプラグインを一元管理し、チームやコミュニティと簡単に共有できる
-- **git worktree活用**: デフォルトブランチから分離された安全な作業環境を提供
-- **MCP統合**: chrome-devtools（ブラウザ自動化）、context7（ライブラリドキュメント取得）、next-devtools（Next.js開発ツール）、shadcn（shadcn/ui統合）のMCPサーバーを統合
+このリポジトリはClaude Code Plugin Marketplaceです。現在登録されているプラグインはありません。
 
 ## プラグイン検証コマンド
 
 ### プラグインの検証
 ```bash
-claude plugin validate getty104/
+claude plugin validate <プラグインディレクトリ>/
 ```
 
 ### ローカルでのテストインストール
 ```bash
-claude plugin install ./getty104
+claude plugin install ./<プラグインディレクトリ>
 ```
 
 ## アーキテクチャと構成
@@ -29,98 +24,9 @@ claude plugin install ./getty104
 
 ```
 claude-code-marketplace/
-├── .claude-plugin/
-│   └── marketplace.json          # Marketplaceメタデータ
-└── base-tools/                    # base-toolsプラグイン
-    ├── .claude-plugin/            # 自動生成される
-    ├── .mcp.json                  # MCP設定
-    ├── agents/                    # サブエージェント
-    ├── hooks/                     # イベントハンドラ
-    ├── scripts/                   # シェルスクリプト
-    └── skills/                    # スキル（スラッシュコマンド含む）
+└── .claude-plugin/
+    └── marketplace.json          # Marketplaceメタデータ（pluginsにプラグインを登録）
 ```
-
-### プラグインの4つのコンポーネント
-
-1. **Agents** (`agents/*.md`): 特定のタスクに特化したサブエージェント
-   - `general-purpose-assistant`: 汎用的な問題解決とタスク実行
-   - `task-requirement-analyzer`: タスク要件の分析と実装プラン策定
-   - `pr-review-planner`: PRレビューコメントの分析と修正プラン作成
-   - `pencil-design-updater`: Pencilの`.pen`デザインファイルをAIプロンプトで更新・編集する。`edit-pencil-design`スキルを通して既存ファイルを上書き更新し、編集Nodeのスクリーンショットを`snapshots/`に残す
-
-2. **Skills** (`skills/*/SKILL.md`): 再利用可能なスキル（スラッシュコマンド含む）
-
-   **ユーザー呼び出し専用スキル（`disable-model-invocation: true`）**:
-   - `/exec-issue <issue番号>`: Issueを読み込み、実装からPR作成まで自動化
-   - `/fix-review-point <ブランチ名>`: 未解決のレビューコメントへの対応
-   - `/fix-review-point-loop <ブランチ名>`: レビューコメントがなくなるまで繰り返し対応
-   - `/general-task <タスク内容>`: general-purpose-assistantを使用して汎用タスクを実行
-   - `/create-plan <タスク内容>`: task-requirement-analyzerで実装プランを作成しGitHub Issueを作成
-   - `/create-issue-from-issue-number <Issue番号>`: 既存Issueのtitle/bodyを起点にコード再分析し、descriptionをリフレッシュ
-   - `/triage-created-issue <Issue番号>`: `cc-issue-created`ラベルがあるIssueの確認事項を確認し、`cc-answer-issue-questions`または`cc-exec-issue`ラベルを付与（または不要ならクローズ）
-   - `/create-epic-pr <Issue番号>`: `cc-epic-<Issue番号>`ブランチからデフォルトブランチへの集約PR（Epic PR）を作成。差分コミットログから本文を自動生成し、サブPR/サブIssueを整理して`gh pr create`で投稿（ラベルなし、`Closes #<Issue番号>`入り）
-   - `/update-coding-guidelines [期間] [関連Issue番号]`: 直近N日（デフォルト1日）のPRレビューコメントを横断収集し、繰り返し指摘されているかつ「対応すべき」と判断できる観点をリポジトリルートの`CODING_GUIDELINES.md`に集約・更新したうえで、`commit-push` + `create-pr`でPRを作成する。クラスタリングはClaudeに意味ベースで行わせ、ドキュメントサイズが膨らみすぎないよう既存ルールとの統合・圧縮も毎回適用する。デフォルトブランチ上で実行された場合は`chore/update-coding-guidelines-<日時>`feature branchを作成してから`commit-push`を呼び、第2引数のIssue番号があれば`create-pr`に渡してPR本文に`Closes #N`を入れる
-
-   **自動/手動呼び出し可能スキル**:
-   - `check-library`: ライブラリの情報をMCPサーバーから取得
-   - `create-pr`: GitHub PRを作成
-   - `edit-pencil-design`: Pencil CLI（`pencil`コマンド）のみで完結。エージェントモード（`pencil --in --out --prompt`、`--in`/`--out`は同パス）で既存`.pen`を上書き編集し、インタラクティブモード（`pencil interactive` をheredocで非対話実行）の `get_editor_state` で編集前後のNodeツリーを比較して「編集されたNode」を特定、`get_screenshot` / `export_nodes` でそのNodeだけを `.pen`と同階層の`snapshots/`にPNG出力する（MCP非依存）
-   - `inspect-pencil-node`: Pencil CLIのインタラクティブモード（`pencil interactive`をheredocで非対話実行、`save()`を呼ばないため読み取り専用）で `batch_get` を使い指定したNodeのデザインデータ（属性・構造）を取得し、`get_screenshot` でそのNodeの画像を `.pen`と同階層の`snapshots/`にPNG出力する。Node IDが未指定なら `get_editor_state` でツリーを取って候補を提示（MCP非依存、ファイル不変性を保証）
-   - `high-quality-commit`: 適切なgitコミット戦略でコード変更をコミット
-   - `read-github-issue`: GitHub Issueの内容を取得
-   - `create-review-fix-plan`: GitHub PRの未解決レビューコメントとCIステータスを確認し、修正プランを作成
-   - `resolve-pr-comments`: GitHub PRの未解決Review threadsを一括Resolve
-   - `resolve-pr-conflict`: GitHub PRがターゲットブランチとコンフリクトしているか確認し、コンフリクトしていればrebaseで解消して`--force-with-lease`でpushする。`triage-pr`が付与する`cc-resolve-conflict`ラベルをトリガーに起動される想定で、単独実行にも対応
-   - `post-issue-body`: 実装準備用Issueの本文整形・投稿前チェック・`gh issue create/edit`実行を担う共有スキル。`create-issue` / `create-issue-from-issue-number` / `update-issue`からSkill tool経由で呼ばれる（フォーマット定義の単一ソース）
-   - `post-scope-issue-body`: スコープIssue（ラベル`cc-triage-scope`）の本文整形・投稿前チェック・`gh issue create`実行を担う共有スキル。`answer-issue-questions` / `breakdown-issues`からSkill tool経由で呼ばれる（スコープ用フォーマット定義の単一ソース）
-
-3. **Hooks** (`hooks/hooks.json`): イベントハンドラの設定
-
-4. **MCP Servers** (`.mcp.json`): 外部ツール統合
-   - `chrome-devtools`: ブラウザ自動化とDevTools統合
-   - `context7`: ライブラリドキュメント取得（HTTPベース）
-   - `next-devtools`: Next.js開発ツールとドキュメント
-   - `shadcn`: shadcn/uiコンポーネントライブラリ統合
-
-### git worktree ワークフロー
-
-このマーケットプレイスの核となる機能は、git worktreeを利用した分離された作業環境です：
-
-1. `.git-worktrees/`ディレクトリに新しいworktreeを作成
-2. ブランチ名には`/`を含めない（worktree名の生成時に`tr '/' '-'`で変換）
-3. `.env`ファイルをworktreeにコピー
-4. 必要なセットアップ（npm installなど）を実行
-5. すべての作業をworktree内で完結
-6. 完了後は`docker compose down`でコンテナを停止
-
-### TDD実装フロー
-
-すべての実装タスクは以下のTDDサイクルに従います：
-
-1. テスト作成（テスト対象のファイルと同じディレクトリに配置）
-2. テスト実行（失敗確認 - Red）
-3. 実装
-4. テスト実行（成功確認 - Green）
-5. 必要に応じてリファクタリング
-6. `npm run lint`でコード品質チェック
-7. エラーがなくなるまで修正
-
-### PR作成ルール
-
-PRを作成する際は以下のルールに従う：
-- PRのdescriptionテンプレートは `.github/PULL_REQUEST_TEMPLATE.md` を参照（存在する場合）
-- テンプレート内のコメントアウト箇所は削除
-- descriptionに`Closes #<issue番号>`を記載
-
-### レビューコメント対応ワークフロー
-
-1. 未解決のレビューコメントを取得（GraphQL API使用）
-2. TDDアプローチで修正
-3. テストとLintを実行
-4. コミット作成とpush
-5. レビューコメントをResolve（GraphQL mutation使用）
-6. `/gemini review`コメントでPRに再レビューを依頼
-7. `docker compose down`で終了
 
 ## 品質基準
 
@@ -154,7 +60,6 @@ color: cyan
 
 `hooks/hooks.json`でイベントハンドラを設定：
 - 利用可能なイベント: `PreToolUse`, `PostToolUse`, `Stop`など
-- 現在は`Stop`イベントでサウンド通知を設定
 
 ### MCPサーバーの追加
 

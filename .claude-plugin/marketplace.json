@@ -7,11 +7,5 @@
   "owner": {
     "name": "getty104"
   },
-  "plugins": [
-    {
-      "name": "base-tools",
-      "source": "./base-tools",
-      "description": "This is a getty104's base tool set"
-    }
-  ]
+  "plugins": []
 }
