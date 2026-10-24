@@ -7,5 +7,12 @@
   "owner": {
     "name": "getty104"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "agent-access",
+      "source": "./agent-access",
+      "description": "Bitwarden Agent Access で保管庫の認証情報を承認付きで受け取り、コマンドやブラウザログインに安全に注入するスキル",
+      "version": "0.1.0"
+    }
+  ]
 }
