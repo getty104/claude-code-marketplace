@@ -3,12 +3,12 @@
 ログイン操作を `aac run` 配下のスクリプトで行い、Playwright MCP は同じブラウザに CDP で接続してログイン済みのタブを操作する。パスワードは MCP のツール呼び出しにも、ファイルにも出ない。
 
 ```
-① Chromium を --remote-debugging-port=9222 で起動
+① Playwright 同梱の Chromium を --remote-debugging-port=9222 で起動
 ② aac run ... -- node scripts/cdp-login.cjs ...   （CDP 接続 → 入力・送信 → 切断。タブは残る）
-③ Playwright MCP を --cdp-endpoint http://localhost:9222 で起動 → ログイン済みタブを操作
+③ Playwright MCP に PLAYWRIGHT_MCP_CDP_ENDPOINT=http://localhost:9222 を渡す → ①の Chromium のログイン済みタブを操作
 ```
 
-`@playwright/mcp` 0.0.83 で、③からログイン済みタブが見えることを確認済み。
+ブラウザは①の Chromium 1つだけで、②のスクリプトと③の MCP が同じ Chromium を操作する。MCP の起動引数は変えないので、claude-task-worker が登録する `playwright` サーバー（`@playwright/mcp --headless --browser chromium`）をそのまま使える。`@playwright/mcp` 0.0.83 で、この引数のまま環境変数だけで①のタブが見えることを確認済み。
 
 ## 禁止事項
 
@@ -33,22 +33,23 @@ NO_SANDBOX=$([ "$(id -u)" = 0 ] && echo --no-sandbox)
 - **サンドボックス**: 通常は Chromium のサンドボックスを有効にしたまま起動する。root で動くコンテナでは Chromium がサンドボックスなしでないと起動しないため、そのときだけ `--no-sandbox` を付ける（上のコマンドは root のときだけ付ける）。この場合はコンテナが唯一の隔離になるので、使い捨てのコンテナに限る
 - **プロファイル**: ログイン済みの Cookie が残るので、起動のたびに作り直し、後片付けで必ず削除する。シェル変数は次のコマンドに引き継がれないため、決まったパスを使う
 
-## 2. Playwright MCP を CDP 接続で登録する
+## 2. Playwright MCP を①の Chromium につなぐ
 
-既存の Playwright MCP（`--headless --browser chromium` など）は自前のブラウザを起動するため、ログイン済みのブラウザは見えない。CDP に接続する別名のサーバーをプロジェクトの `.mcp.json` に追加する。
+Playwright MCP は、何も指定しなければ自前のブラウザを起動するので、ログイン済みのタブは見えない。MCP サーバーを別に登録せず、既存の `playwright` サーバー（claude-task-worker が登録するものなど）に環境変数 `PLAYWRIGHT_MCP_CDP_ENDPOINT` を渡して、①の Chromium につなぐ。起動引数に `--cdp-endpoint` がなければ、この環境変数が使われる（`--headless` と `--browser chromium` は CDP 接続では使われない）。
+
+環境変数は、プロジェクトの `.claude/settings.json` の `env` で渡す。
 
 ```json
 {
-  "mcpServers": {
-    "playwright-cdp": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--cdp-endpoint", "http://localhost:9222"]
-    }
+  "env": {
+    "PLAYWRIGHT_MCP_CDP_ENDPOINT": "http://localhost:9222"
   }
 }
 ```
 
-MCP の設定を反映するには読み込み直しが必要。エージェントからはできないので、ユーザーに `/mcp` での再接続か、セッションの再起動をお願いする。再起動した場合は、①のブラウザを起動し直してから続ける。
+- 設定を反映するには MCP サーバーの起動し直しが必要。エージェントからはできないので、ユーザーに `/mcp` での再接続か、セッションの再起動をお願いする。再起動した場合は、①の Chromium を起動し直してから続ける
+- この環境変数がある間、`playwright` サーバーのブラウザ操作は常に①の Chromium を使う。①を起動していないとブラウザ操作が失敗するので、使い終わったら `env` から消すか、ブラウザ操作の前に必ず①を起動する
+- 起動引数で `--cdp-endpoint` を指定しているサーバーでは引数が優先されるので、その値を `http://localhost:9222` にそろえる
 
 ## 3. aac run 配下でログインする
 

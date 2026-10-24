@@ -1,7 +1,7 @@
 {
   "name": "agent-access",
   "description": "Bitwarden Agent Access で保管庫の認証情報を承認付きで受け取り、コマンドやブラウザログインに安全に注入するスキル",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "getty104"
   },
