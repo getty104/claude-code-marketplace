@@ -64,7 +64,7 @@ claude-code-marketplace/
         └── scripts/
 └── bitwarden-cli/
     ├── .claude-plugin/plugin.json
-    ├── hooks/                 # BW_ 系環境変数の出力を止める PreToolUse フック
+    ├── hooks/                 # クラウドで bw を入れる SessionStart フックと、BW_ 系環境変数の出力を止める PreToolUse フック
     └── skills/bitwarden-cli/
         ├── SKILL.md
         ├── settings.json      # ユーザーの settings.json に追記する deny ルール
