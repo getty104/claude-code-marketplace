@@ -1,27 +1,7 @@
 {
   "permissions": {
     "deny": [
-      "Bash(*BW_*)",
-      "Bash(env)",
-      "Bash(env |*)",
-      "Bash(printenv*)",
-      "Bash(set)",
-      "Bash(export)",
-      "Bash(export -p*)",
-      "Bash(declare -p*)",
-      "Bash(declare -x*)",
-      "Bash(*/proc/*/environ*)",
-      "Bash(bw unlock --raw*)",
-      "Bash(bw unlock --passwordenv*)",
-      "Bash(bw unlock --passwordfile*)",
-      "Bash(bw list items*)",
-      "Bash(bw get password*)",
-      "Bash(bw get item*)",
-      "Bash(bw get totp*)",
-      "Bash(bw export*)",
-      "Read(//proc/**)",
-      "Read(~/.config/Bitwarden CLI/**)",
-      "Read(~/Library/Application Support/Bitwarden CLI/**)"
+      "Bash(*BW_*)"
     ]
   }
 }
