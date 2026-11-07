@@ -13,6 +13,12 @@
       "source": "./agent-access",
       "description": "Bitwarden Agent Access で保管庫の認証情報を承認付きで受け取り、コマンドやブラウザログインに安全に注入するスキル",
       "version": "0.1.0"
+    },
+    {
+      "name": "bitwarden-cli",
+      "source": "./bitwarden-cli",
+      "description": "Bitwarden CLI（bw）を API キーでログインし、BW_ 系の環境変数と保管庫の値を会話に出さずにコマンドやブラウザログインへ使うスキル",
+      "version": "0.1.0"
     }
   ]
 }
