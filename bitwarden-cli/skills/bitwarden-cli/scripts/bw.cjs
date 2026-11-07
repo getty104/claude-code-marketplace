@@ -1,13 +1,29 @@
 const { execFileSync } = require('node:child_process');
 
-const requireSession = () => {
-  if (!process.env.BW_SESSION) {
-    console.error('BW_SESSION is not set. Aborting without running bw.');
+const requirePassword = () => {
+  if (!process.env.BW_PASSWORD) {
+    console.error('BW_PASSWORD is not set. Aborting without running bw.');
     process.exit(2);
   }
 };
 
 const bw = (...args) => execFileSync('bw', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+
+const unlock = () => {
+  requirePassword();
+  try {
+    if (JSON.parse(bw('status')).status === 'unauthenticated') bw('login', '--apikey');
+  } catch {
+    console.error('bw login --apikey failed');
+    process.exit(1);
+  }
+  try {
+    process.env.BW_SESSION = bw('unlock', '--passwordenv', 'BW_PASSWORD', '--raw');
+  } catch {
+    console.error('bw unlock --passwordenv BW_PASSWORD failed');
+    process.exit(3);
+  }
+};
 
 const getLogin = (id) => {
   const item = JSON.parse(bw('get', 'item', id));
@@ -20,7 +36,7 @@ const findItems = (search) =>
     .filter((i) => i.login)
     .map((i) => ({ id: i.id, name: i.name, uris: (i.login.uris ?? []).map((u) => u.uri), totp: Boolean(i.login.totp) }));
 
-module.exports = { requireSession, bw, getLogin, findItems };
+module.exports = { unlock, bw, getLogin, findItems };
 
 const usage = () => {
   console.error('usage: node bw.cjs login\n       node bw.cjs search <query>\n       node bw.cjs run <vault-item-id> -- <command> [args...]');
@@ -28,21 +44,10 @@ const usage = () => {
 };
 
 if (require.main === module) {
-  requireSession();
   const [mode, arg, sep, ...cmd] = process.argv.slice(2);
+  if (!['login', 'search', 'run'].includes(mode)) usage();
+  unlock();
   if (mode === 'login') {
-    try {
-      if (JSON.parse(bw('status')).status === 'unauthenticated') bw('login', '--apikey');
-    } catch {
-      console.error('bw login --apikey failed');
-      process.exit(1);
-    }
-    try {
-      bw('unlock', '--check');
-    } catch {
-      console.error('BW_SESSION is not valid for this vault.');
-      process.exit(3);
-    }
     bw('sync');
     console.log('status=unlocked');
   } else if (mode === 'search' && arg) {
