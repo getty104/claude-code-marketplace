@@ -1,7 +1,7 @@
 {
   "name": "bitwarden-cli",
   "description": "Bitwarden CLI（bw）を API キーでログインし、BW_ 系の環境変数と保管庫の値を会話に出さずにコマンドやブラウザログインへ使うスキル",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "getty104"
   },

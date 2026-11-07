@@ -20,7 +20,15 @@ argument-hint: "[検索語 | vault item id]"
 
 プラグインの `settings.json` では `permissions` が効かないため、[settings.json](settings.json) の `permissions.deny` をユーザーの `~/.claude/settings.json` かプロジェクトの `.claude/settings.json` に入れておく。入っていなければ、追加してよいかユーザーに確認してから追記する。
 
-## 1. 環境変数を確認する
+## 1. bw の導入と環境変数を確認する
+
+クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では、SessionStart フックが `bw` がなければ 最新の `@bitwarden/cli` を `npm install -g` で入れる。入っているか不安なら、次を実行する（入っていれば何もしない。失敗すると exit 1）。
+
+```shell
+sh "${CLAUDE_PLUGIN_ROOT}/hooks/install-bw.sh"
+```
+
+ローカルセッションではインストールしない。`bw.cjs` が bw を見つけられなければ、ユーザーにインストールを依頼する。
 
 ```shell
 sh "${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-cli/scripts/check-env.sh"
