@@ -10,8 +10,8 @@ argument-hint: "[検索語 | vault item id]"
 
 - **BW_SESSION がなければ bw を実行しない。** 手順1で未設定なら、ここで止めてユーザーに設定を依頼する
 - **BW_ 系の環境変数（`BW_SESSION`, `BW_CLIENTID`, `BW_CLIENTSECRET` など）の中身を出力・閲覧・外部送信しない。** コマンドに `BW_` の名前を書かない（bw は自動で読む）。`env` / `printenv` / `set` / `export -p` / `/proc/*/environ` も使わない
-- **保管庫の値（パスワード、TOTP）を会話に出さない。** `bw get password` / `bw get item` / `bw list items` を直接実行しない。必ず `scripts/bw.cjs` か `scripts/cdp-login.cjs` を使う
-- `bw unlock` は `--check` 以外使わない（セッションキーが出力される）。マスターパスワードを尋ねない
+- **`bw` を Bash で直接実行しない。** 保管庫の値やセッションキーが出力されるため、必ず `scripts/bw.cjs` か `scripts/cdp-login.cjs` を使う
+- マスターパスワードを尋ねない
 - 認証情報をファイルに書かない
 
 プラグインの PreToolUse フック（`hooks/guard-bw-env.cjs`）がこれらの一部を機械的に止める。止められたら回避せず、手順を見直す。
@@ -33,12 +33,11 @@ sh "${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-cli/scripts/check-env.sh"
 ## 2. API キーでログインする
 
 ```shell
-bw status | node -e 'const s=JSON.parse(require("fs").readFileSync(0));console.log(s.status)'
+node "${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-cli/scripts/bw.cjs" login
 ```
 
-- `unauthenticated` なら `bw login --apikey` を実行する（`BW_CLIENTID` / `BW_CLIENTSECRET` を自動で読む）
-- その後 `bw unlock --check` で BW_SESSION が有効か確かめる。無効なら中止し、ユーザーに BW_SESSION の再発行を依頼する（BW_SESSION は発行した環境のローカルデータとだけ組になる）
-- 必要に応じて `bw sync` で最新化する
+- 未ログインなら `bw login --apikey` を実行する（`BW_CLIENTID` / `BW_CLIENTSECRET` を自動で読む）。その後 `bw unlock --check` と `bw sync` を行い、`status=unlocked` だけを出力する
+- exit 3 は BW_SESSION が無効という意味。中止し、ユーザーに BW_SESSION の再発行を依頼する（BW_SESSION は発行した環境のローカルデータとだけ組になる）
 
 ## 3. 保管庫の項目を探す
 

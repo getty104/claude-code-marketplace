@@ -1,7 +1,9 @@
 {
   "permissions": {
     "deny": [
-      "Bash(*BW_*)"
+      "Bash(*BW_*)",
+      "Bash(bw)",
+      "Bash(bw *)"
     ]
   }
 }

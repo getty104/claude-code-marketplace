@@ -23,14 +23,29 @@ const findItems = (search) =>
 module.exports = { requireSession, bw, getLogin, findItems };
 
 const usage = () => {
-  console.error('usage: node bw.cjs search <query>\n       node bw.cjs run <vault-item-id> -- <command> [args...]');
+  console.error('usage: node bw.cjs login\n       node bw.cjs search <query>\n       node bw.cjs run <vault-item-id> -- <command> [args...]');
   process.exit(2);
 };
 
 if (require.main === module) {
   requireSession();
   const [mode, arg, sep, ...cmd] = process.argv.slice(2);
-  if (mode === 'search' && arg) {
+  if (mode === 'login') {
+    try {
+      if (JSON.parse(bw('status')).status === 'unauthenticated') bw('login', '--apikey');
+    } catch {
+      console.error('bw login --apikey failed');
+      process.exit(1);
+    }
+    try {
+      bw('unlock', '--check');
+    } catch {
+      console.error('BW_SESSION is not valid for this vault.');
+      process.exit(3);
+    }
+    bw('sync');
+    console.log('status=unlocked');
+  } else if (mode === 'search' && arg) {
     try {
       for (const i of findItems(arg)) console.log(`${i.id}\t${i.name}\t${i.uris.join(',')}\ttotp=${i.totp ? 'yes' : 'no'}`);
     } catch {
