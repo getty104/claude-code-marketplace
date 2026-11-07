@@ -28,7 +28,7 @@ NO_SANDBOX=$([ "$(id -u)" = 0 ] && echo --no-sandbox)
 
 - CDP ポートに届くプロセスはブラウザを完全に操作できる。共有ホストでは実行せず、ポートを localhost 以外に公開しない
 - `--no-sandbox` は root で動く使い捨てコンテナのときだけ付ける
-- プロファイルにはログイン済みの Cookie が残るので、起動のたびに作り直し、後片付けで削除する
+- プロファイルにはログイン済みの Cookie が残るので、起動のたびに作り直す
 
 ## 2. Playwright MCP を CDP 接続で登録する
 
@@ -66,10 +66,3 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-cli/scripts/cdp-login.cjs" <item-id
 ## 4. MCP で操作する
 
 `browser_tabs`（`action: list`）でログイン後のタブを選んでから操作する。
-
-## 後片付け
-
-```shell
-pkill -f -- '--remote-debugging-port=922[2]'
-rm -rf "${TMPDIR:-/tmp}/bitwarden-cli-cdp-profile"
-```

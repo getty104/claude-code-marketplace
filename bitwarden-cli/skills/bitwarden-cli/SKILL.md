@@ -63,7 +63,3 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-cli/scripts/bw.cjs" run <item-id> -
 | ブラウザツール | リファレンス |
 |---|---|
 | Playwright | [references/playwright.md](references/playwright.md) |
-
-## 後片付け
-
-作業が終わったら、ユーザーに確認してから `bw lock` を実行する（現在の BW_SESSION は使えなくなり、再開にはユーザーによる再発行が必要になる）。
