@@ -1,5 +1,5 @@
 const { chromium } = require('playwright');
-const { requireSession, bw, getLogin } = require('./bw.cjs');
+const { unlock, bw, getLogin } = require('./bw.cjs');
 
 const [id, url, userSel, passSel, submitSel, totpSel, totpSubmitSel] = process.argv.slice(2);
 const CDP_ENDPOINT = process.env.CDP_ENDPOINT ?? 'http://localhost:9222';
@@ -8,7 +8,7 @@ if (!id || !url || !userSel || !passSel || !submitSel) {
   console.error('usage: node cdp-login.cjs <vault-item-id> <login-url> <username-selector> <password-selector> <submit-selector> [totp-selector] [totp-submit-selector]');
   process.exit(2);
 }
-requireSession();
+unlock();
 
 const submit = async (page, selector, fallbackSel) => {
   const action = selector ? page.click(selector) : page.press(fallbackSel, 'Enter');

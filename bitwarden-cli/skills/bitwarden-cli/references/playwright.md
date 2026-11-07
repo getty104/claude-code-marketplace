@@ -47,7 +47,7 @@ NO_SANDBOX=$([ "$(id -u)" = 0 ] && echo --no-sandbox)
 
 ## 3. ログインする
 
-SKILL.md の手順1〜3（BW_SESSION の確認、ログイン、項目の検索）を済ませてから、スナップショットでログインフォームのセレクタを調べ（値はまだ入っていない）、次を実行する。
+SKILL.md の手順1〜3（BW_PASSWORD の確認、ログイン、項目の検索）を済ませてから、スナップショットでログインフォームのセレクタを調べ（値はまだ入っていない）、次を実行する。
 
 ```shell
 node "${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-cli/scripts/cdp-login.cjs" <item-id> \
@@ -55,7 +55,7 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-cli/scripts/cdp-login.cjs" <item-id
 ```
 
 - 引数: `<item-id> <ログインURL> <ユーザー名欄> <パスワード欄> <送信ボタン> [TOTP欄] [TOTP送信ボタン]`
-- BW_SESSION がなければ exit 2 で止まり、bw を実行しない
+- BW_PASSWORD がなければ exit 2 で止まり、bw を実行しない。実行のたびに `bw unlock --passwordenv BW_PASSWORD` でアンロックする
 - 出力はログイン後の URL の origin と path だけ。ログインページに戻っていなければ成功と判断する
 - 終了時にパスワード欄が残っていれば空にする
 - TOTP 欄を渡すと `bw get totp` のコードを入力する（残り3秒未満なら次のコードまで待つ）。項目に TOTP がなければ exit 2

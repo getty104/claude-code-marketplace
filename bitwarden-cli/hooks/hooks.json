@@ -1,5 +1,5 @@
 {
-  "description": "クラウドセッションでは bw をインストールし、BW_ 系の環境変数の出力・送信を防ぎ、BW_SESSION がない場合は bw を実行させない",
+  "description": "クラウドセッションでは bw をインストールし、BW_ 系の環境変数の出力・送信を防ぎ、BW_PASSWORD がない場合は bw を実行させない",
   "hooks": {
     "SessionStart": [
       {

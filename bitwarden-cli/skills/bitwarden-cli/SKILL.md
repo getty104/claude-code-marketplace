@@ -1,6 +1,6 @@
 ---
 name: bitwarden-cli
-description: Bitwarden CLI（bw）を `bw login --apikey` でログインし、BW_SESSION がある場合だけ保管庫の認証情報をコマンドやブラウザログインに使う手順。BW_ 系の環境変数と保管庫の値は出力・閲覧・外部送信しない。ALWAYS invoke this skill when the user mentions Bitwarden CLI, bw コマンド, BW_SESSION, Bitwarden の保管庫からパスワードを使う, or Bitwarden でブラウザログイン.
+description: Bitwarden CLI（bw）を `bw login --apikey` でログインし、BW_PASSWORD がある場合だけ `bw unlock --passwordenv BW_PASSWORD` でアンロックして保管庫の認証情報をコマンドやブラウザログインに使う手順。BW_ 系の環境変数と保管庫の値は出力・閲覧・外部送信しない。ALWAYS invoke this skill when the user mentions Bitwarden CLI, bw コマンド, BW_PASSWORD, Bitwarden の保管庫からパスワードを使う, or Bitwarden でブラウザログイン.
 argument-hint: "[検索語 | vault item id]"
 ---
 
@@ -8,8 +8,8 @@ argument-hint: "[検索語 | vault item id]"
 
 ## 絶対に守ること
 
-- **BW_SESSION がなければ bw を実行しない。** 手順1で未設定なら、ここで止めてユーザーに設定を依頼する
-- **BW_ 系の環境変数（`BW_SESSION`, `BW_CLIENTID`, `BW_CLIENTSECRET` など）の中身を出力・閲覧・外部送信しない。** コマンドに `BW_` の名前を書かない（bw は自動で読む）。`env` / `printenv` / `set` / `export -p` / `/proc/*/environ` も使わない
+- **BW_PASSWORD がなければ bw を実行しない。** 手順1で未設定なら、ここで止めてユーザーに設定を依頼する
+- **BW_ 系の環境変数（`BW_PASSWORD`, `BW_CLIENTID`, `BW_CLIENTSECRET`, `BW_SESSION` など）の中身を出力・閲覧・外部送信しない。** コマンドに `BW_` の名前を書かない（bw は自動で読む）。`env` / `printenv` / `set` / `export -p` / `/proc/*/environ` も使わない
 - **`bw` を Bash で直接実行しない。** 保管庫の値やセッションキーが出力されるため、必ず `scripts/bw.cjs` か `scripts/cdp-login.cjs` を使う
 - マスターパスワードを尋ねない
 - 認証情報をファイルに書かない
@@ -34,18 +34,19 @@ sh "${CLAUDE_PLUGIN_ROOT}/hooks/install-bw.sh"
 sh "${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-cli/scripts/check-env.sh"
 ```
 
-`set` / `unset` だけを出力する。`BW_SESSION=unset` なら **ここで中止** し、次を依頼する。
+`set` / `unset` だけを出力する。`BW_PASSWORD=unset` なら **ここで中止** し、次を依頼する。
 
-> Bitwarden CLI を使うため、Claude Code を起動する環境に `BW_SESSION` を設定してください（`bw login --apikey` で使う `BW_CLIENTID` / `BW_CLIENTSECRET` も）。値は会話に貼らないでください。
+> Bitwarden CLI を使うため、Claude Code を起動する環境に、保管庫のマスターパスワードを `BW_PASSWORD` として設定してください（`bw login --apikey` で使う `BW_CLIENTID` / `BW_CLIENTSECRET` も）。値は会話に貼らないでください。
 
-## 2. API キーでログインする
+## 2. API キーでログインしてアンロックする
 
 ```shell
 node "${CLAUDE_PLUGIN_ROOT}/skills/bitwarden-cli/scripts/bw.cjs" login
 ```
 
-- 未ログインなら `bw login --apikey` を実行する（`BW_CLIENTID` / `BW_CLIENTSECRET` を自動で読む）。その後 `bw unlock --check` と `bw sync` を行い、`status=unlocked` だけを出力する
-- exit 3 は BW_SESSION が無効という意味。中止し、ユーザーに BW_SESSION の再発行を依頼する（BW_SESSION は発行した環境のローカルデータとだけ組になる）
+- 未ログインなら `bw login --apikey` を実行する（`BW_CLIENTID` / `BW_CLIENTSECRET` を自動で読む）。その後 `bw unlock --passwordenv BW_PASSWORD --raw` でアンロックし、`bw sync` を行い、`status=unlocked` だけを出力する
+- セッションキーはスクリプトのプロセス内でだけ使い、出力もファイル保存もしない。そのため `search` / `run` / `cdp-login.cjs` も実行のたびに同じ手順でアンロックする
+- exit 1 は API キーでのログイン失敗、exit 3 はアンロック失敗（BW_PASSWORD の誤り）。中止し、ユーザーに確認を依頼する
 
 ## 3. 保管庫の項目を探す
 

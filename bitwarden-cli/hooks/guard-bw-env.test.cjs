@@ -1,7 +1,7 @@
 const assert = require('node:assert');
 const { check } = require('./guard-bw-env.cjs');
 
-const on = { BW_SESSION: 'x' };
+const on = { BW_PASSWORD: 'x' };
 
 for (const cmd of [
   'echo $BW_SESSION',
@@ -30,8 +30,8 @@ for (const cmd of [
   'npm run build',
 ]) assert.strictEqual(check(cmd, on), null, `should allow: ${cmd}`);
 
-assert.ok(check('bw status', {}), 'bw without BW_SESSION');
-assert.ok(check('ls && bw list items', {}), 'bw in chain without BW_SESSION');
+assert.ok(check('bw status', {}), 'bw without BW_PASSWORD');
+assert.ok(check('ls && bw list items', {}), 'bw in chain without BW_PASSWORD');
 assert.strictEqual(check('ls ./bw-notes', {}), null);
 assert.strictEqual(check('git status', {}), null);
 
