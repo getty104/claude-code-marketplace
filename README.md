@@ -11,10 +11,14 @@ getty104 の Claude Code プラグインマーケットプレイスです。
 | Plugin | 説明 |
 |---|---|
 | agent-access | Bitwarden Agent Access で保管庫の認証情報を承認付きで受け取り、コマンドやブラウザログインに安全に注入するスキル |
+| bitwarden-cli | Bitwarden CLI（bw）を API キーでログインし、BW_ 系の環境変数と保管庫の値を会話に出さずにコマンドやブラウザログインへ使うスキル |
 
 ```bash
 /plugin install agent-access --marketplace getty104/claude-code-marketplace
+/plugin install bitwarden-cli --marketplace getty104/claude-code-marketplace
 ```
+
+bitwarden-cli の `permissions.deny` はプラグインからは適用されないため、[`bitwarden-cli/skills/bitwarden-cli/settings.json`](bitwarden-cli/skills/bitwarden-cli/settings.json) の内容を `~/.claude/settings.json` などに追記してください。
 
 ## Installation
 
@@ -57,6 +61,14 @@ claude-code-marketplace/
     └── skills/agent-access/
         ├── SKILL.md
         ├── references/        # ブラウザツール別の認証手順
+        └── scripts/
+└── bitwarden-cli/
+    ├── .claude-plugin/plugin.json
+    ├── hooks/                 # BW_ 系環境変数の出力を止める PreToolUse フック
+    └── skills/bitwarden-cli/
+        ├── SKILL.md
+        ├── settings.json      # ユーザーの settings.json に追記する deny ルール
+        ├── references/
         └── scripts/
 ```
 
