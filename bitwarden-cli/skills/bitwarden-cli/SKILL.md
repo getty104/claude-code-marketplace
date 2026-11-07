@@ -22,7 +22,7 @@ argument-hint: "[検索語 | vault item id]"
 
 ## 1. bw の導入と環境変数を確認する
 
-クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では、SessionStart フックが `bw` がなければ `@bitwarden/cli` を `npm install -g` で入れる。入っているか不安なら、次を実行する（入っていれば何もしない。失敗すると exit 1）。
+クラウドセッション（`CLAUDE_CODE_REMOTE=true`）では、SessionStart フックが `bw` がなければ 最新の `@bitwarden/cli` を `npm install -g` で入れる。入っているか不安なら、次を実行する（入っていれば何もしない。失敗すると exit 1）。
 
 ```shell
 sh "${CLAUDE_PLUGIN_ROOT}/hooks/install-bw.sh"
